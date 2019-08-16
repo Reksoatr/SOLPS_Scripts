@@ -217,10 +217,10 @@ class SOLPSPLOT(object):
             self.ExpDict['Tid3d'] = ExpData['Ti'][kk:]
             
         elif '25' in Shot or '12' in Shot:
-            GFILE = 'gfileProcessing/cmod_files/g11607180' + Shot + '.01209_974'
+            GFILE = 'gfileProcessing/cmod_files/g11607180{}.01209_974'.format(Shot)
             GF = eq.equilibrium(gfile=GFILE)
             
-            ExpFile = '11607180' + Shot
+            ExpFile = '11607180{}'.format(Shot)
             ExpData = loadmat(ExpFile)    
             
             ti = 0
@@ -299,12 +299,12 @@ class SOLPSPLOT(object):
 
         for n in range(N):
             Attempt = Attempts[n]
-            DRT = BASEDRT + 'Shot0' + Shot + '/Attempt' + str(Attempt) + '/Output'     # MAINPATH DIRECTORY STRING
+            DRT = '{}Shot0{}/Attempt{}/Output'.format(BASEDRT, Shot, str(Attempt))     # MAINPATH DIRECTORY STRING
             #DRT2 = 'SOLPS_2D_prof/Shot0' + Shot + '/Attempt' + str(Attempt) + '/Output2'     #Generate Mesh path
             
             YYLoc.values[:,:,n] = Yy
-            RadLoc.values[:,:,n] = np.loadtxt(DRT + '/RadLoc' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
-            VertLoc.values[:,:,n] = np.loadtxt(DRT + '/VertLoc' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+            RadLoc.values[:,:,n] = np.loadtxt('{}/RadLoc{}'.format(DRT, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+            VertLoc.values[:,:,n] = np.loadtxt('{}/VertLoc{}'.format(DRT, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
             
             for j in range(len(Y)):
                 for i in range(len(X)):
@@ -328,16 +328,16 @@ class SOLPSPLOT(object):
                 self.PARAM[self.Parameter[p]] = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,self.Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = self.PARAMDICT[self.Parameter[p]])
                 for n in range(N):
                     Attempt = self.Attempts[n]
-                    DRT = BASEDRT + 'Shot0' + Shot + '/Attempt' + str(Attempt)  #Generate path
+                    DRT = '{}Shot0{}/Attempt{}/Output'.format(BASEDRT, Shot, str(Attempt))   #Generate path
                     try:
-                        RawData = np.loadtxt(DRT + '/Output/' + self.Parameter[p] + str(Attempt),usecols = (3))
+                        RawData = np.loadtxt('{}/Output/{}{}'.format(DRT, self.Parameter[p], str(Attempt)),usecols = (3))
                     except Exception as err:
                         print(err)
                         try:
-                             RawData = np.loadtxt(DRT + '/Output2/' + self.Parameter[p] + str(Attempt),usecols = (3))
+                             RawData = np.loadtxt('{}/Output2/{}{}'.format(DRT, self.Parameter[p], str(Attempt)),usecols = (3))
                         except Exception as err:
                             print(err)
-                            print('Parameter ' + self.Parameter[p] + ' not found for Attempt ' + str(Attempt) + '. Creating NAN Array')
+                            print('Parameter {} not found for Attempt {}. Creating NAN Array'.format(self.Parameter[p], str(Attempt)))
                             self.PARAM[self.Parameter[p]].values[:,:,n] = np.nan
                             
                     if RawData.size == 3724:
@@ -362,7 +362,7 @@ class SOLPSPLOT(object):
         
         #Save all values into self dictionaries
         
-        self.VVFILE = np.loadtxt(BASEDRT + 'Shot0' + Shot + '/vvfile.ogr')
+        self.VVFILE = np.loadtxt('{}Shot0{}/vvfile.ogr'.format(BASEDRT, Shot))
         self.Xx = Xx
         self.Yy = Yy
         self.N = N
@@ -453,12 +453,12 @@ class SOLPSPLOT(object):
                 PARAM = self.PARAM[pn].copy()
             except:
                 try:
-                    print('Plot Parameter ' + pn + ' Not Loaded Into Object. Attempting To Load Data...')
+                    print('Plot Parameter {} Not Loaded Into Object. Attempting To Load Data...'.format(pn))
                     self._LoadSOLPSData(AddNew=pn)
-                    print('Parameter ' + pn + ' Data Load Successful!')
+                    print('Parameter {} Data Load Successful!'.format(pn))
                     PARAM = self.PARAM[pn].copy()
                 except:
-                    print('Plot Parameter ' + pn + ' Does Not Exist Or Could Not Be Loaded! Skipping Plot...')
+                    print('Plot Parameter {} Does Not Exist Or Could Not Be Loaded! Skipping Plot...'.format(pn))
                     pass
             
             print('Beginning Plot Sequence')
@@ -525,9 +525,9 @@ class SOLPSPLOT(object):
                     ax.set_ylabel('Radial Coordinate') 
 
                 if ContKW['Publish'] != []:
-                    ax.set_title('Attempt ' + Publish[n] + ' ' + PARAM.name)
+                    ax.set_title('Attempt {} {}'.format(Publish[n], PARAM.name))
                 else:
-                    ax.set_title('Discharge 0' + Shot + ' Attempt ' + str(Attempts[n]) + ' ' + PARAM.name)
+                    ax.set_title('Discharge 0{} Attempt {} {}'.format(Shot, str(Attempts[n]), PARAM.name))
                 plt.colorbar(IM)
                 ax.set_aspect('equal')
                 
@@ -539,7 +539,7 @@ class SOLPSPLOT(object):
                     plt.grid()
                 
                 if ContKW['SAVE'] is True:
-                    ImgName = 'Profiles/' + Parameter + str(Attempts[n]) + 'Contour.png'
+                    ImgName = 'Profiles/{}{}Contour.png'.format(Parameter, str(Attempts[n]))
                     plt.savefig(ImgName, bbox_inches='tight')
 
             self.ContKW = ContKW
@@ -722,18 +722,18 @@ class SOLPSPLOT(object):
                         Tid3d = self.ExpDict['Tid3d']
                         ax.plot(PsinTi,Tid3d,'bo',markersize=7,linewidth=3)
             
-            ax.set_xlabel('Radial Coordinate ' + Rstr)
+            ax.set_xlabel('Radial Coordinate {}'.format(Rstr))
             
             if RadProfKW['LOG10'] == 1:
-                ax.set_ylabel('Log_10 of ' + PARAM.name)
+                ax.set_ylabel('Log_10 of {}'.format(PARAM.name))
             else:    
                 ax.set_ylabel(PARAM.name)
             if RadProfKW['Publish']==[]:
                 ax.legend(Attempts)
-                ax.set_title('Discharge 0' + str(Shot) + ' Attempt(s) ' + str(Attempts) + ' Midplane Radial ' + PARAM.name)
+                ax.set_title('Discharge 0{} Attempt(s) {} Midplane Radial {}'.format(str(Shot), str(Attempts), PARAM.name))
             else:
                 ax.legend(Publish,loc=2)
-                ax.set_title('Midplane Radial ' + PARAM.name)
+                ax.set_title('Midplane Radial {}'.format(PARAM.name))
             Pmin = float(PARAM.loc[:,JXA,:].min())
             Pmax = float(PARAM.loc[:,JXA,:].max())
             ax.plot([RR.loc[SEP,JXA,Attempts[0]], RR.loc[SEP,JXA,Attempts[0]]],[Pmin, Pmax],color='Black',linewidth=3)

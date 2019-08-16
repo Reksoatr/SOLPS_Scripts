@@ -14,7 +14,7 @@ plt.rc('font',size=25)
 plt.rc('lines',linewidth=5,markersize=10)
 
 Shot='d3d'
-Attempt=72
+Attempt=86
 JXA=56
 SEP = 18
 TC_Psin = TC_psin

@@ -21,7 +21,7 @@ plt.rc('lines',linewidth=5,markersize=10)
 Shot = 'd3d'           #Shot Number (12, 25, or d3d)
 Attempt = 72
 Geo = 1
-Contour = 1
+Contour = 0
 
 CmodReScale = [1.0, 0.90, 0.835, 0.77] 
 D3DReScale = [10, 9, 8.35, 7.7]
