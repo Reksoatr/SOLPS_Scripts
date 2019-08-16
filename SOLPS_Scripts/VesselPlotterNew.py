@@ -328,7 +328,7 @@ class SOLPSPLOT(object):
                 self.PARAM[self.Parameter[p]] = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,self.Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = self.PARAMDICT[self.Parameter[p]])
                 for n in range(N):
                     Attempt = self.Attempts[n]
-                    DRT = '{}Shot0{}/Attempt{}/Output'.format(BASEDRT, Shot, str(Attempt))   #Generate path
+                    DRT = '{}Shot0{}/Attempt{}'.format(BASEDRT, Shot, str(Attempt))   #Generate path
                     try:
                         RawData = np.loadtxt('{}/Output/{}{}'.format(DRT, self.Parameter[p], str(Attempt)),usecols = (3))
                     except Exception as err:
