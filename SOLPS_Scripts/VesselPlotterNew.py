@@ -177,7 +177,12 @@ class SOLPSPLOT(object):
         
         # Create Experiment Data Dictionary (ExpDict) -> d3d or cmod?
         
+        if 'gas' in Shot:
+            BASEDRT = '{}gaspuff/'.format(BASEDRT)
+        
         if 'd3d' in Shot:
+            
+            BASEDRT = '{}d3d'.format(BASEDRT)
             
             self.KW['JXI'] = 40
             self.KW['JXA'] = 56
@@ -214,6 +219,9 @@ class SOLPSPLOT(object):
             self.ExpDict['Tid3d'] = ExpData['Ti'][kk:]
             
         elif '25' in Shot or '12' in Shot:
+            
+            BASEDRT = '{}cmod/0{}home'.format(BASEDRT, Shot[-2:])
+            
             GFILE = 'gfileProcessing/cmod_files/g11607180{}.01209_974'.format(Shot[-2:])
             GF = eq.equilibrium(gfile=GFILE)
             
@@ -292,7 +300,7 @@ class SOLPSPLOT(object):
 
         for n in range(N):
             Attempt = Attempts[n]
-            DRT = '{}Shot0{}/Attempt{}/Output'.format(BASEDRT, Shot, str(Attempt))     # MAINPATH DIRECTORY STRING
+            DRT = '{}/Attempt{}/Output'.format(BASEDRT, str(Attempt))     # MAINPATH DIRECTORY STRING
             #DRT2 = 'SOLPS_2D_prof/Shot0' + Shot + '/Attempt' + str(Attempt) + '/Output2'     #Generate Mesh path
             
             YYLoc.values[:,:,n] = Yy
@@ -321,7 +329,7 @@ class SOLPSPLOT(object):
                 self.PARAM[self.Parameter[p]] = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,self.Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = self.PARAMDICT[self.Parameter[p]])
                 for n in range(N):
                     Attempt = self.Attempts[n]
-                    DRT = '{}Shot0{}/Attempt{}'.format(BASEDRT, Shot, str(Attempt))   #Generate path
+                    DRT = '{}/Attempt{}'.format(BASEDRT, str(Attempt))   #Generate path
                     try:
                         RawData = np.loadtxt('{}/Output/{}{}'.format(DRT, self.Parameter[p], str(Attempt)),usecols = (3))
                     except Exception as err:
@@ -355,7 +363,7 @@ class SOLPSPLOT(object):
         
         #Save all values into self dictionaries
         
-        self.VVFILE = np.loadtxt('{}Shot0{}/vvfile.ogr'.format(BASEDRT, Shot))
+        self.VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
         self.Xx = Xx
         self.Yy = Yy
         self.N = N
