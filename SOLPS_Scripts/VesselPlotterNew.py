@@ -273,16 +273,23 @@ class SOLPSPLOT(object):
         #Get dimensions of simulation grid 
         
         N = len(self.Attempts)
-        P = len(self.Parameter) 
+        P = len(self.Parameter)
         
+        '''
         if DIVREG is True:
             XGrid=XDIM-2
             XMin=0
             XMax=XGrid-1
         else:
-            XGrid=CoreSize
+            XGrid=CoreBound[1]-CoreBound[0]+1 #Used to be XGrid=CoreSize
             XMin=CoreBound[0]
             XMax=CoreBound[1]
+        '''
+        
+        XGrid=XDIM-2
+        XMin=0
+        XMax=XGrid-1
+        
         YSurf=YDIM-2
         
         X = np.linspace(XMin,XMax,XGrid)
@@ -432,10 +439,14 @@ class SOLPSPLOT(object):
                 kwargs[key] = value
         
         N = self.N
+        Xx = self.Xx
+        Yy = self.Yy
         Attempts = self.Attempts
         Shot = self.Shot
         VVFILE = self.VVFILE
         Publish = kwargs['Publish']
+        CoreBound = kwargs['CoreBound']
+        DIVREG = kwargs['DIVREG']
         JXA = kwargs['JXA']-1
         JXI = kwargs['JXI']-1
         SEP = kwargs['SEP']-1
@@ -502,10 +513,17 @@ class SOLPSPLOT(object):
                 
                 if ContKW['GEO'] is True:
                     if ContKW['LOG10'] == 2:
-                        IM = ax.contourf(RadLoc.values[:,:,n],VertLoc.values[:,:,n],PARAM.values[:,:,n],levs,cmap=CMAP,norm=colors.LogNorm())
+                        IM1 = ax.contourf(RadLoc.values[:,CoreBound[0]:CoreBound[1],n],VertLoc.values[:,CoreBound[0]:CoreBound[1],n],PARAM.values[:,CoreBound[0]:CoreBound[1],n],levs,cmap=CMAP,norm=colors.LogNorm())
+                        if DIVREG is True:
+                            IM2 = ax.contourf(RadLoc.values[:,0:CoreBound[0]-1,n],VertLoc.values[:,0:CoreBound[0]-1,n],PARAM.values[:,0:CoreBound[0]-1,n],levs,cmap=CMAP,norm=colors.LogNorm())
+                            IM3 = ax.contourf(RadLoc.values[:,CoreBound[1]:,n],VertLoc.values[:,CoreBound[1]:,n],PARAM.values[:,CoreBound[1]:,n],levs,cmap=CMAP,norm=colors.LogNorm())
+                    
                     else:
-                        IM = ax.contourf(RadLoc.values[:,:,n],VertLoc.values[:,:,n],PARAM.values[:,:,n],levs,cmap=CMAP)
-                        
+                        IM1 = ax.contourf(RadLoc.values[:,CoreBound[0]:CoreBound[1],n],VertLoc.values[:,CoreBound[0]:CoreBound[1],n],PARAM.values[:,CoreBound[0]:CoreBound[1],n],levs,cmap=CMAP)                      
+                        if DIVREG is True:
+                            IM2 = ax.contourf(RadLoc.values[:,0:CoreBound[0]-1,n],VertLoc.values[:,0:CoreBound[0]-1,n],PARAM.values[:,0:CoreBound[0]-1,n],levs,cmap=CMAP)
+                            IM3 = ax.contourf(RadLoc.values[:,CoreBound[1]:,n],VertLoc.values[:,CoreBound[1]:,n],PARAM.values[:,CoreBound[1]:,n],levs,cmap=CMAP)
+             
                     ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
                     ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=3)
                     ax.plot(RadLoc.values[SEP,:,n],VertLoc.values[SEP,:,n],color='Black',linewidth=3)
@@ -514,9 +532,9 @@ class SOLPSPLOT(object):
                     ax.set_ylabel('Vertical Location (m)')                
                 else:
                     if ContKW['LOG10'] == 2:
-                        IM = ax.contourf(Xx[:,:],Yy[:,:],PARAM.values[:,:,n],levs,norm=colors.LogNorm(),cmap=CMAP)
+                        IM1 = ax.contourf(Xx[:,:],Yy[:,:],PARAM.values[:,:,n],levs,norm=colors.LogNorm(),cmap=CMAP)
                     else:
-                        IM = ax.contour(Xx[:,:],Yy[:,:],PARAM.values[:,:,n],levs,cmap=CMAP)
+                        IM1 = ax.contour(Xx[:,:],Yy[:,:],PARAM.values[:,:,n],levs,cmap=CMAP)
                         
                     ax.plot(Xx[:,(JXA-XMin)],Yy[:,(JXA-XMin)],color='Orange',linewidth=3)
                     ax.plot(Xx[:,(JXI-XMin)],Yy[:,(JXI-XMin)],color='Red',linewidth=3)
@@ -528,7 +546,7 @@ class SOLPSPLOT(object):
                     ax.set_title('Attempt {} {}'.format(Publish[n], PARAM.name))
                 else:
                     ax.set_title('Discharge 0{} Attempt {} {}'.format(Shot, str(Attempts[n]), PARAM.name))
-                plt.colorbar(IM)
+                plt.colorbar(IM1)
                 ax.set_aspect('equal')
                 
                 #a.set_xticklabels(['%.1f' % i for i in a.get_xticks()], fontsize='x-large')
