@@ -55,7 +55,6 @@ class SOLPSPLOT(object):
     XDIM = 98 > Dimension of computational grid in the x (poloidal) direction
     YDIM = 38 > Dimension of computational grid in the y (radial) direction
     LVN = 100 > Number of colorbar levels for contour plots
-    CoreSize = 48 > Grid width of Core Region in the x (poloidal) direction
     CoreBound = [24,71] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
     TimeRange = [0.90,1.00] > Time range (in sec) over which experimental data is averaged
     Publish = [] > List of strings to use in legends of publication-quality plots; if not [], changes plotting rc.params 
@@ -108,8 +107,7 @@ class SOLPSPLOT(object):
                      'SEP' : 20,
                      'XDIM' : 98,
                      'YDIM' : 38,
-                     'CoreSize' : 48,
-                     'CoreBound' : [24,71],
+                     'CoreBound' : [24,72],
                      'Publish' : [],
                      'PsinOffset' : 0,
                      'RadOffset' : 0,
@@ -175,7 +173,6 @@ class SOLPSPLOT(object):
         XDIM = self.KW['XDIM']
         YDIM = self.KW['YDIM']
         CoreBound = self.KW['CoreBound']
-        CoreSize = self.KW['CoreSize']
         BASEDRT = self.KW['BASEDRT']
         
         # Create Experiment Data Dictionary (ExpDict) -> d3d or cmod?
@@ -274,17 +271,6 @@ class SOLPSPLOT(object):
         
         N = len(self.Attempts)
         P = len(self.Parameter)
-        
-        '''
-        if DIVREG is True:
-            XGrid=XDIM-2
-            XMin=0
-            XMax=XGrid-1
-        else:
-            XGrid=CoreBound[1]-CoreBound[0]+1 #Used to be XGrid=CoreSize
-            XMin=CoreBound[0]
-            XMax=CoreBound[1]
-        '''
         
         XGrid=XDIM-2
         XMin=0
@@ -513,17 +499,19 @@ class SOLPSPLOT(object):
                 
                 if ContKW['GEO'] is True:
                     if ContKW['LOG10'] == 2:
-                        IM1 = ax.contourf(RadLoc.values[:,CoreBound[0]:CoreBound[1],n],VertLoc.values[:,CoreBound[0]:CoreBound[1],n],PARAM.values[:,CoreBound[0]:CoreBound[1],n],levs,cmap=CMAP,norm=colors.LogNorm())
                         if DIVREG is True:
-                            IM2 = ax.contourf(RadLoc.values[:,0:CoreBound[0]-1,n],VertLoc.values[:,0:CoreBound[0]-1,n],PARAM.values[:,0:CoreBound[0]-1,n],levs,cmap=CMAP,norm=colors.LogNorm())
+                            IM2 = ax.contourf(RadLoc.values[:,0:CoreBound[0],n],VertLoc.values[:,0:CoreBound[0],n],PARAM.values[:,0:CoreBound[0],n],levs,cmap=CMAP,norm=colors.LogNorm())
                             IM3 = ax.contourf(RadLoc.values[:,CoreBound[1]:,n],VertLoc.values[:,CoreBound[1]:,n],PARAM.values[:,CoreBound[1]:,n],levs,cmap=CMAP,norm=colors.LogNorm())
-                    
+
+                        IM1 = ax.contourf(RadLoc.values[:,CoreBound[0]:CoreBound[1],n],VertLoc.values[:,CoreBound[0]:CoreBound[1],n],PARAM.values[:,CoreBound[0]:CoreBound[1],n],levs,cmap=CMAP,norm=colors.LogNorm())
+                                            
                     else:
-                        IM1 = ax.contourf(RadLoc.values[:,CoreBound[0]:CoreBound[1],n],VertLoc.values[:,CoreBound[0]:CoreBound[1],n],PARAM.values[:,CoreBound[0]:CoreBound[1],n],levs,cmap=CMAP)                      
                         if DIVREG is True:
-                            IM2 = ax.contourf(RadLoc.values[:,0:CoreBound[0]-1,n],VertLoc.values[:,0:CoreBound[0]-1,n],PARAM.values[:,0:CoreBound[0]-1,n],levs,cmap=CMAP)
+                            IM2 = ax.contourf(RadLoc.values[:,0:CoreBound[0],n],VertLoc.values[:,0:CoreBound[0],n],PARAM.values[:,0:CoreBound[0],n],levs,cmap=CMAP)
                             IM3 = ax.contourf(RadLoc.values[:,CoreBound[1]:,n],VertLoc.values[:,CoreBound[1]:,n],PARAM.values[:,CoreBound[1]:,n],levs,cmap=CMAP)
-             
+
+                        IM1 = ax.contourf(RadLoc.values[:,CoreBound[0]:CoreBound[1],n],VertLoc.values[:,CoreBound[0]:CoreBound[1],n],PARAM.values[:,CoreBound[0]:CoreBound[1],n],levs,cmap=CMAP)                      
+                                     
                     ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
                     ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=3)
                     ax.plot(RadLoc.values[SEP,:,n],VertLoc.values[SEP,:,n],color='Black',linewidth=3)
