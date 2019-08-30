@@ -217,10 +217,10 @@ class SOLPSPLOT(object):
             self.ExpDict['Tid3d'] = ExpData['Ti'][kk:]
             
         elif '25' in Shot or '12' in Shot:
-            GFILE = 'gfileProcessing/cmod_files/g11607180{}.01209_974'.format(Shot)
+            GFILE = 'gfileProcessing/cmod_files/g11607180{}.01209_974'.format(Shot[-2:])
             GF = eq.equilibrium(gfile=GFILE)
             
-            ExpFile = '11607180{}'.format(Shot)
+            ExpFile = '11607180{}'.format(Shot[-2:])
             ExpData = loadmat(ExpFile)    
             
             ti = 0
