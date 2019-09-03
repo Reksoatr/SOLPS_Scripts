@@ -10,13 +10,14 @@ import xarray as xr
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import colors, cm
-from VesselPlotter import SOLPSPlotter
+#from VesselPlotter import SOLPSPlotter
+from VesselPlotterNew import SOLPSPLOT
 
 plt.rc('font',size=25)
 plt.rc('lines',linewidth=5,markersize=15)
 
 Shot = 'd3d'
-Attempt = 30
+Attempt = 86
 Jxi = 40
 Jxa = 56
 sep = 21
@@ -25,28 +26,29 @@ NDF = 26 #Attempt 129 -> 30; Attempt 58 -> 33
 IF0 = 19
 IFF = 35
 
-IONFLX = SOLPSPlotter(Shot,[Attempt],'IonFlx','Export',RRad='radial')
+#IONFLX = SOLPSPlotter(Shot,[Attempt],'IonFlx','Export',RRad='radial')
+#NEUDEN = SOLPSPlotter(Shot,[Attempt],'NeuDen','Export',RRad='radial')
 
-NEUDEN = SOLPSPlotter(Shot,[Attempt],'NeuDen','Export',RRad='radial')
+SOLPSOBJ = SOLPSPLOT(Shot,[Attempt],Parameter=['IonFlx','NeuDen'])
 
-Rsep = IONFLX['RadLoc'].loc[sep,:,Attempt]
-Vsep = IONFLX['VertLoc'].loc[sep,:,Attempt]
+Rsep = SOLPSOBJ.RadCoords['RadLoc'].loc[sep,:,Attempt]
+Vsep = SOLPSOBJ.RadCoords['VertLoc'].loc[sep,:,Attempt]
 
-RRsep = xr.DataArray(np.zeros(IONFLX['RadLoc'].shape), coords=[IONFLX['RadLoc'].coords['Radial_Location'].values,IONFLX['RadLoc'].coords['Poloidal_Location'].values,[Attempt]], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'R-Rsep $m$')
-for i in (IONFLX['RadLoc'].coords['Radial_Location'].values):
-    for j in (IONFLX['RadLoc'].coords['Poloidal_Location'].values):
-        RRsep.loc[i,j,Attempt] = np.sign(i-sep)*np.sqrt((IONFLX['RadLoc'].loc[i,j,Attempt]-Rsep.loc[j])**2 + (IONFLX['VertLoc'].loc[i,j,Attempt]-Vsep.loc[j])**2)
+RRsep = xr.DataArray(np.zeros(SOLPSOBJ.RadCoords['RadLoc'].shape), coords=[SOLPSOBJ.RadCoords['RadLoc'].coords['Radial_Location'].values,SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'].values,[Attempt]], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'R-Rsep $m$')
+for i in (SOLPSOBJ.RadCoords['RadLoc'].coords['Radial_Location'].values):
+    for j in (SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'].values):
+        RRsep.loc[i,j,Attempt] = np.sign(i-sep)*np.sqrt((SOLPSOBJ.RadCoords['RadLoc'].loc[i,j,Attempt]-Rsep.loc[j])**2 + (SOLPSOBJ.RadCoords['VertLoc'].loc[i,j,Attempt]-Vsep.loc[j])**2)
 
-NeuDen = NEUDEN['PARAM']
+NeuDen = SOLPSOBJ.PARAM['NeuDen']
 NeuDen.values[NeuDen.values==0]=np.nan
 
-IonFlx = IONFLX['PARAM']
+IonFlx = SOLPSOBJ.PARAM['IonFlx']
 IonFlx.values[IonFlx.values==0]=np.nan
 IonFlxPlus = IonFlx.values[IonFlx.values>0]
 IonFlxMinus = np.abs(IonFlx.values[IonFlx.values<0])
 
-NDFit = np.ones((IONFLX['RadLoc'].coords['Poloidal_Location'].size,2))
-IFFit = np.ones((IONFLX['RadLoc'].coords['Poloidal_Location'].size,2))
+NDFit = np.ones((SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'].size,2))
+IFFit = np.ones((SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'].size,2))
 
 print('Inner Midplane at Poloidal Grid Cell ' + str(Jxi))
 print('Outer Midplane at Poloidal Grid Cell ' + str(Jxa))

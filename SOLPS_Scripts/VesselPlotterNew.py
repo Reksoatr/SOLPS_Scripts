@@ -123,7 +123,8 @@ class SOLPSPLOT(object):
                      'TC_Psin' : [],
                      'GRID': False,
                      'AX' : None,
-                     'BASEDRT':'SOLPS_2D_prof/'}
+                     'BASEDRT': r"C:/Users/rmreksoatmodjo/Desktop/My Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/",
+                     'TOPDRT' : r"C:/Users/rmreksoatmodjo/Desktop/My Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/" }
         
         for key, value in self.DefaultSettings.items():
             if key not in kwargs.keys():
@@ -174,6 +175,7 @@ class SOLPSPLOT(object):
         YDIM = self.KW['YDIM']
         CoreBound = self.KW['CoreBound']
         BASEDRT = self.KW['BASEDRT']
+        TOPDRT = self.KW['TOPDRT']
         
         # Create Experiment Data Dictionary (ExpDict) -> d3d or cmod?
         
@@ -188,11 +190,11 @@ class SOLPSPLOT(object):
             self.KW['JXA'] = 56
             self.KW['SEP'] = 22
             
-            GFILE = 'gfileProcessing/d3d_files/g175060.02512'
+            GFILE = '{}gfileProcessing/d3d_files/g175060.02512'.format(TOPDRT)
             GF = eq.equilibrium(gfile=GFILE)
             
-            ExpData = loadmat('gfileProcessing/d3d_files/175060_data_SOLPS.mat')
-            ONETWO = loadmat('gfileProcessing/d3d_files/flow_transport.mat')
+            ExpData = loadmat('{}gfileProcessing/d3d_files/175060_data_SOLPS.mat'.format(TOPDRT))
+            ONETWO = loadmat('{}gfileProcessing/d3d_files/flow_transport.mat'.format(TOPDRT))
             
             ii = 0
             jj = 0
@@ -222,11 +224,11 @@ class SOLPSPLOT(object):
             
             BASEDRT = '{}cmod/0{}home'.format(BASEDRT, Shot[-2:])
             
-            GFILE = 'gfileProcessing/cmod_files/g11607180{}.01209_974'.format(Shot[-2:])
+            GFILE = '{}gfileProcessing/cmod_files/g11607180{}.01209_974'.format(TOPDRT, Shot[-2:])
             GF = eq.equilibrium(gfile=GFILE)
             
             ExpFile = '11607180{}'.format(Shot[-2:])
-            ExpData = loadmat('gfileProcessing/cmod_files/{}.mat'.format(ExpFile))    
+            ExpData = loadmat('{}gfileProcessing/cmod_files/{}.mat'.format(TOPDRT, ExpFile))    
             
             ti = 0
             while TimeRange[0] > ExpData['time'][ti]:
