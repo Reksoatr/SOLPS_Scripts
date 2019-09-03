@@ -226,7 +226,7 @@ class SOLPSPLOT(object):
             GF = eq.equilibrium(gfile=GFILE)
             
             ExpFile = '11607180{}'.format(Shot[-2:])
-            ExpData = loadmat(ExpFile)    
+            ExpData = loadmat('gfileProcessing/cmod_files/{}.mat'.format(ExpFile))    
             
             ti = 0
             while TimeRange[0] > ExpData['time'][ti]:
