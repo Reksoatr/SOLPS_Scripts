@@ -17,17 +17,14 @@ plt.rc('font',size=25)
 plt.rc('lines',linewidth=5,markersize=15)
 
 Shot = 'd3d'
-Attempt = 86
+Attempt = 72
 Jxi = 40
 Jxa = 56
 sep = 21
 ND0 = 9 #Attempt 129 -> 14; Attempt 58 -> 9 
-NDF = 26 #Attempt 129 -> 30; Attempt 58 -> 33
+NDF = 23 #Attempt 129 -> 30; Attempt 58 -> 33
 IF0 = 19
 IFF = 35
-
-#IONFLX = SOLPSPlotter(Shot,[Attempt],'IonFlx','Export',RRad='radial')
-#NEUDEN = SOLPSPlotter(Shot,[Attempt],'NeuDen','Export',RRad='radial')
 
 SOLPSOBJ = SOLPSPLOT(Shot,[Attempt],Parameter=['IonFlx','NeuDen'])
 
@@ -54,7 +51,7 @@ print('Inner Midplane at Poloidal Grid Cell ' + str(Jxi))
 print('Outer Midplane at Poloidal Grid Cell ' + str(Jxa))
 print('')
 
-for jxa in range(24,72): #24 to 72 covers entire core region
+for jxa in range(1,96): #24 to 72 covers entire core region
     NDFit[jxa-24,:] = np.polyfit(RRsep.loc[ND0:NDF,jxa,Attempt],np.log(NeuDen.loc[ND0:NDF,jxa,Attempt]),1)
     
     IFFit[jxa-24,:] = np.polyfit(RRsep.loc[IF0:IFF,jxa,Attempt],np.log(IonFlx.loc[IF0:IFF,jxa,Attempt]),1)
