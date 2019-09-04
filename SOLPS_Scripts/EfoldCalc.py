@@ -17,7 +17,7 @@ plt.rc('font',size=25)
 plt.rc('lines',linewidth=5,markersize=15)
 
 Shot = 'd3d'
-Attempt = 75
+Attempt = 72
 Jxi = 40
 Jxa = 56
 sep = 21
