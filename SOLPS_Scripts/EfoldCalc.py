@@ -10,24 +10,20 @@ import xarray as xr
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import colors, cm
-#from VesselPlotter import SOLPSPlotter
 from VesselPlotterNew import SOLPSPLOT
 
 plt.rc('font',size=25)
 plt.rc('lines',linewidth=5,markersize=15)
 
 Shot = 'd3d'
-Attempt = 86
-Jxi = 40
-Jxa = 56
+Attempt = 72
+Jxi = 40 - 1
+Jxa = 56 - 1
 sep = 21
 ND0 = 9 #Attempt 129 -> 14; Attempt 58 -> 9 
-NDF = 26 #Attempt 129 -> 30; Attempt 58 -> 33
+NDF = np.arange(20,30) #Attempt 129 -> 30; Attempt 58 -> 33
 IF0 = 19
 IFF = 35
-
-#IONFLX = SOLPSPlotter(Shot,[Attempt],'IonFlx','Export',RRad='radial')
-#NEUDEN = SOLPSPlotter(Shot,[Attempt],'NeuDen','Export',RRad='radial')
 
 SOLPSOBJ = SOLPSPLOT(Shot,[Attempt],Parameter=['IonFlx','NeuDen'])
 
@@ -47,17 +43,25 @@ IonFlx.values[IonFlx.values==0]=np.nan
 IonFlxPlus = IonFlx.values[IonFlx.values>0]
 IonFlxMinus = np.abs(IonFlx.values[IonFlx.values<0])
 
-NDFit = np.ones((SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'].size,2))
-IFFit = np.ones((SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'].size,2))
+SZ = len(SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'])
+
+NDFit = np.ones((SZ,2))
+IFFit = np.ones((SZ,2))
+NDTrial = {}
 
 print('Inner Midplane at Poloidal Grid Cell ' + str(Jxi))
 print('Outer Midplane at Poloidal Grid Cell ' + str(Jxa))
 print('')
 
-for jxa in range(24,72): #24 to 72 covers entire core region
-    NDFit[jxa-24,:] = np.polyfit(RRsep.loc[ND0:NDF,jxa,Attempt],np.log(NeuDen.loc[ND0:NDF,jxa,Attempt]),1)
-    
-    IFFit[jxa-24,:] = np.polyfit(RRsep.loc[IF0:IFF,jxa,Attempt],np.log(IonFlx.loc[IF0:IFF,jxa,Attempt]),1)
+for jxa in np.arange(54,58): #range(SZ): #24 to 72 covers entire core region
+    for N in NDF:
+        NDTrial[N] = np.polyfit(RRsep.loc[ND0:N,jxa,Attempt],np.log(NeuDen.loc[ND0:N,jxa,Attempt]),1,full=True)
+        print('Residual for fit from {} to {} at jxa={}: {}'.format(ND0, N, jxa, NDTrial[N][1][0]))
+        
+
+        #IFFit[jxa-24,:] = np.polyfit(RRsep.loc[IF0:IFF,jxa,Attempt],np.log(IonFlx.loc[IF0:IFF,jxa,Attempt]),1,full=True)
+'''
+    NDFit[jxa-24,:] = 
     
     if IFFit[jxa-24,0]==0:
         IFFit[jxa-24,0]=np.nan
@@ -114,6 +118,8 @@ a.ticklabel_format(axis='y',style='scientific')
 #a.set_xticklabels(['%.2f' % i for i in a.get_xticks()], fontsize='x-large')
 #a.set_yticklabels(['%.1e' % j for j in a.get_yticks()], fontsize='x-large')
 plt.grid()
+'''
+
 
 '''
 IonFlxFit1 = np.exp(IFFit[jxa-24,1]) * np.exp(IFFit[jxa-24,0]*RRsep.loc[IF0:IFF,jxa,Attempt])
