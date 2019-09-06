@@ -48,21 +48,22 @@ SZ = len(SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'])
 NDFit = np.ones((SZ,2))
 IFFit = np.ones((SZ,2))
 NDTrial = {}
+NDResiduals = np.ones(len(NDF))
 
 print('Inner Midplane at Poloidal Grid Cell ' + str(Jxi))
 print('Outer Midplane at Poloidal Grid Cell ' + str(Jxa))
 print('')
 
 for jxa in np.arange(54,58): #range(SZ): #24 to 72 covers entire core region
-    for N in NDF:
-        NDTrial[N] = np.polyfit(RRsep.loc[ND0:N,jxa,Attempt],np.log(NeuDen.loc[ND0:N,jxa,Attempt]),1,full=True)
-        print('Residual for fit from {} to {} at jxa={}: {}'.format(ND0, N, jxa, NDTrial[N][1][0]))
+    for n, N in enumerate(NDF):
+        NDTrial[n] = np.polyfit(RRsep.loc[ND0:N,jxa,Attempt],np.log(NeuDen.loc[ND0:N,jxa,Attempt]),1,full=True)
+        print('Residual for fit from {} to {} at jxa={}: {}'.format(ND0, N, jxa, NDTrial[n][1][0]))
+        NDResiduals[n] = NDTrial[n][1][0] 
+    Key = np.argmin(NDResiduals)
+    NDFit[jxa-24,:] = NDTrial[Key][0]
         
-
-        #IFFit[jxa-24,:] = np.polyfit(RRsep.loc[IF0:IFF,jxa,Attempt],np.log(IonFlx.loc[IF0:IFF,jxa,Attempt]),1,full=True)
-'''
-    NDFit[jxa-24,:] = 
-    
+    '''
+    #IFFit[jxa-24,:] = np.polyfit(RRsep.loc[IF0:IFF,jxa,Attempt],np.log(IonFlx.loc[IF0:IFF,jxa,Attempt]),1,full=True)   
     if IFFit[jxa-24,0]==0:
         IFFit[jxa-24,0]=np.nan
     if NDFit[jxa-24,0]==0:
