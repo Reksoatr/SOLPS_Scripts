@@ -15,13 +15,15 @@ from VesselPlotterNew import SOLPSPLOT
 plt.rc('font',size=25)
 plt.rc('lines',linewidth=5,markersize=15)
 
-Shot = 'd3d'
-Attempt = 72
+Shot = 'gas012'
+Attempt = 17
 Jxi = 40 - 1
 Jxa = 56 - 1
+Crn = 48 - 1
+Div = 24 - 1
 sep = 21
-ND0 = 7 #Attempt 129 -> 14; Attempt 58 -> 9 
-NDF = np.arange(20,30) #Attempt 129 -> 30; Attempt 58 -> 33
+ND0 = np.arange(7,14) #Attempt 129 -> 14; Attempt 58 -> 9 
+NDF = np.arange(20,34) #Attempt 129 -> 30; Attempt 58 -> 33
 IF0 = 19
 IFF = 35
 
@@ -48,7 +50,7 @@ SZ = len(SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'])
 NDFit = np.ones((SZ,2))
 IFFit = np.ones((SZ,2))
 NDTrial = {}
-NDResiduals = np.ones(len(NDF))
+NDResiduals = np.ones((len(NDF),len(ND0)))
 
 print('Inner Midplane at Poloidal Grid Cell ' + str(Jxi))
 print('Outer Midplane at Poloidal Grid Cell ' + str(Jxa))
@@ -56,14 +58,16 @@ print('')
 
 for jxa in np.arange(54,55): #range(SZ): #24 to 72 covers entire core region
     for n, N in enumerate(NDF):
-        NDTrial[n] = np.polyfit(RRsep.loc[ND0:N,jxa,Attempt],np.log(NeuDen.loc[ND0:N,jxa,Attempt]),1,full=True)
-        print('Residual for fit from {} to {} at jxa={}: {}'.format(ND0, N, jxa, NDTrial[n][1][0]))
-        NDResiduals[n] = NDTrial[n][1][0] 
-    Key = np.argmin(NDResiduals)
+        for m, M in enumerate(ND0):
+            NDTrial[n,m] = np.polyfit(RRsep.loc[M:N,jxa,Attempt],np.log(NeuDen.loc[M:N,jxa,Attempt]),1,full=True)
+            print('Residual for exp fit from {} to {} at jxa={}: {}'.format(M, N, jxa, NDTrial[n,m][1][0]))
+            NDResiduals[n, m] = NDTrial[n,m][1][0] 
+    Key = np.unravel_index(np.argmin(NDResiduals),NDResiduals.shape)
     NDFit[jxa-24,:] = NDTrial[Key][0]
-    NDF = NDF[Key]
-    print(NDTrial[Key])
-        
+    NDF = NDF[Key[0]]
+    ND0 = ND0[Key[1]]
+    print(NDTrial[Key], NDF, ND0)
+    
     '''
     #IFFit[jxa-24,:] = np.polyfit(RRsep.loc[IF0:IFF,jxa,Attempt],np.log(IonFlx.loc[IF0:IFF,jxa,Attempt]),1,full=True)   
     if IFFit[jxa-24,0]==0:
@@ -88,13 +92,15 @@ for jxa in np.arange(54,55): #range(SZ): #24 to 72 covers entire core region
         print('e-folding length = ' + str(1000/IFFit[jxa-24,0]) + ' mm')
         print('')
 
-'''
+    '''
 fig0 = plt.figure(figsize=(14,10))
 plt.plot(RRsep.coords['Poloidal_Location'].values,1000/NDFit[:,0],'b+-') #,RRsep.coords['Poloidal_Location'].values,1000/IFFit[:,0],'g+-')
 Mmin = np.nanmin(1000/NDFit[:,0]) #IFFit[:,0])
 Mmax = np.nanmax(1000/NDFit[:,0])
 plt.plot([Jxi, Jxi],[Mmin, Mmax],color='Red', linestyle='solid', linewidth=3)
 plt.plot([Jxa, Jxa],[Mmin, Mmax],color='Orange', linestyle='solid', linewidth=3)
+plt.plot([Crn, Crn],[Mmin, Mmax],color='Cyan', linestyle='solid', linewidth=3)
+plt.plot([Div, Div],[Mmin, Mmax],color='Green', linestyle='solid', linewidth=3)
 plt.title('Poloidal profile of Radial e-folding lengths')
 plt.xlabel('Poloidal Grid Cell Index X')
 plt.ylabel('e-folding length (mm)')
