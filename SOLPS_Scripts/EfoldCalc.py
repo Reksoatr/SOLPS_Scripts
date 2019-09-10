@@ -20,7 +20,7 @@ Attempt = 72
 Jxi = 40 - 1
 Jxa = 56 - 1
 sep = 21
-ND0 = 9 #Attempt 129 -> 14; Attempt 58 -> 9 
+ND0 = 7 #Attempt 129 -> 14; Attempt 58 -> 9 
 NDF = np.arange(20,30) #Attempt 129 -> 30; Attempt 58 -> 33
 IF0 = 19
 IFF = 35
@@ -104,7 +104,7 @@ a = plt.gca()
 #a.set_yticklabels(['%.f' % j for j in a.get_yticks()], fontsize='x-large')
 plt.grid()
 
-jxa = Jxa
+#jxa = Jxa
 NeuDenFit1 = np.exp(NDFit[jxa-24,1]) * np.exp(NDFit[jxa-24,0]*RRsep.loc[ND0:NDF,jxa,Attempt])
 
 fig1 = plt.figure(figsize=(14,10))
