@@ -21,7 +21,7 @@ class SOLPSPLOT(object):
     '''  
     Plot SOLPS data!!! 2.0!!!
     
-    REQUIRED:
+ m    REQUIRED:
     ** Setup **
     Shot = Shot Number (Either 12 or 25) or 'd3d' for d3d experiment
     Attempts = Simulation Attempt Number(s) [As a List!]
@@ -102,8 +102,8 @@ class SOLPSPLOT(object):
                      'GRAD' : False,
                      'ELEV' : 75,
                      'AZIM' : 270,
-                     'JXI' : 37,
-                     'JXA' : 55,
+                     'JXI' : 38,
+                     'JXA' : 57,
                      'SEP' : 20,
                      'XDIM' : 98,
                      'YDIM' : 38,
