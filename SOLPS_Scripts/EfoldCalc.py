@@ -54,13 +54,15 @@ print('Inner Midplane at Poloidal Grid Cell ' + str(Jxi))
 print('Outer Midplane at Poloidal Grid Cell ' + str(Jxa))
 print('')
 
-for jxa in np.arange(54,58): #range(SZ): #24 to 72 covers entire core region
+for jxa in np.arange(54,55): #range(SZ): #24 to 72 covers entire core region
     for n, N in enumerate(NDF):
         NDTrial[n] = np.polyfit(RRsep.loc[ND0:N,jxa,Attempt],np.log(NeuDen.loc[ND0:N,jxa,Attempt]),1,full=True)
         print('Residual for fit from {} to {} at jxa={}: {}'.format(ND0, N, jxa, NDTrial[n][1][0]))
         NDResiduals[n] = NDTrial[n][1][0] 
     Key = np.argmin(NDResiduals)
     NDFit[jxa-24,:] = NDTrial[Key][0]
+    NDF = NDF[Key]
+    print(NDTrial[Key])
         
     '''
     #IFFit[jxa-24,:] = np.polyfit(RRsep.loc[IF0:IFF,jxa,Attempt],np.log(IonFlx.loc[IF0:IFF,jxa,Attempt]),1,full=True)   
@@ -86,7 +88,7 @@ for jxa in np.arange(54,58): #range(SZ): #24 to 72 covers entire core region
         print('e-folding length = ' + str(1000/IFFit[jxa-24,0]) + ' mm')
         print('')
 
-
+'''
 fig0 = plt.figure(figsize=(14,10))
 plt.plot(RRsep.coords['Poloidal_Location'].values,1000/NDFit[:,0],'b+-') #,RRsep.coords['Poloidal_Location'].values,1000/IFFit[:,0],'g+-')
 Mmin = np.nanmin(1000/NDFit[:,0]) #IFFit[:,0])
@@ -119,7 +121,7 @@ a.ticklabel_format(axis='y',style='scientific')
 #a.set_xticklabels(['%.2f' % i for i in a.get_xticks()], fontsize='x-large')
 #a.set_yticklabels(['%.1e' % j for j in a.get_yticks()], fontsize='x-large')
 plt.grid()
-'''
+
 
 
 '''
