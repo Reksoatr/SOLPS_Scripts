@@ -56,14 +56,14 @@ print('Inner Midplane at Poloidal Grid Cell ' + str(Jxi))
 print('Outer Midplane at Poloidal Grid Cell ' + str(Jxa))
 print('')
 
-for jxa in np.arange(54,55): #range(SZ): #24 to 72 covers entire core region
+for jxa in np.arange(SZ): #range(SZ): #24 to 72 covers entire core region
     for n, N in enumerate(NDF):
         for m, M in enumerate(ND0):
             NDTrial[n,m] = np.polyfit(RRsep.loc[M:N,jxa,Attempt],np.log(NeuDen.loc[M:N,jxa,Attempt]),1,full=True)
             print('Residual for exp fit from {} to {} at jxa={}: {}'.format(M, N, jxa, NDTrial[n,m][1][0]))
             NDResiduals[n, m] = NDTrial[n,m][1][0] 
     Key = np.unravel_index(np.argmin(NDResiduals),NDResiduals.shape)
-    NDFit[jxa-24,:] = NDTrial[Key][0]
+    NDFit[jxa,:] = NDTrial[Key][0]
     NDF = NDF[Key[0]]
     ND0 = ND0[Key[1]]
     print(NDTrial[Key], NDF, ND0)
@@ -110,7 +110,7 @@ a = plt.gca()
 #a.set_yticklabels(['%.f' % j for j in a.get_yticks()], fontsize='x-large')
 plt.grid()
 
-#jxa = Jxa
+jxa = Jxa
 NeuDenFit1 = np.exp(NDFit[jxa-24,1]) * np.exp(NDFit[jxa-24,0]*RRsep.loc[ND0:NDF,jxa,Attempt])
 
 fig1 = plt.figure(figsize=(14,10))
