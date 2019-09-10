@@ -55,7 +55,7 @@ class SOLPSPLOT(object):
     XDIM = 98 > Dimension of computational grid in the x (poloidal) direction
     YDIM = 38 > Dimension of computational grid in the y (radial) direction
     LVN = 100 > Number of colorbar levels for contour plots
-    CoreBound = [24,71] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
+    CoreBound = [24,72] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
     TimeRange = [0.90,1.00] > Time range (in sec) over which experimental data is averaged
     Publish = [] > List of strings to use in legends of publication-quality plots; if not [], changes plotting rc.params 
     RADC = 'psin' > Set radial coordinate convention - Either 'psin', 'radial', or 'Y'    
