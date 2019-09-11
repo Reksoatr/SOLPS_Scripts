@@ -123,8 +123,8 @@ class SOLPSPLOT(object):
                      'TC_Psin' : [],
                      'GRID': False,
                      'AX' : None,
-                     'BASEDRT': r"C:/Users/rmreksoatmodjo/Desktop/My Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/",
-                     'TOPDRT' : r"C:/Users/rmreksoatmodjo/Desktop/My Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/" }
+                     'BASEDRT': r"C:/Users/18313/GDrive/School stuff/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/",
+                     'TOPDRT' : r"C:/Users/18313/GDrive/School stuff/College of William and Mary/Research/SOLPS Stuff/" }
         
         for key, value in self.DefaultSettings.items():
             if key not in kwargs.keys():
