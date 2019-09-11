@@ -78,7 +78,7 @@ if fitplot == 1:
             IFFit[Xx-24,0]=np.nan
         '''    
             
-        if NDFit[Xx,0]==0:
+        if NDFit[Xx,0]==1:
             NDFit[Xx,0]=1000
         
         if Xx == JXI:
