@@ -7,7 +7,6 @@ Created on Fri Feb 15 18:25:30 2019
 import os
 import numpy as np
 import xarray as xr
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import colors, cm
 from VesselPlotterNew import SOLPSPLOT
