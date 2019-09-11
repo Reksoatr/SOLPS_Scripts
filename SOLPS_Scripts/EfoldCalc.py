@@ -56,43 +56,48 @@ print('Inner Midplane at Poloidal Grid Cell ' + str(Jxi))
 print('Outer Midplane at Poloidal Grid Cell ' + str(Jxa))
 print('')
 
-for jxa in np.arange(54,55): #range(SZ): #24 to 72 covers entire core region
+for jxa in np.arange(SZ): #range(SZ): #24 to 72 covers entire core region
     for n, N in enumerate(NDF):
         for m, M in enumerate(ND0):
             NDTrial[n,m] = np.polyfit(RRsep.loc[M:N,jxa,Attempt],np.log(NeuDen.loc[M:N,jxa,Attempt]),1,full=True)
-            print('Residual for exp fit from {} to {} at jxa={}: {}'.format(M, N, jxa, NDTrial[n,m][1][0]))
+            #print('Residual for exp fit from {} to {} at jxa={}: {}'.format(M, N, jxa, NDTrial[n,m][1][0]))
             NDResiduals[n, m] = NDTrial[n,m][1][0] 
     Key = np.unravel_index(np.argmin(NDResiduals),NDResiduals.shape)
-    NDFit[jxa-24,:] = NDTrial[Key][0]
-    NDF = NDF[Key[0]]
-    ND0 = ND0[Key[1]]
-    print(NDTrial[Key], NDF, ND0)
+    NDFit[jxa,:] = NDTrial[Key][0]
+    print(jxa, NDTrial[Key][0], NDTrial[Key][1], ND0[Key[1]], NDF[Key[0]])
     
     '''
     #IFFit[jxa-24,:] = np.polyfit(RRsep.loc[IF0:IFF,jxa,Attempt],np.log(IonFlx.loc[IF0:IFF,jxa,Attempt]),1,full=True)   
     if IFFit[jxa-24,0]==0:
         IFFit[jxa-24,0]=np.nan
-    if NDFit[jxa-24,0]==0:
-        NDFit[jxa-24,0]=np.nan
+    '''    
+        
+    if NDFit[jxa,0]==0:
+        NDFit[jxa,0]=np.nan
     
     if jxa == Jxi:
         print('INNER MIDPLANE')
         print('Poloidal Grid Cell ' + str(jxa))
-        print('NeuDen = ' + str(np.exp(NDFit[jxa-24,1])) + '* e ^ [' + str(NDFit[jxa-24,0]) + ' * X]')
-        print('e-folding length = ' + str(1000/NDFit[jxa-24,0]) + ' mm')
-        print('IonFlx = ' + str(np.exp(IFFit[jxa-24,1])) + '* e ^ [' + str(IFFit[jxa-24,0]) + ' * X]')
-        print('e-folding length = ' + str(1000/IFFit[jxa-24,0]) + ' mm')
+        print('NeuDen = ' + str(np.exp(NDFit[jxa,1])) + '* e ^ [' + str(NDFit[jxa,0]) + ' * X]')
+        print('e-folding length = ' + str(1000/NDFit[jxa,0]) + ' mm')
+        '''
+        print('IonFlx = ' + str(np.exp(IFFit[jxa,1])) + '* e ^ [' + str(IFFit[jxa,0]) + ' * X]')
+        print('e-folding length = ' + str(1000/IFFit[jxa,0]) + ' mm')
         print('')
+        '''
     if jxa == Jxa:
         print('OUTER MIDPLANE')
         print('Poloidal Grid Cell ' + str(jxa))
-        print('NeuDen = ' + str(np.exp(NDFit[jxa-24,1])) + '* e ^ [' + str(NDFit[jxa-24,0]) + ' * X]')
-        print('e-folding length = ' + str(1000/NDFit[jxa-24,0]) + ' mm')
-        print('IonFlx = ' + str(np.exp(IFFit[jxa-24,1])) + '* e ^ [' + str(IFFit[jxa-24,0]) + ' * X]')
-        print('e-folding length = ' + str(1000/IFFit[jxa-24,0]) + ' mm')
+        print('NeuDen = ' + str(np.exp(NDFit[jxa,1])) + '* e ^ [' + str(NDFit[jxa,0]) + ' * X]')
+        print('e-folding length = ' + str(1000/NDFit[jxa,0]) + ' mm')
+        ND0A = ND0[Key[1]]
+        NDFA = NDF[Key[0]]
+        '''
+        print('IonFlx = ' + str(np.exp(IFFit[jxa,1])) + '* e ^ [' + str(IFFit[jxa,0]) + ' * X]')
+        print('e-folding length = ' + str(1000/IFFit[jxa,0]) + ' mm')
         print('')
-
-    '''
+        '''
+        
 fig0 = plt.figure(figsize=(14,10))
 plt.plot(RRsep.coords['Poloidal_Location'].values,1000/NDFit[:,0],'b+-') #,RRsep.coords['Poloidal_Location'].values,1000/IFFit[:,0],'g+-')
 Mmin = np.nanmin(1000/NDFit[:,0]) #IFFit[:,0])
@@ -110,11 +115,11 @@ a = plt.gca()
 #a.set_yticklabels(['%.f' % j for j in a.get_yticks()], fontsize='x-large')
 plt.grid()
 
-#jxa = Jxa
-NeuDenFit1 = np.exp(NDFit[jxa-24,1]) * np.exp(NDFit[jxa-24,0]*RRsep.loc[ND0:NDF,jxa,Attempt])
+jxa = Jxa
+NeuDenFit1 = np.exp(NDFit[jxa,1]) * np.exp(NDFit[jxa,0]*RRsep.loc[ND0A:NDFA,jxa,Attempt])
 
 fig1 = plt.figure(figsize=(14,10))
-plt.plot(RRsep.loc[:,jxa,Attempt],NeuDen.loc[:,jxa,Attempt],'x',RRsep.loc[ND0:NDF,jxa,Attempt],NeuDenFit1.values,'-')
+plt.plot(RRsep.loc[:,jxa,Attempt],NeuDen.loc[:,jxa,Attempt],'x',RRsep.loc[ND0A:NDFA,jxa,Attempt],NeuDenFit1.values,'-')
 NDmin = float(NeuDenFit1.min())
 NDmax = float(NeuDenFit1.max())
 plt.plot([RRsep.loc[sep,jxa,Attempt], RRsep.loc[sep,jxa,Attempt]],[NDmin, NDmax],color='Black',linewidth=3)
@@ -127,8 +132,6 @@ a.ticklabel_format(axis='y',style='scientific')
 #a.set_xticklabels(['%.2f' % i for i in a.get_xticks()], fontsize='x-large')
 #a.set_yticklabels(['%.1e' % j for j in a.get_yticks()], fontsize='x-large')
 plt.grid()
-
-
 
 '''
 IonFlxFit1 = np.exp(IFFit[jxa-24,1]) * np.exp(IFFit[jxa-24,0]*RRsep.loc[IF0:IFF,jxa,Attempt])
