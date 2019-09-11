@@ -15,17 +15,19 @@ from VesselPlotterNew import SOLPSPLOT
 plt.rc('font',size=25)
 plt.rc('lines',linewidth=5,markersize=15)
 
-Shot = 'gas012'
-Attempt = 17
-Jxi = 40 - 1
-Jxa = 56 - 1
+Shot = 'd3d'
+Attempt = 86
+JXI = 40 - 1
+JXA = 56 - 1
 Crn = 48 - 1
-Div = 24 - 1
+Div1 = 24 - 1
+Div2 = 72 - 1
 sep = 21
 ND0 = np.arange(7,14) #Attempt 129 -> 14; Attempt 58 -> 9 
 NDF = np.arange(20,34) #Attempt 129 -> 30; Attempt 58 -> 33
 IF0 = 19
 IFF = 35
+PI = 77
 
 SOLPSOBJ = SOLPSPLOT(Shot,[Attempt],Parameter=['IonFlx','NeuDen'])
 
@@ -52,49 +54,49 @@ IFFit = np.ones((SZ,2))
 NDTrial = {}
 NDResiduals = np.ones((len(NDF),len(ND0)))
 
-print('Inner Midplane at Poloidal Grid Cell ' + str(Jxi))
-print('Outer Midplane at Poloidal Grid Cell ' + str(Jxa))
+print('Inner Midplane at Poloidal Grid Cell ' + str(JXI))
+print('Outer Midplane at Poloidal Grid Cell ' + str(JXA))
 print('')
 
-for jxa in np.arange(SZ): #range(SZ): #24 to 72 covers entire core region
+for Xx in np.arange(SZ): #range(SZ): #24 to 72 covers entire core region
     for n, N in enumerate(NDF):
         for m, M in enumerate(ND0):
-            NDTrial[n,m] = np.polyfit(RRsep.loc[M:N,jxa,Attempt],np.log(NeuDen.loc[M:N,jxa,Attempt]),1,full=True)
-            #print('Residual for exp fit from {} to {} at jxa={}: {}'.format(M, N, jxa, NDTrial[n,m][1][0]))
+            NDTrial[n,m] = np.polyfit(RRsep.loc[M:N,Xx,Attempt],np.log(NeuDen.loc[M:N,Xx,Attempt]),1,full=True)
+            #print('Residual for exp fit from {} to {} at Xx={}: {}'.format(M, N, Xx, NDTrial[n,m][1][0]))
             NDResiduals[n, m] = NDTrial[n,m][1][0] 
     Key = np.unravel_index(np.argmin(NDResiduals),NDResiduals.shape)
-    NDFit[jxa,:] = NDTrial[Key][0]
-    print(jxa, NDTrial[Key][0], NDTrial[Key][1], ND0[Key[1]], NDF[Key[0]])
+    NDFit[Xx,:] = NDTrial[Key][0]
+    print(Xx, NDTrial[Key][0], NDTrial[Key][1], ND0[Key[1]], NDF[Key[0]])
     
     '''
-    #IFFit[jxa-24,:] = np.polyfit(RRsep.loc[IF0:IFF,jxa,Attempt],np.log(IonFlx.loc[IF0:IFF,jxa,Attempt]),1,full=True)   
-    if IFFit[jxa-24,0]==0:
-        IFFit[jxa-24,0]=np.nan
+    #IFFit[Xx-24,:] = np.polyfit(RRsep.loc[IF0:IFF,Xx,Attempt],np.log(IonFlx.loc[IF0:IFF,Xx,Attempt]),1,full=True)   
+    if IFFit[Xx-24,0]==0:
+        IFFit[Xx-24,0]=np.nan
     '''    
         
-    if NDFit[jxa,0]==0:
-        NDFit[jxa,0]=np.nan
+    if NDFit[Xx,0]==0:
+        NDFit[Xx,0]=np.nan
     
-    if jxa == Jxi:
+    if Xx == JXI:
         print('INNER MIDPLANE')
-        print('Poloidal Grid Cell ' + str(jxa))
-        print('NeuDen = ' + str(np.exp(NDFit[jxa,1])) + '* e ^ [' + str(NDFit[jxa,0]) + ' * X]')
-        print('e-folding length = ' + str(1000/NDFit[jxa,0]) + ' mm')
+        print('Poloidal Grid Cell ' + str(Xx))
+        print('NeuDen = ' + str(np.exp(NDFit[Xx,1])) + '* e ^ [' + str(NDFit[Xx,0]) + ' * X]')
+        print('e-folding length = ' + str(1000/NDFit[Xx,0]) + ' mm')
         '''
-        print('IonFlx = ' + str(np.exp(IFFit[jxa,1])) + '* e ^ [' + str(IFFit[jxa,0]) + ' * X]')
-        print('e-folding length = ' + str(1000/IFFit[jxa,0]) + ' mm')
+        print('IonFlx = ' + str(np.exp(IFFit[Xx,1])) + '* e ^ [' + str(IFFit[Xx,0]) + ' * X]')
+        print('e-folding length = ' + str(1000/IFFit[Xx,0]) + ' mm')
         print('')
         '''
-    if jxa == Jxa:
+    if Xx == JXA:
         print('OUTER MIDPLANE')
-        print('Poloidal Grid Cell ' + str(jxa))
-        print('NeuDen = ' + str(np.exp(NDFit[jxa,1])) + '* e ^ [' + str(NDFit[jxa,0]) + ' * X]')
-        print('e-folding length = ' + str(1000/NDFit[jxa,0]) + ' mm')
+        print('Poloidal Grid Cell ' + str(Xx))
+        print('NeuDen = ' + str(np.exp(NDFit[Xx,1])) + '* e ^ [' + str(NDFit[Xx,0]) + ' * X]')
+        print('e-folding length = ' + str(1000/NDFit[Xx,0]) + ' mm')
         ND0A = ND0[Key[1]]
         NDFA = NDF[Key[0]]
         '''
-        print('IonFlx = ' + str(np.exp(IFFit[jxa,1])) + '* e ^ [' + str(IFFit[jxa,0]) + ' * X]')
-        print('e-folding length = ' + str(1000/IFFit[jxa,0]) + ' mm')
+        print('IonFlx = ' + str(np.exp(IFFit[Xx,1])) + '* e ^ [' + str(IFFit[Xx,0]) + ' * X]')
+        print('e-folding length = ' + str(1000/IFFit[Xx,0]) + ' mm')
         print('')
         '''
         
@@ -102,27 +104,28 @@ fig0 = plt.figure(figsize=(14,10))
 plt.plot(RRsep.coords['Poloidal_Location'].values,1000/NDFit[:,0],'b+-') #,RRsep.coords['Poloidal_Location'].values,1000/IFFit[:,0],'g+-')
 Mmin = np.nanmin(1000/NDFit[:,0]) #IFFit[:,0])
 Mmax = np.nanmax(1000/NDFit[:,0])
-plt.plot([Jxi, Jxi],[Mmin, Mmax],color='Red', linestyle='solid', linewidth=3)
-plt.plot([Jxa, Jxa],[Mmin, Mmax],color='Orange', linestyle='solid', linewidth=3)
+plt.plot([JXI, JXI],[Mmin, Mmax],color='Red', linestyle='solid', linewidth=3)
+plt.plot([JXA, JXA],[Mmin, Mmax],color='Orange', linestyle='solid', linewidth=3)
 plt.plot([Crn, Crn],[Mmin, Mmax],color='Cyan', linestyle='solid', linewidth=3)
-plt.plot([Div, Div],[Mmin, Mmax],color='Green', linestyle='solid', linewidth=3)
+plt.plot([Div1, Div1],[Mmin, Mmax],color='Green', linestyle='solid', linewidth=3)
+plt.plot([Div2, Div2],[Mmin, Mmax],color='Green', linestyle='solid', linewidth=3)
 plt.title('Poloidal profile of Radial e-folding lengths')
 plt.xlabel('Poloidal Grid Cell Index X')
 plt.ylabel('e-folding length (mm)')
-plt.legend(['Neutral Density e-fold length','Inner Midplane','Outer Midplane'],loc=2) #,'Ionization e-fold length'
+plt.legend(['Neutral Density e-fold length','Inner Midplane','Outer Midplane', 'Crown', 'Core Boundary']) #,'Ionization e-fold length'
 a = plt.gca()
 #a.set_xticklabels(['%.f' % i for i in a.get_xticks()], fontsize='x-large')
 #a.set_yticklabels(['%.f' % j for j in a.get_yticks()], fontsize='x-large')
 plt.grid()
 
-jxa = Jxa
-NeuDenFit1 = np.exp(NDFit[jxa,1]) * np.exp(NDFit[jxa,0]*RRsep.loc[ND0A:NDFA,jxa,Attempt])
+Xx = PI
+NeuDenFit1 = np.exp(NDFit[Xx,1]) * np.exp(NDFit[Xx,0]*RRsep.loc[ND0A:NDFA,Xx,Attempt])
 
 fig1 = plt.figure(figsize=(14,10))
-plt.plot(RRsep.loc[:,jxa,Attempt],NeuDen.loc[:,jxa,Attempt],'x',RRsep.loc[ND0A:NDFA,jxa,Attempt],NeuDenFit1.values,'-')
+plt.plot(RRsep.loc[:,Xx,Attempt],NeuDen.loc[:,Xx,Attempt],'x',RRsep.loc[ND0A:NDFA,Xx,Attempt],NeuDenFit1.values,'-')
 NDmin = float(NeuDenFit1.min())
 NDmax = float(NeuDenFit1.max())
-plt.plot([RRsep.loc[sep,jxa,Attempt], RRsep.loc[sep,jxa,Attempt]],[NDmin, NDmax],color='Black',linewidth=3)
+plt.plot([RRsep.loc[sep,Xx,Attempt], RRsep.loc[sep,Xx,Attempt]],[NDmin, NDmax],color='Black',linewidth=3)
 plt.title('Neutral Density Profile at Outer Midplane')
 plt.xlabel('R-Rsep (m)')
 plt.ylabel(r'Neutral Density ($m^{-3}$)')
@@ -134,13 +137,13 @@ a.ticklabel_format(axis='y',style='scientific')
 plt.grid()
 
 '''
-IonFlxFit1 = np.exp(IFFit[jxa-24,1]) * np.exp(IFFit[jxa-24,0]*RRsep.loc[IF0:IFF,jxa,Attempt])
+IonFlxFit1 = np.exp(IFFit[Xx-24,1]) * np.exp(IFFit[Xx-24,0]*RRsep.loc[IF0:IFF,Xx,Attempt])
 
 fig2 = plt.figure(figsize=(14,10))
-plt.plot(RRsep.loc[:,jxa,Attempt],IonFlx.loc[:,jxa,Attempt],'x',RRsep.loc[IF0:IFF,jxa,Attempt],IonFlxFit1.values,'-')
+plt.plot(RRsep.loc[:,Xx,Attempt],IonFlx.loc[:,Xx,Attempt],'x',RRsep.loc[IF0:IFF,Xx,Attempt],IonFlxFit1.values,'-')
 IFmin = float(IonFlxFit1.min())
 IFmax = float(IonFlxFit1.max())
-plt.plot([RRsep.loc[sep,jxa,Attempt], RRsep.loc[sep,jxa,Attempt]],[IFmin, IFmax],color='Black')
+plt.plot([RRsep.loc[sep,Xx,Attempt], RRsep.loc[sep,Xx,Attempt]],[IFmin, IFmax],color='Black')
 plt.title('Discharge 0' + str(Shot) + ' Attempt ' + str(Attempt) + ' Radial Particle Flux/Ionization Profile at Midplane')
 plt.xlabel('R-Rsep (m)')
 plt.ylabel('Radial Particle Flux/Ionization')
