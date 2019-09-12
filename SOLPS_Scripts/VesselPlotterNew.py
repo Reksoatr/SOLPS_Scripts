@@ -615,8 +615,39 @@ class SOLPSPLOT(object):
             for key, value in self.KW.items():
                 if key not in kwargs.keys():
                     kwargs[key] = value
-                
+
+            Shot = self.Shot
+            Attempts = self.Attempts
+            Publish = kwargs['Publish']
+            JXA = kwargs['JXA']-1
+            SEP = kwargs['SEP'] -1
+            RADC = kwargs['RADC']
+            Offset = [kwargs['PsinOffset'],kwargs['RadOffset']]         
             PolKW = kwargs
+            
+            RR, Rexp, Rstr = self.GetRadCoords(RADC,Offset)
+            
+            if Parameter is None:
+                self.PltParams = self.Parameter
+            elif isinstance(Parameter,str):
+                self.PltParams = [Parameter]
+            else:
+                self.PltParams = Parameter
+                
+            for pn in self.PltParams:
+                try:
+                    PARAM = self.PARAM[pn].copy()
+                except:
+                    try:
+                        print('Plot Parameter Not Loaded Into Object. Attempting To Load Data...')
+                        self._LoadSOLPSData(AddNew=pn)
+                        print('Parameter Data Load Successful!')
+                        PARAM = self.PARAM[pn].copy()
+                    except:
+                        print('Plot Parameter Does Not Exist Or Could Not Be Loaded! Skipping Plot...')
+                        pass
+
+            print('Beginning Plot Sequence')                
             
             fig2a = plt.figure(figsize=(14,7))
             PolVal = PARAM.loc[RadSel[0],:,:].values
