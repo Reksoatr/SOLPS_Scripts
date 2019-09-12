@@ -15,8 +15,8 @@ from VesselPlotterNew import SOLPSPLOT
 plt.rc('font',size=25)
 plt.rc('lines',linewidth=5,markersize=15)
 
-Shot = 'gas012'
-Attempt = 17
+Shot = 'd3d'
+Attempt = 86
 Jxi = 40 - 1
 Jxa = 56 - 1
 Crn = 48 - 1
@@ -56,7 +56,7 @@ print('Inner Midplane at Poloidal Grid Cell ' + str(Jxi))
 print('Outer Midplane at Poloidal Grid Cell ' + str(Jxa))
 print('')
 
-for jxa in np.arange(SZ): #range(SZ): #24 to 72 covers entire core region
+for jxa in np.arange(56,57): #range(SZ): #24 to 72 covers entire core region
     for n, N in enumerate(NDF):
         for m, M in enumerate(ND0):
             NDTrial[n,m] = np.polyfit(RRsep.loc[M:N,jxa,Attempt],np.log(NeuDen.loc[M:N,jxa,Attempt]),1,full=True)
@@ -111,7 +111,7 @@ a = plt.gca()
 plt.grid()
 
 jxa = Jxa
-NeuDenFit1 = np.exp(NDFit[jxa-24,1]) * np.exp(NDFit[jxa-24,0]*RRsep.loc[ND0:NDF,jxa,Attempt])
+NeuDenFit1 = np.exp(NDFit[jxa,1]) * np.exp(NDFit[jxa,0]*RRsep.loc[ND0:NDF,jxa,Attempt])
 
 fig1 = plt.figure(figsize=(14,10))
 plt.plot(RRsep.loc[:,jxa,Attempt],NeuDen.loc[:,jxa,Attempt],'x',RRsep.loc[ND0:NDF,jxa,Attempt],NeuDenFit1.values,'-')
