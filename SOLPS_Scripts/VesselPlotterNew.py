@@ -333,7 +333,7 @@ class SOLPSPLOT(object):
             
             
             PolCo=['XXLoc', 'DJXA', 'Theta', 'Flux Expansion']
-            PolVec = xr.DataArray(np.zeros((YSurf,XGrid,N,3)), coords=[Y,X,Attempts,PolCo], dims=['Radial_Location','Poloidal_Location','Attempt','Poloidal Metric'], name = 'Poloidal Coordinate Data')
+            PolVec = xr.DataArray(np.zeros((YSurf,XGrid,N,4)), coords=[Y,X,Attempts,PolCo], dims=['Radial_Location','Poloidal_Location','Attempt','Poloidal Metric'], name = 'Poloidal Coordinate Data')
             
             #try:
             #    RadCor.values[:,:,n] = np.loadtxt(DRT2 + '/Rad0Cor' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
@@ -773,25 +773,25 @@ class SOLPSPLOT(object):
                     if pn == 'Ne':
                         NemidAvg = self.ExpDict['NemidAvg']
                         ErrNe = self.ExpDict['ErrNe']
-                        ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='bo',markersize=7,linewidth=3,capsize=7)
+                        ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7)
                     elif pn == 'Te':
                         TemidAvg = self.ExpDict['TemidAvg']
                         ErrTe = self.ExpDict['ErrTe']
-                        ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='bo',markersize=7,linewidth=3,capsize=7)
+                        ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7)
                 
                 if 'd3d' in Shot:
                     if pn == 'Ne':
                         PsinNe = Rexp[0]
                         Ned3d = self.ExpDict['Ned3d']
-                        ax.plot(PsinNe,Ned3d,'bo',markersize=7,linewidth=3)
+                        ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3)
                     elif pn == 'Te':
                         PsinTe = Rexp[1]
                         Ted3d = self.ExpDict['Ted3d']
-                        ax.plot(PsinTe,Ted3d,'bo',markersize=7,linewidth=3)
+                        ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3)
                     elif pn == 'Ti':
                         PsinTi = Rexp[2]
                         Tid3d = self.ExpDict['Tid3d']
-                        ax.plot(PsinTi,Tid3d,'bo',markersize=7,linewidth=3)
+                        ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3)
             
             ax.set_xlabel('Radial Coordinate {}'.format(Rstr))
             
@@ -807,7 +807,8 @@ class SOLPSPLOT(object):
                 ax.set_title('Midplane Radial {}'.format(PARAM.name))
             Pmin = float(PARAM.loc[:,JXA,:].min())
             Pmax = float(PARAM.loc[:,JXA,:].max())
-            ax.plot([RR.loc[SEP,JXA,Attempts[0]], RR.loc[SEP,JXA,Attempts[0]]],[Pmin, Pmax],color='Black',linewidth=3)
+            if SEP != 0:
+                ax.plot([RR.loc[SEP,JXA,Attempts[0]], RR.loc[SEP,JXA,Attempts[0]]],[Pmin, Pmax],color='Black',linewidth=3)
             
             if RadProfKW['GRID'] is True:
                 ax.grid(b=1)
