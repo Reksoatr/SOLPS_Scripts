@@ -112,6 +112,7 @@ class SOLPSPLOT(object):
                      'PsinOffset' : 0,
                      'RadOffset' : 0,
                      'RADC' : 'psin',
+                     'POLC' : 'theta',
                      'RadSel' : None,
                      'PolSel' : None, 
                      'GEO' : True,
@@ -202,7 +203,7 @@ class SOLPSPLOT(object):
             
             self.KW['JXI'] = 40
             self.KW['JXA'] = 56
-            self.KW['SEP'] = 22
+            self.KW['SEP'] = 23
             
             GFILE = '{}gfileProcessing/d3d_files/g175060.02512'.format(TOPDRT)
             GF = eq.equilibrium(gfile=GFILE)
@@ -309,14 +310,17 @@ class SOLPSPLOT(object):
         RadLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Radial Coordinate $m$')
         VertLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Vertical Coordinate $m$')
 
-        RadCo = ['YYLoc', 'RRsep', 'PsiNLoc']
-        RadVec = xr.DataArray(np.zeros((YSurf,XGrid,N,3)), coords=[Y,X,Attempts,RadCo], dims=['Radial_Location','Poloidal_Location','Attempt','Radial Metric'], name = 'Radial Coordinate Data')
+        #RadCo = ['YYLoc', 'RRsep', 'PsiNLoc']
+        #RadVec = xr.DataArray(np.zeros((YSurf,XGrid,N,3)), coords=[Y,X,Attempts,RadCo], dims=['Radial_Location','Poloidal_Location','Attempt','Radial Metric'], name = 'Radial Coordinate Data')
 
         YYLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Radial Grid Point $N$')
         PsinLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Normalized Psi $\psi_N$')
         
         #RadCor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Corner Radial Coordinate $m$')
         #VertCor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Corner Vertical Coordinate $m$')
+
+        PolLbl = ['XXLoc', 'Theta', 'DJXA', 'Flux Expansion']
+        PolVec = xr.DataArray(np.zeros((YSurf,XGrid,N,4)), coords=[Y,X,Attempts,PolLbl], dims=['Radial_Location','Poloidal_Location','Attempt','Poloidal Metric'], name = 'Poloidal Coordinate Data')            
 
         for n in range(N):
             Attempt = Attempts[n]
@@ -331,10 +335,16 @@ class SOLPSPLOT(object):
                 for i in range(len(X)):
                     PsinLoc.values[j,i,n] = GF.psiN(RadLoc.loc[Y[j],X[i],Attempt].values,VertLoc.loc[Y[j],X[i],Attempt].values,)            
             
+            PolVec.loc[:,:,Attempt,'XXLoc'] = Xx
             
-            PolCo=['XXLoc', 'DJXA', 'Theta', 'Flux Expansion']
-            PolVec = xr.DataArray(np.zeros((YSurf,XGrid,N,4)), coords=[Y,X,Attempts,PolCo], dims=['Radial_Location','Poloidal_Location','Attempt','Poloidal Metric'], name = 'Poloidal Coordinate Data')
+            YVector=np.zeros((len(X),2))
+            YVector[:,0] = RadLoc.values[1,:,n] - RadLoc.values[0,:,n]
+            YVector[:,1] = VertLoc.values[1,:,n] - VertLoc.values[0,:,n]            
             
+            for i in range(len(X)):
+                PolVec.loc[:,X[i],Attempt,'Theta'] = np.degrees(np.math.atan2(np.linalg.det([YVector[JXA-1,:],YVector[i,:]]),np.dot(YVector[JXA-1,:],YVector[i,:])))
+                if PolVec.loc[:,X[i],Attempt,'Theta'].values[0] < 0 and X[i] < JXA:
+                    PolVec.loc[:,X[i],Attempt,'Theta'] = PolVec.loc[:,X[i],Attempt,'Theta'] + 360
             #try:
             #    RadCor.values[:,:,n] = np.loadtxt(DRT2 + '/Rad0Cor' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
             #    VertCor.values[:,:,n] = np.loadtxt(DRT2 + '/Vert0Cor' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
@@ -400,6 +410,7 @@ class SOLPSPLOT(object):
         self.RadCoords['PsinAvg'] = PsinAvg
         self.RadCoords['RadLoc'] = RadLoc
         self.RadCoords['VertLoc'] = VertLoc
+        self.PolVec = PolVec
         if 'd3d' not in Shot:
                 self.RadCoords['RmidAvg'] = RmidAvg
                 
@@ -583,40 +594,7 @@ class SOLPSPLOT(object):
                     plt.savefig(ImgName, bbox_inches='tight')
 
             self.ContKW = ContKW
-    
-    def Surface(self,Parameter=None,**kwargs):
-        
-        for key, value in self.KW.items():
-            if key not in kwargs.keys():
-                kwargs[key] = value
-                
-        SurfKW = kwargs
-        
-        if LOG10 == 2:
-            PARAM.values[PARAM.values==0] = np.nan
-            PARAM.values = np.log10(PARAM.values)
-        Zmax = np.nanmax(PARAM.values) 
-        for n in range(N):
-            fig1 = plt.figure(figsize=(18,12))  # Size is width x height
-            ax1 = fig1.gca(projection='3d')
-        
-            SURF = ax1.plot_surface(RadLoc.values[:,:,n],VertLoc.values[:,:,n],PARAM.values[:,:,n],cmap=CMAP,vmax=Zmax)
-            OMP = ax1.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],PARAM.loc[:,JXA,Attempts[n]],color='Orange')
-            IMP = ax1.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],PARAM.loc[:,JXI,Attempts[n]],color='Red')
-            SEP = ax1.plot(RadLoc.values[SEP,:,n],VertLoc.values[SEP,:,n],PARAM.loc[SEP,:,Attempts[n]],color='Black')
-            plt.legend(('Outboard Midplane','Inboard Midplane','SEParatrix'))            
-            
-            ax1.view_init(ELEV,AZIM)     # Use (30,135) for Ne,Te,DN,KYE,IonFlx. Use (30,315) for NeuDen
-            ax1.set_zlabel(PARAM.name)
-            ax1.set_zbound(upper=Zmax)
-            plt.title('Discharge 0' + str(Shot) + ' Attempt(s) ' + str(Attempts[n]) + ' ' + PARAM.name)
-            plt.xlabel('Radial Location (m)')
-            plt.ylabel('Poloidal Location (m)')
-            plt.colorbar(SURF)
-            if SAVE == 1:
-                ImgName = 'Profiles/' + Parameter + 'SurfA' + str(Attempts[n]) + '.png'
-                plt.savefig(ImgName, bbox_inches='tight')
-    
+
     def PolPlot(self,Parameter=None,**kwargs):
         #with plt.xkcd():
             
@@ -626,14 +604,15 @@ class SOLPSPLOT(object):
 
             Shot = self.Shot
             Attempts = self.Attempts
+            PolVec = self.PolVec
             Publish = kwargs['Publish']
             JXA = kwargs['JXA']-1
+            JXI = kwargs['JXI'] -1
             SEP = kwargs['SEP'] -1
-            RADC = kwargs['RADC']
-            Offset = [kwargs['PsinOffset'],kwargs['RadOffset']]         
+            POLC = kwargs['POLC']
+            CoreBound = kwargs['CoreBound']
+            CoreBound[1] = CoreBound[1]-1
             PolKW = kwargs
-            
-            RR, Rexp, Rstr = self.GetRadCoords(RADC,Offset)
             
             if Parameter is None:
                 self.PltParams = self.Parameter
@@ -655,58 +634,48 @@ class SOLPSPLOT(object):
                         print('Plot Parameter Does Not Exist Or Could Not Be Loaded! Skipping Plot...')
                         pass
 
+            if POLC == 'theta':
+                PP = PolVec.loc[:,:,:,'Theta']
+                PolXLbl = r'Poloidal Angle $\theta$' 
+            elif POLC == 'X':
+                PP = PolVec.loc[:,:,:,'XXLoc']
+                PolXLbl = r'Poloidal Cell Index $X$'
+            elif POLC == 'djxa':
+                PP = PolVec.loc[:,:,:,'DJXA']
+                PolXLbl = r'Distance from Outer Midplane $m$'
+
             print('Beginning Plot Sequence')                
-            
-            fig2a = plt.figure(figsize=(14,7))
-            PolVal = PARAM.loc[RadSel[0],:,:].values
-            PolVal[PolVal==0]=np.nan
-            if LOG10 == 2:
-                plt.semilogy(X,PolVal)
+
+            if PolKW['AX'] is None: # if no axis was supplied to the function create our own
+                fig, ax = plt.subplots(nrows=1,ncols=1,figsize=(14,7))
             else:
-                plt.plot(X,PolVal)
+                ax = PolKW['AX']
+            
+            if PolKW['GRAD'] is True:
+                PARAM.values = np.gradient(PARAM.values,axis=0)
+                
+            if PolKW['LOG10'] == 1:
+                #PARAM.values[PARAM.values<0] = 0
+                PARAM.values[PARAM.values>1] = np.log10(PARAM.values[PARAM.values>1])
+                PARAM.values[PARAM.values<-1] = -1*np.log10(np.abs(PARAM.values[PARAM.values<-1]))      
+            
+            if PolKW['LOG10'] == 2:
+                ax.semilogy(PP.loc[SEP,CoreBound[0]:CoreBound[1],:], PARAM.loc[SEP,CoreBound[0]:CoreBound[1],:])
+            else:
+                ax.plot(PP.loc[SEP,CoreBound[0]:CoreBound[1],:], PARAM.loc[SEP,CoreBound[0]:CoreBound[1],:],linewidth=3)
+
             if Publish==[]:
                 plt.legend(Attempts)
                 plt.title('Discharge 0' + str(Shot) + ' Attempt(s) ' + str(Attempts) + ' Poloidal ' + PARAM.name)
             else:
-                plt.legend(Publish,loc=4)
+                plt.legend(Publish)
                 plt.title('Poloidal ' + PARAM.name + ' along Separatrix')
-            Pmin = np.nanmin(PolVal)
-            Pmax = np.nanmax(PolVal)
-            plt.plot([int(JXI), int(JXI)],[Pmin, Pmax],color='Red')
-            plt.plot([int(JXA), int(JXA)],[Pmin, Pmax],color='Orange')
-            plt.xlabel('Poloidal Coordinate')
-            plt.ylabel(r'$Log_{10}$ of ' + PARAM.name)
-            plt.grid()
-    
-    def RadPlot(self,Parameter=None,**kwargs):
-        
-            for key, value in self.KW.items():
-                if key not in kwargs.keys():
-                    kwargs[key] = value
-                
-            RadKW = kwargs    
-        
-            fig2b = plt.figure(figsize=(14,10))
-            if GRAD == 1:
-                PARAM.values = np.gradient(PARAM.values,axis=0)
-            if LOG10 == 2:
-                plt.semilogy(RR.loc[:,PolSel,Attempts[0]].values, PARAM.loc[:,PolSel,Attempts[0]].values)
-            else:
-                plt.plot(RR.loc[:,PolSel,Attempts[0]].values, PARAM.loc[:,PolSel,Attempts[0]].values)
-            if PolSel==[JXI,JXA]:
-                plt.legend(['Inner Midplane','Outer Midplane'])
-            else:
-                plt.legend(PolSel)
-            Pmin = float(PARAM.values.min())
-            Pmax = float(PARAM.values.max())
-            plt.plot([RR.loc[SEP,JXA,Attempt], RR.loc[SEP,JXA,Attempt]],[Pmin, Pmax],color='Black')
-            if LOG10 == 1:
-                plt.yticks(y_exp)
-                labels = ['10^' + str(int(ex)) for ex in y_exp]
-                plt.gca().set_yticklabels(labels)
-            
-            plt.title('Discharge 0' + str(Shot) + ' Attempt(s) ' + str(Attempts) + ' Radial ' + PARAM.name)
-            plt.xlabel('Radial Coordinate ' + Rstr)
+            Pmin = float(PARAM.loc[SEP,CoreBound[0]:CoreBound[1],:].min())
+            Pmax = float(PARAM.loc[SEP,CoreBound[0]:CoreBound[1],:].max())    
+
+            plt.plot([PP.loc[SEP,JXI,Attempts[0]], PP.loc[SEP,JXI,Attempts[0]]],[Pmin, Pmax],'r--')
+            plt.plot([PP.loc[SEP,JXA,Attempts[0]], PP.loc[SEP,JXA,Attempts[0]]],[Pmin, Pmax],'--')
+            plt.xlabel(PolXLbl)
             plt.ylabel(PARAM.name)
             plt.grid()
     
@@ -803,7 +772,7 @@ class SOLPSPLOT(object):
                 ax.legend(Attempts)
                 ax.set_title('Discharge 0{} Attempt(s) {} Midplane Radial {}'.format(str(Shot), str(Attempts), PARAM.name))
             else:
-                ax.legend(Publish,loc=2)
+                ax.legend(Publish)
                 ax.set_title('Midplane Radial {}'.format(PARAM.name))
             Pmin = float(PARAM.loc[:,JXA,:].min())
             Pmax = float(PARAM.loc[:,JXA,:].max())
@@ -814,6 +783,72 @@ class SOLPSPLOT(object):
                 ax.grid(b=1)
                 
             self.RadProfKW = RadProfKW
+
+    def RadPlot(self,Parameter=None,**kwargs):
+        
+            for key, value in self.KW.items():
+                if key not in kwargs.keys():
+                    kwargs[key] = value
+                
+            RadKW = kwargs    
+        
+            fig2b = plt.figure(figsize=(14,10))
+            if GRAD == 1:
+                PARAM.values = np.gradient(PARAM.values,axis=0)
+            if LOG10 == 2:
+                plt.semilogy(RR.loc[:,PolSel,Attempts[0]].values, PARAM.loc[:,PolSel,Attempts[0]].values)
+            else:
+                plt.plot(RR.loc[:,PolSel,Attempts[0]].values, PARAM.loc[:,PolSel,Attempts[0]].values)
+            if PolSel==[JXI,JXA]:
+                plt.legend(['Inner Midplane','Outer Midplane'])
+            else:
+                plt.legend(PolSel)
+            Pmin = float(PARAM.values.min())
+            Pmax = float(PARAM.values.max())
+            plt.plot([RR.loc[SEP,JXA,Attempt], RR.loc[SEP,JXA,Attempt]],[Pmin, Pmax],color='Black')
+            if LOG10 == 1:
+                plt.yticks(y_exp)
+                labels = ['10^' + str(int(ex)) for ex in y_exp]
+                plt.gca().set_yticklabels(labels)
+            
+            plt.title('Discharge 0' + str(Shot) + ' Attempt(s) ' + str(Attempts) + ' Radial ' + PARAM.name)
+            plt.xlabel('Radial Coordinate ' + Rstr)
+            plt.ylabel(PARAM.name)
+            plt.grid()    
+
+    def Surface(self,Parameter=None,**kwargs):
+        
+        for key, value in self.KW.items():
+            if key not in kwargs.keys():
+                kwargs[key] = value
+                
+        SurfKW = kwargs
+        
+        if LOG10 == 2:
+            PARAM.values[PARAM.values==0] = np.nan
+            PARAM.values = np.log10(PARAM.values)
+        Zmax = np.nanmax(PARAM.values) 
+        for n in range(N):
+            fig1 = plt.figure(figsize=(18,12))  # Size is width x height
+            ax1 = fig1.gca(projection='3d')
+        
+            SURF = ax1.plot_surface(RadLoc.values[:,:,n],VertLoc.values[:,:,n],PARAM.values[:,:,n],cmap=CMAP,vmax=Zmax)
+            OMP = ax1.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],PARAM.loc[:,JXA,Attempts[n]],color='Orange')
+            IMP = ax1.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],PARAM.loc[:,JXI,Attempts[n]],color='Red')
+            SEP = ax1.plot(RadLoc.values[SEP,:,n],VertLoc.values[SEP,:,n],PARAM.loc[SEP,:,Attempts[n]],color='Black')
+            plt.legend(('Outboard Midplane','Inboard Midplane','SEParatrix'))            
+            
+            ax1.view_init(ELEV,AZIM)     # Use (30,135) for Ne,Te,DN,KYE,IonFlx. Use (30,315) for NeuDen
+            ax1.set_zlabel(PARAM.name)
+            ax1.set_zbound(upper=Zmax)
+            plt.title('Discharge 0' + str(Shot) + ' Attempt(s) ' + str(Attempts[n]) + ' ' + PARAM.name)
+            plt.xlabel('Radial Location (m)')
+            plt.ylabel('Poloidal Location (m)')
+            plt.colorbar(SURF)
+            if SAVE == 1:
+                ImgName = 'Profiles/' + Parameter + 'SurfA' + str(Attempts[n]) + '.png'
+                plt.savefig(ImgName, bbox_inches='tight')
+    
     
     def SumPolPlot(self,Parameter=None,**kwargs):
         #with plt.xkcd():
