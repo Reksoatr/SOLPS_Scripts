@@ -21,7 +21,7 @@ class SOLPSPLOT(object):
     '''  
     Plot SOLPS data!!! 2.0!!!
     
- m    REQUIRED:
+    REQUIRED:
     ** Setup **
     Shot = Shot Number (Either 12 or 25) or 'd3d' for d3d experiment
     Attempts = Simulation Attempt Number(s) [As a List!]
@@ -109,6 +109,8 @@ class SOLPSPLOT(object):
                      'YDIM' : 38,
                      'CoreBound' : [24,72],
                      'Publish' : [],
+                     'Markers' : True,
+                     'PlotScheme' : [],
                      'PsinOffset' : 0,
                      'RadOffset' : 0,
                      'RADC' : 'psin',
@@ -203,7 +205,7 @@ class SOLPSPLOT(object):
             
             self.KW['JXI'] = 40
             self.KW['JXA'] = 56
-            self.KW['SEP'] = 23
+            self.KW['SEP'] = 22
             
             GFILE = '{}gfileProcessing/d3d_files/g175060.02512'.format(TOPDRT)
             GF = eq.equilibrium(gfile=GFILE)
@@ -606,6 +608,8 @@ class SOLPSPLOT(object):
             Attempts = self.Attempts
             PolVec = self.PolVec
             Publish = kwargs['Publish']
+            PlotScheme = kwargs['PlotScheme']
+            Markers = kwargs['Markers']
             JXA = kwargs['JXA']-1
             JXI = kwargs['JXI'] -1
             SEP = kwargs['SEP'] -1
@@ -613,6 +617,8 @@ class SOLPSPLOT(object):
             CoreBound = kwargs['CoreBound']
             CoreBound[1] = CoreBound[1]-1
             PolKW = kwargs
+            
+            SURF = 17
             
             if Parameter is None:
                 self.PltParams = self.Parameter
@@ -659,10 +665,17 @@ class SOLPSPLOT(object):
                 PARAM.values[PARAM.values>1] = np.log10(PARAM.values[PARAM.values>1])
                 PARAM.values[PARAM.values<-1] = -1*np.log10(np.abs(PARAM.values[PARAM.values<-1]))      
             
-            if PolKW['LOG10'] == 2:
-                ax.semilogy(PP.loc[SEP,CoreBound[0]:CoreBound[1],:], PARAM.loc[SEP,CoreBound[0]:CoreBound[1],:])
-            else:
-                ax.plot(PP.loc[SEP,CoreBound[0]:CoreBound[1],:], PARAM.loc[SEP,CoreBound[0]:CoreBound[1],:],linewidth=3)
+            if len(PlotScheme) == self.N:
+                for n in range(self.N):
+                    if PolKW['LOG10'] == 2:
+                        ax.semilogy(PP.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PlotScheme[n])
+                    else:
+                        ax.plot(PP.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PlotScheme[n], linewidth=3)
+            else:            
+                if PolKW['LOG10'] == 2:
+                    ax.semilogy(PP.loc[SURF,CoreBound[0]:CoreBound[1],:], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],:])
+                else:
+                    ax.plot(PP.loc[SURF,CoreBound[0]:CoreBound[1],:], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],:],linewidth=3)
 
             if Publish==[]:
                 plt.legend(Attempts)
@@ -670,11 +683,13 @@ class SOLPSPLOT(object):
             else:
                 plt.legend(Publish)
                 plt.title('Poloidal ' + PARAM.name + ' along Separatrix')
-            Pmin = float(PARAM.loc[SEP,CoreBound[0]:CoreBound[1],:].min())
-            Pmax = float(PARAM.loc[SEP,CoreBound[0]:CoreBound[1],:].max())    
-
-            plt.plot([PP.loc[SEP,JXI,Attempts[0]], PP.loc[SEP,JXI,Attempts[0]]],[Pmin, Pmax],'r--')
-            plt.plot([PP.loc[SEP,JXA,Attempts[0]], PP.loc[SEP,JXA,Attempts[0]]],[Pmin, Pmax],'--')
+            Pmin = float(PARAM.loc[SURF,CoreBound[0]:CoreBound[1],:].min())
+            Pmax = float(PARAM.loc[SURF,CoreBound[0]:CoreBound[1],:].max())    
+            
+            if Markers == True:
+                plt.plot([PP.loc[SURF,JXI,Attempts[0]], PP.loc[SURF,JXI,Attempts[0]]],[Pmin, Pmax],'r--')
+                plt.plot([PP.loc[SURF,JXA,Attempts[0]], PP.loc[SURF,JXA,Attempts[0]]],[Pmin, Pmax],'--')
+            
             plt.xlabel(PolXLbl)
             plt.ylabel(PARAM.name)
             plt.grid()
@@ -691,6 +706,8 @@ class SOLPSPLOT(object):
         JXA = kwargs['JXA']-1
         SEP = kwargs['SEP'] -1
         RADC = kwargs['RADC']
+        Markers = kwargs['Markers']
+        PlotScheme = kwargs['PlotScheme']
         Offset = [kwargs['PsinOffset'],kwargs['RadOffset']]         
         RadProfKW = kwargs
         
@@ -732,10 +749,18 @@ class SOLPSPLOT(object):
                 PARAM.values[PARAM.values<-1] = -1*np.log10(np.abs(PARAM.values[PARAM.values<-1]))    
                 y_exp = np.arange(np.floor(np.nanmin(PARAM.values)), np.ceil(np.nanmax(PARAM.values))+1,2)    
             
-            if RadProfKW['LOG10'] == 2:
-                ax.semilogy(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:])
+            
+            if len(PlotScheme) == self.N:
+                for n in range(self.N):
+                    if RadProfKW['LOG10'] == 2:
+                        ax.semilogy(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n])
+                    else:
+                        ax.plot(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n],linewidth=3)
             else:
-                ax.plot(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:],linewidth=3)
+                if RadProfKW['LOG10'] == 2:
+                    ax.semilogy(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:])
+                else:
+                    ax.plot(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:],linewidth=3)
 
             if RadProfKW['EXP'] is True:
                 if 'd3d' not in Shot:
@@ -776,13 +801,17 @@ class SOLPSPLOT(object):
                 ax.set_title('Midplane Radial {}'.format(PARAM.name))
             Pmin = float(PARAM.loc[:,JXA,:].min())
             Pmax = float(PARAM.loc[:,JXA,:].max())
-            if SEP != 0:
+            if Markers == True:
                 ax.plot([RR.loc[SEP,JXA,Attempts[0]], RR.loc[SEP,JXA,Attempts[0]]],[Pmin, Pmax],color='Black',linewidth=3)
             
             if RadProfKW['GRID'] is True:
                 ax.grid(b=1)
                 
             self.RadProfKW = RadProfKW
+
+
+### FUNCTIONS BELOW NEED TO BE WORKED ON
+
 
     def RadPlot(self,Parameter=None,**kwargs):
         

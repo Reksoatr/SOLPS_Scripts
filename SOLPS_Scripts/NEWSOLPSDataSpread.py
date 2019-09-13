@@ -26,7 +26,7 @@ def SOLPSDataSpread(Shot, Attempt):
 	else:
 		PsinOffset = 0
 
-	SOLPSOBJ = SOLPSPLOT(Shot, Attempt, PsinOffset=PsinOffset, GRID=True, BASEDRT= 'solps-iter/runs/')
+	SOLPSOBJ = SOLPSPLOT(Shot, Attempt, PsinOffset=PsinOffset, GRID=True, BASEDRT= 'solps-iter/runs/', TOPDRT='')
 
 	plt.rc('font',size=20)
 	plt.rc('lines',linewidth=5,markersize=5)
