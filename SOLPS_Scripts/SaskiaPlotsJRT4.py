@@ -11,9 +11,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 Base=0
-Balloon=0
+Balloon=1
 Gas=0
-GasTime=1
+GasTime=0
 
 # BASELINE PLOTS
 
@@ -69,7 +69,7 @@ if Balloon == 1:
     
     Bal012.PolPlot('NeuDen',AX=NeuDenPolPlot,LOG10=2,Markers=False)
     Bal025.PolPlot('NeuDen',AX=NeuDenPolPlot,LOG10=2,Markers=False)
-    Bald3d.PolPlot('NeuDen',AX=NeuDenPolPlot,LOG10=2)
+    Bald3d.PolPlot('NeuDen',AX=NeuDenPolPlot,LOG10=2,Markers=False)
     
     DNPolfig, DNPolPlot = plt.subplots(nrows=1, ncols=1)
     
