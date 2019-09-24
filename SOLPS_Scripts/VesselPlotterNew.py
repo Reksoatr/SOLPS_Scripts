@@ -185,14 +185,14 @@ class SOLPSPLOT(object):
         
         if os.environ['OS'] == 'Windows_NT':
             if os.environ['USERNAME'] == 'rmreksoatmodjo':
-                BASEDRT = r"C:/Users/rmreksoatmodjo/Desktop/My Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-                TOPDRT = r"C:/Users/rmreksoatmodjo/Desktop/My Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/"
+                BASEDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
+                TOPDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
             elif os.environ['USERNAME'] == '18313':
-                BASEDRT = r"C:/Users/18313/GDrive/School stuff/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-                TOPDRT = r"C:/Users/18313/GDrive/School stuff/College of William and Mary/Research/SOLPS Stuff/"
+                BASEDRT = r"C:/Users/18313/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
+                TOPDRT = r"C:/Users/18313/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
             elif os.environ['USERNAME'] == 'Richard':
-                BASEDRT = r"C:/Users/Richard/Desktop/Google Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-                TOPDRT = r"C:/Users/Richard/Desktop/Google Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/"
+                BASEDRT = r"C:/Users/Richard/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
+                TOPDRT = r"C:/Users/Richard/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
 
         # Create Experiment Data Dictionary (ExpDict) -> d3d or cmod?
         
