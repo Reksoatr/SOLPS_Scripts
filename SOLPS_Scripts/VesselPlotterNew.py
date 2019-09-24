@@ -787,7 +787,7 @@ class SOLPSPLOT(object):
                         Tid3d = self.ExpDict['Tid3d']
                         ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3)
             
-            ax.set_xlabel('Radial Coordinate {}'.format(Rstr))
+            ax.set_xlabel(Rstr)
             
             if RadProfKW['LOG10'] == 1:
                 ax.set_ylabel('Log_10 of {}'.format(PARAM.name))
@@ -798,7 +798,7 @@ class SOLPSPLOT(object):
                 ax.set_title('Discharge 0{} Attempt(s) {} Midplane Radial {}'.format(str(Shot), str(Attempts), PARAM.name))
             else:
                 ax.legend(Publish)
-                ax.set_title('Midplane Radial {}'.format(PARAM.name))
+                ax.set_title('Radial Midplane {}'.format(PARAM.name))
             Pmin = float(PARAM.loc[:,JXA,:].min())
             Pmax = float(PARAM.loc[:,JXA,:].max())
             if Markers == True:
