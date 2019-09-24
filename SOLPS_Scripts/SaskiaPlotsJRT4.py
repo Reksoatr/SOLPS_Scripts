@@ -10,9 +10,9 @@ from VesselPlotterNew import SOLPSPLOT
 import matplotlib.pyplot as plt
 import numpy as np
 
-Base=1
+Base=0
 Balloon=0
-Gas=0
+Gas=1
 GasTime=0
 
 # BASELINE PLOTS
@@ -26,31 +26,31 @@ if Base == 1:
     Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
     
     Base012.RadProf('Ne',AX=NeRadPlot,PsinOffset=-0.01,Markers=False,PlotScheme=['b-'])
-    Base025.RadProf('Ne',AX=NeRadPlot,PsinOffset=-0.015,Markers=False,Publish=['1160718012','1160718025'],PlotScheme=['r-'])
+    Base025.RadProf('Ne',AX=NeRadPlot,PsinOffset=-0.015,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
     #Based3d.RadProf('Ne',AX=NeRadPlot,Publish=['1160718012','1160718025','175060'])
     
     Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
     
     Base012.RadProf('Te',AX=TeRadPlot,PsinOffset=-0.01,Markers=False,PlotScheme=['b-'])
-    Base025.RadProf('Te',AX=TeRadPlot,PsinOffset=-0.015,Markers=False,Publish=['1160718012','1160718025'],PlotScheme=['r-'])
+    Base025.RadProf('Te',AX=TeRadPlot,PsinOffset=-0.015,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
     #Based3d.RadProf('Te',AX=TeRadPlot,Publish=['1160718012','1160718025','175060'])
     
     IonFlxfig, IonFlxRadPlot = plt.subplots(nrows=1, ncols=1)
     
     Base012.RadProf('IonFlx',AX=IonFlxRadPlot,Markers=False,PlotScheme=['b-'])
-    Base025.RadProf('IonFlx',AX=IonFlxRadPlot,Markers=False,Publish=['1160718012','1160718025'],PlotScheme=['r-'])
+    Base025.RadProf('IonFlx',AX=IonFlxRadPlot,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
     #Based3d.RadProf('IonFlx',AX=IonFlxRadPlot,Publish=['1160718012','1160718025','175060'])
     
     DNfig, DNRadPlot = plt.subplots(nrows=1, ncols=1)
     
     Base012.RadProf('DN',AX=DNRadPlot,Markers=False,PlotScheme=['b-'])
-    Base025.RadProf('DN',AX=DNRadPlot,Markers=False,Publish=['1160718012','1160718025'],PlotScheme=['r-'])
+    Base025.RadProf('DN',AX=DNRadPlot,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
     #Based3d.RadProf('DN',AX=DNRadPlot,Publish=['1160718012','1160718025','175060'])
     
     NeuDenfig, NeuDenRadPlot = plt.subplots(nrows=1, ncols=1)
     
-    Base012.RadProf('NeuDen',AX=NeuDenRadPlot,LOG10=2,Markers=False,PlotScheme=['b-'])
-    Base025.RadProf('NeuDen',AX=NeuDenRadPlot,LOG10=2,Markers=False,Publish=['1160718012','1160718025'],PlotScheme=['r-'])
+    Base012.RadProf('NeuDen',AX=NeuDenRadPlot,LOG10=1,Markers=False,PlotScheme=['b-'])
+    Base025.RadProf('NeuDen',AX=NeuDenRadPlot,LOG10=1,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
     #Based3d.RadProf('NeuDen',AX=NeuDenRadPlot,LOG10=2,Publish=['1160718012','1160718025','175060'])
     
 if Balloon == 1:
@@ -78,25 +78,25 @@ if Balloon == 1:
     Bald3d.PolPlot('DN',AX=DNPolPlot)
     
 if Gas == 1:
-    Gas012=SOLPSPLOT('gas012',[19,18,17,8],Publish=['77.8 TorrL total D2','39.5 TorrL total D2','8.25 TorrL total D2','No D2 puff'])
-    Gas025=SOLPSPLOT('gas025',[19,16,1],Publish=['72.2 TorrL total D2','6.77 TorrL total D2','No D2 puff'])
-    Gasd3d=SOLPSPLOT('gasd3d',[30,29,28,27,86],Publish=['300 TorrL total D2','200 TorrL total D2','150 TorrL total D2','50 TorrL total D2','No D2 puff'])
+    Gas012=SOLPSPLOT('gas012',[19,18,17,8],Publish=['77.8 TorrL total D2','39.5 TorrL total D2','8.25 TorrL total D2','No D2 puff'],Markers=False,PlotScheme=['y','r','b','g'])
+    Gas025=SOLPSPLOT('gas025',[19,16,1],Publish=['72.2 TorrL total D2','6.77 TorrL total D2','No D2 puff'],Markers=False,PlotScheme=['r','b','g'])
+    #Gasd3d=SOLPSPLOT('gasd3d',[30,29,28,27,86],Publish=['300 TorrL total D2','200 TorrL total D2','150 TorrL total D2','50 TorrL total D2','No D2 puff'])
     
     Gas012.RadProf('Ne',PsinOffset=-0.01)
     Gas025.RadProf('Ne',PsinOffset=-0.015)
-    Gasd3d.RadProf('Ne')
+    #Gasd3d.RadProf('Ne')
     
     Gas012.RadProf('IonFlx')
     Gas025.RadProf('IonFlx')
-    Gasd3d.RadProf('IonFlx')
+    #Gasd3d.RadProf('IonFlx')
     
     Gas012.RadProf('NeuDen',LOG10=2)
     Gas025.RadProf('NeuDen',LOG10=2)
-    Gasd3d.RadProf('NeuDen',LOG10=2)
+    #Gasd3d.RadProf('NeuDen',LOG10=2)
 
     Gas012.PolPlot('NeuDen',LOG10=2)
     Gas025.PolPlot('NeuDen',LOG10=2)
-    Gasd3d.PolPlot('NeuDen',LOG10=2)
+    #Gasd3d.PolPlot('NeuDen',LOG10=2)
 
 if GasTime == 1:
     
