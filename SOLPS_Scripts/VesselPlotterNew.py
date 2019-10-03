@@ -97,6 +97,7 @@ class SOLPSPLOT(object):
             self.Parameter = ['Ne','Te','Ti','DN','KYE','KYI','NeuDen','IonFlx']
             
         self.DefaultSettings = {'TimeRange' : [0.90,1.00],  
+                     'DEV': 'cmod',
                      'EXP' : True,
                      'LOG10' : 0,
                      'GRAD' : False,
@@ -182,6 +183,7 @@ class SOLPSPLOT(object):
         CoreBound = self.KW['CoreBound']
         BASEDRT = self.KW['BASEDRT']
         TOPDRT = self.KW['TOPDRT']
+        DEV = self.KW['DEV']
         
         if os.environ['OS'] == 'Windows_NT':
             if os.environ['USERNAME'] == 'rmreksoatmodjo':
@@ -199,7 +201,7 @@ class SOLPSPLOT(object):
         if 'gas' in Shot:
             BASEDRT = '{}gaspuff/'.format(BASEDRT)
         
-        if 'd3d' in Shot:
+        if 'd3d' in Shot or DEV=='d3d':
             
             BASEDRT = '{}d3d'.format(BASEDRT)
             
@@ -237,7 +239,7 @@ class SOLPSPLOT(object):
             self.ExpDict['Ted3d'] = ExpData['Te'][jj:]
             self.ExpDict['Tid3d'] = ExpData['Ti'][kk:]
             
-        elif '25' in Shot or '12' in Shot:
+        elif DEV=='cmod':
             
             BASEDRT = '{}cmod/0{}home'.format(BASEDRT, Shot[-2:])
             
@@ -248,10 +250,10 @@ class SOLPSPLOT(object):
             ExpData = loadmat('{}gfileProcessing/cmod_files/{}.mat'.format(TOPDRT, ExpFile))    
             
             ti = 0
-            while TimeRange[0] > ExpData['time'][ti]:
+            while TimeRange[0] > ExpData['time'].flatten()[ti]:
                 ti = ti+1           
             tf = 0
-            while TimeRange[1] > ExpData['time'][tf]:
+            while TimeRange[1] > ExpData['time'].flatten()[tf]:
                 tf = tf+1
             
             Psin = np.transpose(ExpData['psin'])[:,ti:tf]
@@ -263,28 +265,22 @@ class SOLPSPLOT(object):
             Nemid = np.transpose(ExpData['ne'])[:,ti:tf]
             Nemid[Nemid == 0] = np.nan
             NemidAvg = np.nanmean(Nemid, axis=1)
-            HiErrNe = np.nanmax(Nemid,axis=1) - NemidAvg
-            LoErrNe = NemidAvg - np.nanmin(Nemid,axis=1)
-            ErrNe = [LoErrNe,HiErrNe]
-            NeThresh = (ErrNe[1]-ErrNe[0])/NemidAvg
+            ErrNe = np.nanmean(ExpData['nerr'][:,ti:tf])
+            NeThresh = (ErrNe*2)/NemidAvg
             for NT in range(len(NeThresh)):
                 if np.abs(NeThresh[NT]) > 0.5:
                     NemidAvg[NT] = np.nan
-                    ErrNe[0][NT] = np.nan
-                    ErrNe[1][NT] = np.nan
+                    ErrNe[NT] = np.nan
             
             Temid = np.transpose(ExpData['te'])[:,ti:tf]
             Temid[Temid == 0] = np.nan
             TemidAvg = np.nanmean(Temid, axis=1)
-            HiErrTe = np.nanmax(Temid,axis=1) - TemidAvg
-            LoErrTe = TemidAvg - np.nanmin(Temid,axis=1)
-            ErrTe = [LoErrTe,HiErrTe]
-            TeThresh = (ErrTe[1]-ErrTe[0])/TemidAvg
+            ErrTe = np.nanmean(ExpData['terr'][:,ti:tf])
+            TeThresh = (ErrTe*2)/TemidAvg
             for TT in range(len(TeThresh)):
                 if np.abs(TeThresh[TT]) > 0.5:
                     TemidAvg[TT] = np.nan
-                    ErrTe[0][TT] = np.nan
-                    ErrTe[1][TT] = np.nan
+                    ErrTe[TT] = np.nan
                     
             self.ExpDict['NemidAvg'] = NemidAvg
             self.ExpDict['ErrNe'] = ErrNe
