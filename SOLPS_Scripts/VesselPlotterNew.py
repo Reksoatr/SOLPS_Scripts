@@ -15,6 +15,7 @@ import geqdsk
 import equilibrium as eq
 from D3DPreProcess import PsiNtoR
 from D3DPreProcess import RhotoPsiN
+from TOOLS import SET_WDIR
 
 class SOLPSPLOT(object):
         
@@ -60,8 +61,8 @@ class SOLPSPLOT(object):
     Publish = [] > List of strings to use in legends of publication-quality plots; if not [], changes plotting rc.params 
     RADC = 'psin' > Set radial coordinate convention - Either 'psin', 'radial', or 'Y'    
     BASEDRT = 'SOLPS_2D_prof/' > Local home directory
-    RadSel = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
-    PolSel = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
+    RadLoc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
+    PolLoc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
     AX = None > Pass the name of a matplotlib axis for the SOLPSPLOT object to plot on; by default SOLPSPLOT plots on a new axis
         
     PLOT TYPES:
@@ -116,8 +117,8 @@ class SOLPSPLOT(object):
                      'RadOffset' : 0,
                      'RADC' : 'psin',
                      'POLC' : 'theta',
-                     'RadSel' : None,
-                     'PolSel' : None, 
+                     'RadLoc' : None,
+                     'PolLoc' : None, 
                      'GEO' : True,
                      'LVN' : 100,
                      'DIVREG' : True,
@@ -175,8 +176,8 @@ class SOLPSPLOT(object):
         TimeRange = self.KW['TimeRange']
         PsinOffset = self.KW['PsinOffset']        
         RadOffset = self.KW['RadOffset']
-        RadSel = self.KW['RadSel']
-        PolSel = self.KW['PolSel']
+        RadLoc = self.KW['RadLoc']
+        PolLoc = self.KW['PolLoc']
         SEP = self.KW['SEP']
         XDIM = self.KW['XDIM']
         YDIM = self.KW['YDIM']
@@ -185,17 +186,8 @@ class SOLPSPLOT(object):
         TOPDRT = self.KW['TOPDRT']
         DEV = self.KW['DEV']
         
-        if os.environ['OS'] == 'Windows_NT':
-            if os.environ['USERNAME'] == 'rmreksoatmodjo':
-                BASEDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-                TOPDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
-            elif os.environ['USERNAME'] == '18313':
-                BASEDRT = r"C:/Users/18313/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-                TOPDRT = r"C:/Users/18313/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
-            elif os.environ['USERNAME'] == 'Richard':
-                BASEDRT = r"C:/Users/Richard/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-                TOPDRT = r"C:/Users/Richard/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
-
+        BASEDRT, TOPDRT = SET_WDIR()
+        
         # Create Experiment Data Dictionary (ExpDict) -> d3d or cmod?
         
         if 'gas' in Shot:
@@ -378,14 +370,14 @@ class SOLPSPLOT(object):
                     elif RawData.size == 7448:
                         self.PARAM[self.Parameter[p]].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
                         
-                    if RadSel == 'all':
-                        RadSel = self.PARAM.coords['Radial_Location'].values
-                    if RadSel == None:
-                        RadSel = [SEP]
-                    if PolSel == 'all':
-                        PolSel = self.PARAM.coords['Poloidal_Location'].values
-                    if PolSel == None:
-                        PolSel = [JXI,JXA]
+                    if RadLoc == 'all':
+                        RadLoc = self.PARAM.coords['Radial_Location'].values
+                    if RadLoc == None:
+                        RadLoc = [SEP]
+                    if PolLoc == 'all':
+                        PolLoc = self.PARAM.coords['Poloidal_Location'].values
+                    if PolLoc == None:
+                        PolLoc = [JXI,JXA]
                 
         if Publish != []:
             plt.rc('font',size=25)
@@ -821,13 +813,13 @@ class SOLPSPLOT(object):
             if GRAD == 1:
                 PARAM.values = np.gradient(PARAM.values,axis=0)
             if LOG10 == 2:
-                plt.semilogy(RR.loc[:,PolSel,Attempts[0]].values, PARAM.loc[:,PolSel,Attempts[0]].values)
+                plt.semilogy(RR.loc[:,PolLoc,Attempts[0]].values, PARAM.loc[:,PolLoc,Attempts[0]].values)
             else:
-                plt.plot(RR.loc[:,PolSel,Attempts[0]].values, PARAM.loc[:,PolSel,Attempts[0]].values)
-            if PolSel==[JXI,JXA]:
+                plt.plot(RR.loc[:,PolLoc,Attempts[0]].values, PARAM.loc[:,PolLoc,Attempts[0]].values)
+            if PolLoc==[JXI,JXA]:
                 plt.legend(['Inner Midplane','Outer Midplane'])
             else:
-                plt.legend(PolSel)
+                plt.legend(PolLoc)
             Pmin = float(PARAM.values.min())
             Pmax = float(PARAM.values.max())
             plt.plot([RR.loc[SEP,JXA,Attempt], RR.loc[SEP,JXA,Attempt]],[Pmin, Pmax],color='Black')

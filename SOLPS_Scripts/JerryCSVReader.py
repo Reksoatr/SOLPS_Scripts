@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import os
 from scipy.io import loadmat
 from VesselPlotterNew import SOLPSPLOT
+from TOOLS import SET_WDIR
 
 DEV = 'cmod'
 ExpID = [24,25]
@@ -20,7 +21,9 @@ PsinOffset=-0.01
 
 JJ=0
 
-Wdir = r"C:\Users\18313\WMGDrive\College of William and Mary\Research\SOLPS Stuff\MatData"
+BASEDRT, TOPDRT = SET_WDIR()
+
+Wdir = "{}MatData".format(TOPDRT)
 
 Jexp = np.genfromtxt('{}\exp_data_1040122027.csv'.format(Wdir),dtype=float,delimiter=',',skip_header=3,names=True)
 
