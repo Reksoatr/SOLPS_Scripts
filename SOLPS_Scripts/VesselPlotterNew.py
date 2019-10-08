@@ -61,8 +61,8 @@ class SOLPSPLOT(object):
     Publish = [] > List of strings to use in legends of publication-quality plots; if not [], changes plotting rc.params 
     RADC = 'psin' > Set radial coordinate convention - Either 'psin', 'radial', or 'Y'    
     BASEDRT = 'SOLPS_2D_prof/' > Local home directory
-    RadLoc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
-    PolLoc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
+    RadSlc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
+    PolSlc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
     AX = None > Pass the name of a matplotlib axis for the SOLPSPLOT object to plot on; by default SOLPSPLOT plots on a new axis
         
     PLOT TYPES:
@@ -117,8 +117,8 @@ class SOLPSPLOT(object):
                      'RadOffset' : 0,
                      'RADC' : 'psin',
                      'POLC' : 'theta',
-                     'RadLoc' : None,
-                     'PolLoc' : None, 
+                     'RadSlc' : None,
+                     'PolSlc' : None, 
                      'GEO' : True,
                      'LVN' : 100,
                      'DIVREG' : True,
@@ -176,8 +176,8 @@ class SOLPSPLOT(object):
         TimeRange = self.KW['TimeRange']
         PsinOffset = self.KW['PsinOffset']        
         RadOffset = self.KW['RadOffset']
-        RadLoc = self.KW['RadLoc']
-        PolLoc = self.KW['PolLoc']
+        RadSlc = self.KW['RadSlc']
+        PolSlc = self.KW['PolSlc']
         SEP = self.KW['SEP']
         XDIM = self.KW['XDIM']
         YDIM = self.KW['YDIM']
@@ -248,26 +248,26 @@ class SOLPSPLOT(object):
             while TimeRange[1] > ExpData['time'].flatten()[tf]:
                 tf = tf+1
             
-            Psin = np.transpose(ExpData['psin'])[:,ti:tf]
+            Psin = ExpData['psin'][:,ti:tf]
             PsinAvg = np.mean(Psin, axis=1)
             
-            Rmid = np.transpose(ExpData['rmid'])[:,ti:tf]
+            Rmid = ExpData['rmid'][:,ti:tf]
             RmidAvg = np.mean(Rmid, axis=1)
             
-            Nemid = np.transpose(ExpData['ne'])[:,ti:tf]
+            Nemid = ExpData['ne'][:,ti:tf]
             Nemid[Nemid == 0] = np.nan
             NemidAvg = np.nanmean(Nemid, axis=1)
-            ErrNe = np.nanmean(ExpData['nerr'][:,ti:tf])
+            ErrNe = np.nanmean(ExpData['nerr'][:,ti:tf], axis=1)
             NeThresh = (ErrNe*2)/NemidAvg
             for NT in range(len(NeThresh)):
                 if np.abs(NeThresh[NT]) > 0.5:
                     NemidAvg[NT] = np.nan
                     ErrNe[NT] = np.nan
             
-            Temid = np.transpose(ExpData['te'])[:,ti:tf]
+            Temid = ExpData['te'][:,ti:tf]
             Temid[Temid == 0] = np.nan
             TemidAvg = np.nanmean(Temid, axis=1)
-            ErrTe = np.nanmean(ExpData['terr'][:,ti:tf])
+            ErrTe = np.nanmean(ExpData['terr'][:,ti:tf], axis=1)
             TeThresh = (ErrTe*2)/TemidAvg
             for TT in range(len(TeThresh)):
                 if np.abs(TeThresh[TT]) > 0.5:
@@ -370,14 +370,14 @@ class SOLPSPLOT(object):
                     elif RawData.size == 7448:
                         self.PARAM[self.Parameter[p]].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
                         
-                    if RadLoc == 'all':
-                        RadLoc = self.PARAM.coords['Radial_Location'].values
-                    if RadLoc == None:
-                        RadLoc = [SEP]
-                    if PolLoc == 'all':
-                        PolLoc = self.PARAM.coords['Poloidal_Location'].values
-                    if PolLoc == None:
-                        PolLoc = [JXI,JXA]
+                    if RadSlc == 'all':
+                        RadSlc = self.PARAM.coords['Radial_Location'].values
+                    if RadSlc == None:
+                        RadSlc = [SEP]
+                    if PolSlc == 'all':
+                        PolSlc = self.PARAM.coords['Poloidal_Location'].values
+                    if PolSlc == None:
+                        PolSlc = [JXI,JXA]
                 
         if Publish != []:
             plt.rc('font',size=25)
@@ -813,13 +813,13 @@ class SOLPSPLOT(object):
             if GRAD == 1:
                 PARAM.values = np.gradient(PARAM.values,axis=0)
             if LOG10 == 2:
-                plt.semilogy(RR.loc[:,PolLoc,Attempts[0]].values, PARAM.loc[:,PolLoc,Attempts[0]].values)
+                plt.semilogy(RR.loc[:,PolSlc,Attempts[0]].values, PARAM.loc[:,PolSlc,Attempts[0]].values)
             else:
-                plt.plot(RR.loc[:,PolLoc,Attempts[0]].values, PARAM.loc[:,PolLoc,Attempts[0]].values)
-            if PolLoc==[JXI,JXA]:
+                plt.plot(RR.loc[:,PolSlc,Attempts[0]].values, PARAM.loc[:,PolSlc,Attempts[0]].values)
+            if PolSlc==[JXI,JXA]:
                 plt.legend(['Inner Midplane','Outer Midplane'])
             else:
-                plt.legend(PolLoc)
+                plt.legend(PolSlc)
             Pmin = float(PARAM.values.min())
             Pmax = float(PARAM.values.max())
             plt.plot([RR.loc[SEP,JXA,Attempt], RR.loc[SEP,JXA,Attempt]],[Pmin, Pmax],color='Black')
