@@ -288,13 +288,13 @@ class SOLPSPLOT(object):
         P = len(self.Parameter)
         
         XGrid=XDIM-2
-        XMin=0
-        XMax=XGrid-1
+        XMin=1
+        XMax=XGrid
         
         YSurf=YDIM-2
         
         X = np.linspace(XMin,XMax,XGrid)
-        Y = np.linspace(0,YSurf-1,YSurf)
+        Y = np.linspace(1,YSurf,YSurf)
         Xx, Yy = np.meshgrid(X,Y)   # Create X and Y mesh grid arrays
         
         RadLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Radial Coordinate $m$')
@@ -332,7 +332,7 @@ class SOLPSPLOT(object):
             YVector[:,1] = VertLoc.values[1,:,n] - VertLoc.values[0,:,n]            
             
             for i in range(len(X)):
-                PolVec.loc[:,X[i],Attempt,'Theta'] = np.degrees(np.math.atan2(np.linalg.det([YVector[JXA-1,:],YVector[i,:]]),np.dot(YVector[JXA-1,:],YVector[i,:])))
+                PolVec.loc[:,X[i],Attempt,'Theta'] = np.degrees(np.math.atan2(np.linalg.det([YVector[JXA,:],YVector[i,:]]),np.dot(YVector[JXA,:],YVector[i,:])))
                 if PolVec.loc[:,X[i],Attempt,'Theta'].values[0] < 0 and X[i] < JXA:
                     PolVec.loc[:,X[i],Attempt,'Theta'] = PolVec.loc[:,X[i],Attempt,'Theta'] + 360
             #try:
@@ -370,14 +370,15 @@ class SOLPSPLOT(object):
                     elif RawData.size == 7448:
                         self.PARAM[self.Parameter[p]].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
                         
-                    if RadSlc == 'all':
-                        RadSlc = self.PARAM.coords['Radial_Location'].values
-                    if RadSlc == None:
-                        RadSlc = [SEP]
-                    if PolSlc == 'all':
-                        PolSlc = self.PARAM.coords['Poloidal_Location'].values
-                    if PolSlc == None:
-                        PolSlc = [JXI,JXA]
+        if RadSlc == 'all':
+            RadSlc = self.PARAM.coords['Radial_Location'].values
+        if RadSlc == None:
+            RadSlc = [SEP]
+            
+        if PolSlc == 'all':
+            PolSlc = self.PARAM.coords['Poloidal_Location'].values
+        if PolSlc == None:
+            PolSlc = [JXI,JXA]
                 
         if Publish != []:
             plt.rc('font',size=25)
@@ -468,9 +469,9 @@ class SOLPSPLOT(object):
         Publish = kwargs['Publish']
         CoreBound = kwargs['CoreBound']
         DIVREG = kwargs['DIVREG']
-        JXA = kwargs['JXA']-1
-        JXI = kwargs['JXI']-1
-        SEP = kwargs['SEP']-1
+        JXA = kwargs['JXA']
+        JXI = kwargs['JXI']
+        SEP = kwargs['SEP']
         Offset = [kwargs['PsinOffset'],kwargs['RadOffset']]             
         ContKW = kwargs
         
@@ -598,9 +599,9 @@ class SOLPSPLOT(object):
             Publish = kwargs['Publish']
             PlotScheme = kwargs['PlotScheme']
             Markers = kwargs['Markers']
-            JXA = kwargs['JXA']-1
-            JXI = kwargs['JXI'] -1
-            SEP = kwargs['SEP'] -1
+            JXA = kwargs['JXA']
+            JXI = kwargs['JXI']
+            SEP = kwargs['SEP']
             POLC = kwargs['POLC']
             CoreBound = kwargs['CoreBound']
             CoreBound[1] = CoreBound[1]-1
@@ -691,9 +692,10 @@ class SOLPSPLOT(object):
         Shot = self.Shot
         Attempts = self.Attempts
         Publish = kwargs['Publish']
-        JXA = kwargs['JXA']-1
-        SEP = kwargs['SEP'] -1
+        JXA = kwargs['JXA']
+        SEP = kwargs['SEP']
         RADC = kwargs['RADC']
+        PolSlc = kwargs['PolSlc']
         Markers = kwargs['Markers']
         PlotScheme = kwargs['PlotScheme']
         Offset = [kwargs['PsinOffset'],kwargs['RadOffset']]         

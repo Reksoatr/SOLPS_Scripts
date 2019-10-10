@@ -10,9 +10,9 @@ from VesselPlotterNew import SOLPSPLOT
 import matplotlib.pyplot as plt
 import numpy as np
 
-Base=0
+Base=1
 Balloon=0
-Gas=1
+Gas=0
 GasTime=0
 
 # BASELINE PLOTS
@@ -23,34 +23,39 @@ if Base == 1:
     Base025=SOLPSPLOT('25',[153])
     #Based3d=SOLPSPLOT('d3d',[86])
     
-    Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
+    Fig, RadPlot = plt.subplots(nrows=6,ncols=1,sharex=True)
     
-    Base012.RadProf('Ne',AX=NeRadPlot,PsinOffset=-0.01,Markers=False,PlotScheme=['b-'])
-    Base025.RadProf('Ne',AX=NeRadPlot,PsinOffset=-0.015,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
+    #Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
+    
+    Base012.RadProf('Ne',AX=RadPlot[0],PsinOffset=-0.01,Markers=False,PlotScheme=['b-'])
+    Base025.RadProf('Ne',AX=RadPlot[0],PsinOffset=-0.015,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
     #Based3d.RadProf('Ne',AX=NeRadPlot,Publish=['1160718012','1160718025','175060'])
     
-    Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
+    #Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
     
-    Base012.RadProf('Te',AX=TeRadPlot,PsinOffset=-0.01,Markers=False,PlotScheme=['b-'])
-    Base025.RadProf('Te',AX=TeRadPlot,PsinOffset=-0.015,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
+    Base012.RadProf('Te',AX=RadPlot[2],PsinOffset=-0.01,Markers=False,PlotScheme=['b-'])
+    Base025.RadProf('Te',AX=RadPlot[2],PsinOffset=-0.015,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
     #Based3d.RadProf('Te',AX=TeRadPlot,Publish=['1160718012','1160718025','175060'])
     
-    IonFlxfig, IonFlxRadPlot = plt.subplots(nrows=1, ncols=1)
+    #IonFlxfig, IonFlxRadPlot = plt.subplots(nrows=1, ncols=1)
     
-    Base012.RadProf('IonFlx',AX=IonFlxRadPlot,Markers=False,PlotScheme=['b-'])
-    Base025.RadProf('IonFlx',AX=IonFlxRadPlot,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
+    Base012.RadProf('IonFlx',AX=RadPlot[4],Markers=False,PlotScheme=['b-'])
+    Base025.RadProf('IonFlx',AX=RadPlot[4],Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
     #Based3d.RadProf('IonFlx',AX=IonFlxRadPlot,Publish=['1160718012','1160718025','175060'])
     
-    DNfig, DNRadPlot = plt.subplots(nrows=1, ncols=1)
+    #DNfig, DNRadPlot = plt.subplots(nrows=1, ncols=1)
     
-    Base012.RadProf('DN',AX=DNRadPlot,Markers=False,PlotScheme=['b-'])
-    Base025.RadProf('DN',AX=DNRadPlot,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
+    Base012.RadProf('DN',AX=RadPlot[1],Markers=False,PlotScheme=['b-'])
+    Base025.RadProf('DN',AX=RadPlot[1],Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
     #Based3d.RadProf('DN',AX=DNRadPlot,Publish=['1160718012','1160718025','175060'])
     
-    NeuDenfig, NeuDenRadPlot = plt.subplots(nrows=1, ncols=1)
+    Base012.RadProf('KYE',AX=RadPlot[3],Markers=False,PlotScheme=['b-'])
+    Base025.RadProf('KYE',AX=RadPlot[3],Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
     
-    Base012.RadProf('NeuDen',AX=NeuDenRadPlot,LOG10=1,Markers=False,PlotScheme=['b-'])
-    Base025.RadProf('NeuDen',AX=NeuDenRadPlot,LOG10=1,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
+    #NeuDenfig, NeuDenRadPlot = plt.subplots(nrows=1, ncols=1)
+    
+    Base012.RadProf('NeuDen',AX=RadPlot[5],LOG10=1,Markers=False,PlotScheme=['b-'])
+    Base025.RadProf('NeuDen',AX=RadPlot[5],LOG10=1,Markers=False,Publish=['High Ip','Low Ip'],PlotScheme=['r-'])
     #Based3d.RadProf('NeuDen',AX=NeuDenRadPlot,LOG10=2,Publish=['1160718012','1160718025','175060'])
     
 if Balloon == 1:
