@@ -764,7 +764,7 @@ class SOLPSPLOT(object):
                 else:
                     ax.plot(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:],linewidth=3)
 
-            if RadProfKW['EXP'] is True:
+            if RadProfKW['EXP'] is True and RadProfKW['RADC'] != 'rrsep' and RadProfKW['RADC'] != 'Y':
                 if 'd3d' not in Shot:
                     if pn == 'Ne':
                         NemidAvg = self.ExpDict['NemidAvg']
