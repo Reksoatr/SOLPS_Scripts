@@ -97,7 +97,7 @@ class SOLPSPLOT(object):
         else:
             self.Parameter = ['Ne','Te','Ti','DN','KYE','KYI','NeuDen','IonFlx']
             
-        self.DefaultSettings = {'TimeRange' : [0.90,1.00],  
+        self.DefaultSettings = {'TimeRange' : [1.10,1.30],  
                      'DEV': 'cmod',
                      'EXP' : True,
                      'LOG10' : 0,
@@ -428,6 +428,18 @@ class SOLPSPLOT(object):
             else:
                 print('No experimental radial coordinates available!')
             Rstr = 'm'
+        elif RADC == 'rrsep':
+            PsinSep=np.abs(self.RadCoords['PsinLoc']-1)
+            Sign = np.sign(self.RadCoords['PsinLoc']-1)
+            RADSEP=self.RadCoords['RadLoc'].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
+            RADSEP=RADSEP[~np.isnan(RADSEP)]
+            RRsepRad = self.RadCoords['RadLoc'][:,:,0] - RADSEP
+            VERTSEP=self.RadCoords['VertLoc'].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
+            VERTSEP=VERTSEP[~np.isnan(VERTSEP)]
+            RRsepVert = self.RadCoords['VertLoc'][:,:,0] - VERTSEP
+            RR = np.sqrt(RRsepRad**2 + RRsepVert**2)*Sign
+            Rexp = None
+            Rstr = '$R-R_{sep}$'           
         else:
             print('Invalid Radial Coordinate specified')
             
