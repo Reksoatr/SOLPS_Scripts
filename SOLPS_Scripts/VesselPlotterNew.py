@@ -406,7 +406,9 @@ class SOLPSPLOT(object):
                 self.RadCoords['RmidAvg'] = RmidAvg
                 
     def GetRadCoords(self,RADC, Offset):
-        #Separate method to handle radial coordinate switching - Support (R-Rsep)?
+        #Separate method to handle radial coordinate switching
+        
+        #ADAPTIVE SEPARATRIX LOCATOR???
 
         PsinOffset = Offset[0]
         RadOffset = Offset[1]
