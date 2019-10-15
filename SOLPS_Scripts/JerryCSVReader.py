@@ -14,12 +14,14 @@ from VesselPlotterNew import SOLPSPLOT
 from TOOLS import SET_WDIR
 
 DEV = 'cmod'
-ExpID = [24,25]
-COLORS = ['y','r','b']
+Shot=12
+ExpID = [23,13,12]
+COLORS = ['k','y','r','r:']
 TimeRange=[0.9,1.0]
 PsinOffset=-0.01
 
 JJ=0
+JND=0
 
 BASEDRT, TOPDRT = SET_WDIR()
 
@@ -126,35 +128,37 @@ for Shot in ExpID:
     
 Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
 Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
-NeuDenfig, NeuDRadPlot = plt.subplots(nrows=1, ncols=1)
-'''            
-Gas012 = SOLPSPLOT('gas012',[19,18,17,8],Publish=['77.8 TorrL total D2','39.5 TorrL total D2','8.25 TorrL total D2','No D2 puff'],PsinOffset=PsinOffset,Markers=False,PlotScheme=COLORS,EXP=False)
 
-Gas012.RadProf('Ne',AX=NeRadPlot)
-Gas012.RadProf('Te',AX=TeRadPlot)
+if Shot == 12:              
+    Gas012 = SOLPSPLOT('gas012',[19,18,17,8],Publish=['77.8 TorrL total D2','39.5 TorrL total D2','8.25 TorrL total D2','No D2 puff'],PsinOffset=PsinOffset,Markers=False,PlotScheme=COLORS,EXP=False)
+    Gas012.RadProf('Ne',AX=NeRadPlot)
+    Gas012.RadProf('Te',AX=TeRadPlot)
+    
+    for n, Shot in enumerate(ExpID):
+        NeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
+        TeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
+elif Shot == 25:
+    Gas025=SOLPSPLOT('gas025',[19,16,1],Publish=['72.2 TorrL total D2','6.77 TorrL total D2','No D2 puff'],Markers=False,PlotScheme=COLORS,EXP=False)
+    
+    Gas025.RadProf('Ne',AX=NeRadPlot)
+    Gas025.RadProf('Te',AX=TeRadPlot)
+    
+    for n, Shot in enumerate(ExpID):
+        NeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n][0],markersize=7,linewidth=3,capsize=7)
+        TeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n][0],markersize=7,linewidth=3,capsize=7)
 
-for n, Shot in enumerate(ExpID):
-    NeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
-    TeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
-'''
-Gas025=SOLPSPLOT('gas025',[19,16,1],Publish=['72.2 TorrL total D2','6.77 TorrL total D2','No D2 puff'],Markers=False,PlotScheme=COLORS)
+NeRadPlot.set_title(r'Outer Midplane Electron Density $n_e\;(m^{-3})$')
+NeRadPlot.set_ylabel('')
 
-Gas025.RadProf('Ne',AX=NeRadPlot)
-Gas025.RadProf('Te',AX=TeRadPlot)
+TeRadPlot.set_title(r'Outer Midplane Electron Temperature $T_e\;(eV)$')
+TeRadPlot.set_ylabel('')
 
-for n, Shot in enumerate(ExpID):
-    NeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
-    TeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
-
-
-RR=Gas025.GetRadCoords('radial',[0,0])[0]
-SEP = Gas025.KW['SEP']
-JXA = Gas025.KW['JXA']
-AT=1
-
-Gas025.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,RADC='radial')
-NeuDRadPlot.semilogy(Jexp['R__R_LCFS_m']+RR[SEP,JXA,AT].values,Jexp['N_D_m3'],'--')
-NeuDRadPlot.semilogy(Jkn1d_H['R__R_LCFS_m']+RR[SEP,JXA,AT].values,Jkn1d_H['NH_m3'],':')
+if JND == 1:
+    NeuDenfig, NeuDRadPlot = plt.subplots(nrows=1, ncols=1)
+    NeuDen025 = SOLPSPLOT('gas025',[1])
+    NeuDen025.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,RADC='rrsep')
+    NeuDRadPlot.semilogy(Jexp['R__R_LCFS_m'],Jexp['N_D_m3'],'--')
+    NeuDRadPlot.semilogy(Jkn1d_H['R__R_LCFS_m'],Jkn1d_H['NH_m3'],':')
 
 
 

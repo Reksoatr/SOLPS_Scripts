@@ -56,10 +56,10 @@ class SOLPSPLOT(object):
     XDIM = 98 > Dimension of computational grid in the x (poloidal) direction
     YDIM = 38 > Dimension of computational grid in the y (radial) direction
     LVN = 100 > Number of colorbar levels for contour plots
-    CoreBound = [24,71] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
+    CoreBound = [25,72] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
     TimeRange = [0.90,1.00] > Time range (in sec) over which experimental data is averaged
     Publish = [] > List of strings to use in legends of publication-quality plots; if not [], changes plotting rc.params 
-    RADC = 'psin' > Set radial coordinate convention - Either 'psin', 'radial', or 'Y'    
+    RADC = 'psin' > Set radial coordinate convention - Either 'psin', 'radial', 'rrsep' or 'Y'    
     BASEDRT = 'SOLPS_2D_prof/' > Local home directory
     RadSlc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
     PolSlc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
@@ -109,7 +109,7 @@ class SOLPSPLOT(object):
                      'SEP' : 20,
                      'XDIM' : 98,
                      'YDIM' : 38,
-                     'CoreBound' : [24,72],
+                     'CoreBound' : [25,72],
                      'Publish' : [],
                      'Markers' : True,
                      'PlotScheme' : [],
@@ -137,9 +137,9 @@ class SOLPSPLOT(object):
                     
         self.KW = kwargs         
         
-        self.PARAMDICT = {'Ne': r'Electron Density $n_e (m^{-3})$',
-                     'Te': r'Electron Temperature $T_e (eV)$',
-                     'Ti': r'Ion Temperature $T_i (eV)$',
+        self.PARAMDICT = {'Ne': r'Electron Density $n_e\;(m^{-3})$',
+                     'Te': r'Electron Temperature $T_e\;(eV)$',
+                     'Ti': r'Ion Temperature $T_i\;(eV)$',
                      'DN': r'Particle Density Diffusivity $D\;(m^2/s)$',
                      'KYE': r'Electron Thermal Diffusivity $\chi_e (m^2/s)$',
                      'KYI': r'Ion Thermal Diffusivity $\chi_i (m^2/s)$',
@@ -441,7 +441,7 @@ class SOLPSPLOT(object):
             RRsepVert = self.RadCoords['VertLoc'][:,:,0] - VERTSEP
             RR = np.sqrt(RRsepRad**2 + RRsepVert**2)*Sign
             Rexp = None
-            Rstr = '$R-R_{sep}$'           
+            Rstr = '$R-R_{sep}$ (m)'           
         else:
             print('Invalid Radial Coordinate specified')
             
@@ -550,43 +550,45 @@ class SOLPSPLOT(object):
                 if ContKW['GEO'] is True:
                     if ContKW['LOG10'] == 2:
                         if DIVREG is True:
-                            IM2 = ax.contourf(RadLoc.values[:,0:CoreBound[0],n],VertLoc.values[:,0:CoreBound[0],n],PARAM.values[:,0:CoreBound[0],n],levs,cmap=CMAP,norm=colors.LogNorm())
-                            IM3 = ax.contourf(RadLoc.values[:,CoreBound[1]:,n],VertLoc.values[:,CoreBound[1]:,n],PARAM.values[:,CoreBound[1]:,n],levs,cmap=CMAP,norm=colors.LogNorm())
+                            IM2 = ax.contourf(RadLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],VertLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
+                            IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
 
-                        IM1 = ax.contourf(RadLoc.values[:,CoreBound[0]:CoreBound[1],n],VertLoc.values[:,CoreBound[0]:CoreBound[1],n],PARAM.values[:,CoreBound[0]:CoreBound[1],n],levs,cmap=CMAP,norm=colors.LogNorm())
+                        IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
                                             
                     else:
                         if DIVREG is True:
-                            IM2 = ax.contourf(RadLoc.values[:,0:CoreBound[0],n],VertLoc.values[:,0:CoreBound[0],n],PARAM.values[:,0:CoreBound[0],n],levs,cmap=CMAP)
-                            IM3 = ax.contourf(RadLoc.values[:,CoreBound[1]:,n],VertLoc.values[:,CoreBound[1]:,n],PARAM.values[:,CoreBound[1]:,n],levs,cmap=CMAP)
+                            IM2 = ax.contourf(RadLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],VertLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP)
+                            IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP)
 
-                        IM1 = ax.contourf(RadLoc.values[:,CoreBound[0]:CoreBound[1],n],VertLoc.values[:,CoreBound[0]:CoreBound[1],n],PARAM.values[:,CoreBound[0]:CoreBound[1],n],levs,cmap=CMAP)                      
+                        IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,cmap=CMAP)                      
                                      
                     ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
                     ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=3)
                     ax.plot(RadLoc.values[SEP,:,n],VertLoc.values[SEP,:,n],color='Black',linewidth=3)
                     ax.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000)
                     ax.set_xlabel('Radial Location (m)')
-                    ax.set_ylabel('Vertical Location (m)')                
+                    ax.set_ylabel('Vertical Location (m)')
+                    ax.set_aspect('equal')
                 else:
                     if ContKW['LOG10'] == 2:
-                        IM1 = ax.contourf(Xx[:,:],Yy[:,:],PARAM.values[:,:,n],levs,norm=colors.LogNorm(),cmap=CMAP)
+                        IM1 = ax.contourf(Xx[:,:],RR.values[:,:,n],PARAM.values[:,:,n],levs,norm=colors.LogNorm(),cmap=CMAP)
                     else:
-                        IM1 = ax.contour(Xx[:,:],Yy[:,:],PARAM.values[:,:,n],levs,cmap=CMAP)
-                        
-                    ax.plot(Xx[:,(JXA-XMin)],Yy[:,(JXA-XMin)],color='Orange',linewidth=3)
-                    ax.plot(Xx[:,(JXI-XMin)],Yy[:,(JXI-XMin)],color='Red',linewidth=3)
-                    ax.plot(Xx[SEP,:],Yy[SEP,:],color='Black',linewidth=3)
+                        IM1 = ax.contour(Xx[:,:],RR.values[:,:,n],PARAM.values[:,:,n],levs,cmap=CMAP)
+                    ax.plot(Xx[0:SEP+1,CoreBound[0]-2],RR.values[0:SEP+1,CoreBound[0]-2,n],color='Black',linewidth=3)
+                    ax.plot(Xx[0:SEP+1,CoreBound[1]-2],RR.values[0:SEP+1,CoreBound[1]-2,n],color='Black',linewidth=3)
+                    ax.plot(Xx[:,(JXA-XMin)],RR.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
+                    ax.plot(Xx[:,(JXI-XMin)],RR.values[:,(JXI-XMin),n],color='Red',linewidth=3)
+                    ax.plot(Xx[SEP,:],RR.values[SEP,:,n],color='Black',linewidth=3)
                     ax.set_xlabel('Poloidal Coordinate')
-                    ax.set_ylabel('Radial Coordinate') 
+                    ax.set_ylabel(Rstr) 
 
                 if ContKW['Publish'] != []:
                     ax.set_title('Attempt {} {}'.format(Publish[n], PARAM.name))
                 else:
                     ax.set_title('Discharge 0{} Attempt {} {}'.format(Shot, str(Attempts[n]), PARAM.name))
-                plt.colorbar(IM1)
-                ax.set_aspect('equal')
-                
+                    
+                plt.colorbar(IM1,ax=ax)
+
                 #a.set_xticklabels(['%.1f' % i for i in a.get_xticks()], fontsize='x-large')
                 #a.set_yticklabels(['%.1f' % j for j in a.get_yticks()], fontsize='x-large')
                 #a.tick_params(labelsize=20)
@@ -760,36 +762,61 @@ class SOLPSPLOT(object):
                         ax.semilogy(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n])
                     else:
                         ax.plot(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n],linewidth=3)
+                        
+                    if RadProfKW['EXP'] is True and RadProfKW['RADC'] != 'rrsep' and RadProfKW['RADC'] != 'Y':
+                        if 'd3d' not in Shot:
+                            if pn == 'Ne':
+                                NemidAvg = self.ExpDict['NemidAvg']
+                                ErrNe = self.ExpDict['ErrNe']
+                                ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[n][0])
+                            elif pn == 'Te':
+                                TemidAvg = self.ExpDict['TemidAvg']
+                                ErrTe = self.ExpDict['ErrTe']
+                                ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[n][0])
+                        
+                        if 'd3d' in Shot:
+                            if pn == 'Ne':
+                                PsinNe = Rexp[0]
+                                Ned3d = self.ExpDict['Ned3d']
+                                ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0])
+                            elif pn == 'Te':
+                                PsinTe = Rexp[1]
+                                Ted3d = self.ExpDict['Ted3d']
+                                ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0])
+                            elif pn == 'Ti':
+                                PsinTi = Rexp[2]
+                                Tid3d = self.ExpDict['Tid3d']
+                                ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0])
             else:
                 if RadProfKW['LOG10'] == 2:
                     ax.semilogy(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:])
                 else:
                     ax.plot(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:],linewidth=3)
 
-            if RadProfKW['EXP'] is True and RadProfKW['RADC'] != 'rrsep' and RadProfKW['RADC'] != 'Y':
-                if 'd3d' not in Shot:
-                    if pn == 'Ne':
-                        NemidAvg = self.ExpDict['NemidAvg']
-                        ErrNe = self.ExpDict['ErrNe']
-                        ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7)
-                    elif pn == 'Te':
-                        TemidAvg = self.ExpDict['TemidAvg']
-                        ErrTe = self.ExpDict['ErrTe']
-                        ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7)
-                
-                if 'd3d' in Shot:
-                    if pn == 'Ne':
-                        PsinNe = Rexp[0]
-                        Ned3d = self.ExpDict['Ned3d']
-                        ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3)
-                    elif pn == 'Te':
-                        PsinTe = Rexp[1]
-                        Ted3d = self.ExpDict['Ted3d']
-                        ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3)
-                    elif pn == 'Ti':
-                        PsinTi = Rexp[2]
-                        Tid3d = self.ExpDict['Tid3d']
-                        ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3)
+                if RadProfKW['EXP'] is True and RadProfKW['RADC'] != 'rrsep' and RadProfKW['RADC'] != 'Y':
+                    if 'd3d' not in Shot:
+                        if pn == 'Ne':
+                            NemidAvg = self.ExpDict['NemidAvg']
+                            ErrNe = self.ExpDict['ErrNe']
+                            ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7)
+                        elif pn == 'Te':
+                            TemidAvg = self.ExpDict['TemidAvg']
+                            ErrTe = self.ExpDict['ErrTe']
+                            ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7)
+                    
+                    if 'd3d' in Shot:
+                        if pn == 'Ne':
+                            PsinNe = Rexp[0]
+                            Ned3d = self.ExpDict['Ned3d']
+                            ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3)
+                        elif pn == 'Te':
+                            PsinTe = Rexp[1]
+                            Ted3d = self.ExpDict['Ted3d']
+                            ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3)
+                        elif pn == 'Ti':
+                            PsinTi = Rexp[2]
+                            Tid3d = self.ExpDict['Tid3d']
+                            ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3)
             
             ax.set_xlabel(Rstr)
             
