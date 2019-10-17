@@ -381,7 +381,7 @@ class SOLPSPLOT(object):
             PolSlc = [JXI,JXA]
                 
         if Publish != []:
-            plt.rc('font',size=25)
+            plt.rc('font',size=30)
             plt.rc('lines',linewidth=5,markersize=15)
         else:
             plt.rc('font',size=14)
@@ -480,6 +480,9 @@ class SOLPSPLOT(object):
         Attempts = self.Attempts
         Shot = self.Shot
         VVFILE = self.VVFILE
+        PolVec = self.PolVec
+        Markers = kwargs['Markers']
+        POLC = kwargs['POLC']
         Publish = kwargs['Publish']
         CoreBound = kwargs['CoreBound']
         DIVREG = kwargs['DIVREG']
@@ -494,6 +497,16 @@ class SOLPSPLOT(object):
         XMin = self.RadCoords['XMin']
         
         RR, Rexp, Rstr = self.GetRadCoords(ContKW['RADC'], Offset)
+        
+        if POLC == 'theta':
+            PP = PolVec.loc[:,:,:,'Theta']
+            PolXLbl = r'Poloidal Angle $\theta$' 
+        elif POLC == 'X':
+            PP = PolVec.loc[:,:,:,'XXLoc']
+            PolXLbl = r'Poloidal Cell Index $X$'
+        elif POLC == 'djxa':
+            PP = PolVec.loc[:,:,:,'DJXA']
+            PolXLbl = r'Distance from Outer Midplane $m$'
         
         for pn in self.PltParams:
             try:
@@ -561,9 +574,11 @@ class SOLPSPLOT(object):
                             IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP)
 
                         IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,cmap=CMAP)                      
-                                     
-                    ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
-                    ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=3)
+                    
+                    if Markers is True:                 
+                        ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
+                        ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=3)
+                    
                     ax.plot(RadLoc.values[SEP,:,n],VertLoc.values[SEP,:,n],color='Black',linewidth=3)
                     ax.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000)
                     ax.set_xlabel('Radial Location (m)')
@@ -571,15 +586,26 @@ class SOLPSPLOT(object):
                     ax.set_aspect('equal')
                 else:
                     if ContKW['LOG10'] == 2:
-                        IM1 = ax.contourf(Xx[:,:],RR.values[:,:,n],PARAM.values[:,:,n],levs,norm=colors.LogNorm(),cmap=CMAP)
+                        if DIVREG is True and POLC != 'theta':
+                            IM2 = ax.contourf(PP.loc[:,1:CoreBound[0]-1,Attempts[n]],RR.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
+                            IM3 = ax.contourf(PP.loc[:,CoreBound[1]+1:,Attempts[n]],RR.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
+                        
+                        IM1 = ax.contourf(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,norm=colors.LogNorm(),cmap=CMAP)
                     else:
-                        IM1 = ax.contour(Xx[:,:],RR.values[:,:,n],PARAM.values[:,:,n],levs,cmap=CMAP)
-                    ax.plot(Xx[0:SEP+1,CoreBound[0]-2],RR.values[0:SEP+1,CoreBound[0]-2,n],color='Black',linewidth=3)
-                    ax.plot(Xx[0:SEP+1,CoreBound[1]-2],RR.values[0:SEP+1,CoreBound[1]-2,n],color='Black',linewidth=3)
-                    ax.plot(Xx[:,(JXA-XMin)],RR.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
-                    ax.plot(Xx[:,(JXI-XMin)],RR.values[:,(JXI-XMin),n],color='Red',linewidth=3)
-                    ax.plot(Xx[SEP,:],RR.values[SEP,:,n],color='Black',linewidth=3)
-                    ax.set_xlabel('Poloidal Coordinate')
+                        if DIVREG is True and POLC != 'theta':
+                            IM2 = ax.contourf(PP.loc[:,1:CoreBound[0]-1,Attempts[n]],RR.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP)
+                            IM3 = ax.contourf(PP.loc[:,CoreBound[1]+1:,Attempts[n]],RR.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP)
+
+                        IM1 = ax.contour(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,cmap=CMAP)
+                    
+                    if Markers is True:
+                        ax.plot(PP.loc[:,JXA,Attempts[n]],RR.loc[:,JXA,Attempts[n]],color='Orange',linewidth=3)                         #Outer Midplane
+                        ax.plot(PP.loc[:,JXI,Attempts[n]],RR.loc[:,JXI,Attempts[n]],color='Red',linewidth=3)                            #Inner Midplane
+                    
+                    ax.plot(PP.loc[1:SEP,CoreBound[0],Attempts[n]],RR.loc[1:SEP,CoreBound[0],Attempts[n]],color='Black',linewidth=3)    #Inner PFR Boundary
+                    ax.plot(PP.loc[1:SEP,CoreBound[1],Attempts[n]],RR.loc[1:SEP,CoreBound[1],Attempts[n]],color='Black',linewidth=3)    #Outer PFR Boundary
+                    ax.plot(PP.loc[SEP,:,Attempts[n]],RR.loc[SEP,:,Attempts[n]],color='Black',linewidth=3)                              #Separatrix
+                    ax.set_xlabel(PolXLbl)
                     ax.set_ylabel(Rstr) 
 
                 if ContKW['Publish'] != []:

@@ -21,7 +21,7 @@ TimeRange=[0.9,1.0]
 PsinOffset=-0.01
 
 JJ=0
-JND=0
+JND=1
 
 BASEDRT, TOPDRT = SET_WDIR()
 
@@ -155,8 +155,8 @@ TeRadPlot.set_ylabel('')
 
 if JND == 1:
     NeuDenfig, NeuDRadPlot = plt.subplots(nrows=1, ncols=1)
-    NeuDen025 = SOLPSPLOT('gas025',[1])
-    NeuDen025.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,RADC='rrsep')
+    NeuDen025 = SOLPSPLOT('gas025',[19])
+    NeuDen025.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,RADC='rrsep',Markers=False)
     NeuDRadPlot.semilogy(Jexp['R__R_LCFS_m'],Jexp['N_D_m3'],'--')
     NeuDRadPlot.semilogy(Jkn1d_H['R__R_LCFS_m'],Jkn1d_H['NH_m3'],':')
 

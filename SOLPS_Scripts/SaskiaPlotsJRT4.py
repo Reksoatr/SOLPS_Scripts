@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 Base=0
-Balloon=0
-Gas=1
+Balloon=1
+Gas=0
 GasTime=0
 
 # BASELINE PLOTS
