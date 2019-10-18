@@ -45,12 +45,16 @@ if fitplot == 1:
     
     NeuDen = SOLPSOBJ.PARAM['NeuDen']
     NeuDen.values[NeuDen.values==0]=np.nan
+
     '''    
+
     IonFlx = SOLPSOBJ.PARAM['IonFlx']
     IonFlx.values[IonFlx.values==0]=np.nan
     IonFlxPlus = IonFlx.values[IonFlx.values>0]
     IonFlxMinus = np.abs(IonFlx.values[IonFlx.values<0])
+
     '''    
+
     SZ = len(SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'])
     
     NDFit = np.ones((SZ,2))

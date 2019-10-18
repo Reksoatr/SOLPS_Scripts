@@ -15,6 +15,7 @@ import geqdsk
 import equilibrium as eq
 from D3DPreProcess import PsiNtoR
 from D3DPreProcess import RhotoPsiN
+from TOOLS import SET_WDIR
 
 class SOLPSPLOT(object):
         
@@ -55,13 +56,13 @@ class SOLPSPLOT(object):
     XDIM = 98 > Dimension of computational grid in the x (poloidal) direction
     YDIM = 38 > Dimension of computational grid in the y (radial) direction
     LVN = 100 > Number of colorbar levels for contour plots
-    CoreBound = [24,71] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
+    CoreBound = [25,72] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
     TimeRange = [0.90,1.00] > Time range (in sec) over which experimental data is averaged
     Publish = [] > List of strings to use in legends of publication-quality plots; if not [], changes plotting rc.params 
-    RADC = 'psin' > Set radial coordinate convention - Either 'psin', 'radial', or 'Y'    
+    RADC = 'psin' > Set radial coordinate convention - Either 'psin', 'radial', 'rrsep' or 'Y'    
     BASEDRT = 'SOLPS_2D_prof/' > Local home directory
-    RadSel = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
-    PolSel = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
+    RadSlc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
+    PolSlc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
     AX = None > Pass the name of a matplotlib axis for the SOLPSPLOT object to plot on; by default SOLPSPLOT plots on a new axis
         
     PLOT TYPES:
@@ -96,7 +97,8 @@ class SOLPSPLOT(object):
         else:
             self.Parameter = ['Ne','Te','Ti','DN','KYE','KYI','NeuDen','IonFlx']
             
-        self.DefaultSettings = {'TimeRange' : [0.90,1.00],  
+        self.DefaultSettings = {'TimeRange' : [1.10,1.30],  
+                     'DEV': 'cmod',
                      'EXP' : True,
                      'LOG10' : 0,
                      'GRAD' : False,
@@ -107,7 +109,7 @@ class SOLPSPLOT(object):
                      'SEP' : 20,
                      'XDIM' : 98,
                      'YDIM' : 38,
-                     'CoreBound' : [24,72],
+                     'CoreBound' : [25,72],
                      'Publish' : [],
                      'Markers' : True,
                      'PlotScheme' : [],
@@ -115,8 +117,8 @@ class SOLPSPLOT(object):
                      'RadOffset' : 0,
                      'RADC' : 'psin',
                      'POLC' : 'theta',
-                     'RadSel' : None,
-                     'PolSel' : None, 
+                     'RadSlc' : None,
+                     'PolSlc' : None, 
                      'GEO' : True,
                      'LVN' : 100,
                      'DIVREG' : True,
@@ -135,9 +137,9 @@ class SOLPSPLOT(object):
                     
         self.KW = kwargs         
         
-        self.PARAMDICT = {'Ne': r'Electron Density $n_e (m^{-3})$',
-                     'Te': r'Electron Temperature $T_e (eV)$',
-                     'Ti': r'Ion Temperature $T_i (eV)$',
+        self.PARAMDICT = {'Ne': r'Electron Density $n_e\;(m^{-3})$',
+                     'Te': r'Electron Temperature $T_e\;(eV)$',
+                     'Ti': r'Ion Temperature $T_i\;(eV)$',
                      'DN': r'Particle Density Diffusivity $D\;(m^2/s)$',
                      'KYE': r'Electron Thermal Diffusivity $\chi_e (m^2/s)$',
                      'KYI': r'Ion Thermal Diffusivity $\chi_i (m^2/s)$',
@@ -174,32 +176,24 @@ class SOLPSPLOT(object):
         TimeRange = self.KW['TimeRange']
         PsinOffset = self.KW['PsinOffset']        
         RadOffset = self.KW['RadOffset']
-        RadSel = self.KW['RadSel']
-        PolSel = self.KW['PolSel']
+        RadSlc = self.KW['RadSlc']
+        PolSlc = self.KW['PolSlc']
         SEP = self.KW['SEP']
         XDIM = self.KW['XDIM']
         YDIM = self.KW['YDIM']
         CoreBound = self.KW['CoreBound']
         BASEDRT = self.KW['BASEDRT']
         TOPDRT = self.KW['TOPDRT']
+        DEV = self.KW['DEV']
         
-        if os.environ['OS'] == 'Windows_NT':
-            if os.environ['USERNAME'] == 'rmreksoatmodjo':
-                BASEDRT = r"C:/Users/rmreksoatmodjo/Desktop/My Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-                TOPDRT = r"C:/Users/rmreksoatmodjo/Desktop/My Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/"
-            elif os.environ['USERNAME'] == '18313':
-                BASEDRT = r"C:/Users/18313/GDrive/School stuff/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-                TOPDRT = r"C:/Users/18313/GDrive/School stuff/College of William and Mary/Research/SOLPS Stuff/"
-            elif os.environ['USERNAME'] == 'Richard':
-                BASEDRT = r"C:/Users/Richard/Desktop/Google Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-                TOPDRT = r"C:/Users/Richard/Desktop/Google Drive/School stuff/College of William and Mary/Research/SOLPS Stuff/"
-
+        BASEDRT, TOPDRT = SET_WDIR()
+        
         # Create Experiment Data Dictionary (ExpDict) -> d3d or cmod?
         
         if 'gas' in Shot:
             BASEDRT = '{}gaspuff/'.format(BASEDRT)
         
-        if 'd3d' in Shot:
+        if 'd3d' in Shot or DEV=='d3d':
             
             BASEDRT = '{}d3d'.format(BASEDRT)
             
@@ -237,7 +231,7 @@ class SOLPSPLOT(object):
             self.ExpDict['Ted3d'] = ExpData['Te'][jj:]
             self.ExpDict['Tid3d'] = ExpData['Ti'][kk:]
             
-        elif '25' in Shot or '12' in Shot:
+        elif DEV=='cmod':
             
             BASEDRT = '{}cmod/0{}home'.format(BASEDRT, Shot[-2:])
             
@@ -248,43 +242,37 @@ class SOLPSPLOT(object):
             ExpData = loadmat('{}gfileProcessing/cmod_files/{}.mat'.format(TOPDRT, ExpFile))    
             
             ti = 0
-            while TimeRange[0] > ExpData['time'][ti]:
+            while TimeRange[0] > ExpData['time'].flatten()[ti]:
                 ti = ti+1           
             tf = 0
-            while TimeRange[1] > ExpData['time'][tf]:
+            while TimeRange[1] > ExpData['time'].flatten()[tf]:
                 tf = tf+1
             
-            Psin = np.transpose(ExpData['psin'])[:,ti:tf]
+            Psin = ExpData['psin'][:,ti:tf]
             PsinAvg = np.mean(Psin, axis=1)
             
-            Rmid = np.transpose(ExpData['rmid'])[:,ti:tf]
+            Rmid = ExpData['rmid'][:,ti:tf]
             RmidAvg = np.mean(Rmid, axis=1)
             
-            Nemid = np.transpose(ExpData['ne'])[:,ti:tf]
+            Nemid = ExpData['ne'][:,ti:tf]
             Nemid[Nemid == 0] = np.nan
             NemidAvg = np.nanmean(Nemid, axis=1)
-            HiErrNe = np.nanmax(Nemid,axis=1) - NemidAvg
-            LoErrNe = NemidAvg - np.nanmin(Nemid,axis=1)
-            ErrNe = [LoErrNe,HiErrNe]
-            NeThresh = (ErrNe[1]-ErrNe[0])/NemidAvg
+            ErrNe = np.nanmean(ExpData['nerr'][:,ti:tf], axis=1)
+            NeThresh = (ErrNe*2)/NemidAvg
             for NT in range(len(NeThresh)):
                 if np.abs(NeThresh[NT]) > 0.5:
                     NemidAvg[NT] = np.nan
-                    ErrNe[0][NT] = np.nan
-                    ErrNe[1][NT] = np.nan
+                    ErrNe[NT] = np.nan
             
-            Temid = np.transpose(ExpData['te'])[:,ti:tf]
+            Temid = ExpData['te'][:,ti:tf]
             Temid[Temid == 0] = np.nan
             TemidAvg = np.nanmean(Temid, axis=1)
-            HiErrTe = np.nanmax(Temid,axis=1) - TemidAvg
-            LoErrTe = TemidAvg - np.nanmin(Temid,axis=1)
-            ErrTe = [LoErrTe,HiErrTe]
-            TeThresh = (ErrTe[1]-ErrTe[0])/TemidAvg
+            ErrTe = np.nanmean(ExpData['terr'][:,ti:tf], axis=1)
+            TeThresh = (ErrTe*2)/TemidAvg
             for TT in range(len(TeThresh)):
                 if np.abs(TeThresh[TT]) > 0.5:
                     TemidAvg[TT] = np.nan
-                    ErrTe[0][TT] = np.nan
-                    ErrTe[1][TT] = np.nan
+                    ErrTe[TT] = np.nan
                     
             self.ExpDict['NemidAvg'] = NemidAvg
             self.ExpDict['ErrNe'] = ErrNe
@@ -300,13 +288,13 @@ class SOLPSPLOT(object):
         P = len(self.Parameter)
         
         XGrid=XDIM-2
-        XMin=0
-        XMax=XGrid-1
+        XMin=1
+        XMax=XGrid
         
         YSurf=YDIM-2
         
         X = np.linspace(XMin,XMax,XGrid)
-        Y = np.linspace(0,YSurf-1,YSurf)
+        Y = np.linspace(1,YSurf,YSurf)
         Xx, Yy = np.meshgrid(X,Y)   # Create X and Y mesh grid arrays
         
         RadLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Radial Coordinate $m$')
@@ -344,7 +332,7 @@ class SOLPSPLOT(object):
             YVector[:,1] = VertLoc.values[1,:,n] - VertLoc.values[0,:,n]            
             
             for i in range(len(X)):
-                PolVec.loc[:,X[i],Attempt,'Theta'] = np.degrees(np.math.atan2(np.linalg.det([YVector[JXA-1,:],YVector[i,:]]),np.dot(YVector[JXA-1,:],YVector[i,:])))
+                PolVec.loc[:,X[i],Attempt,'Theta'] = np.degrees(np.math.atan2(np.linalg.det([YVector[JXA,:],YVector[i,:]]),np.dot(YVector[JXA,:],YVector[i,:])))
                 if PolVec.loc[:,X[i],Attempt,'Theta'].values[0] < 0 and X[i] < JXA:
                     PolVec.loc[:,X[i],Attempt,'Theta'] = PolVec.loc[:,X[i],Attempt,'Theta'] + 360
             #try:
@@ -382,17 +370,18 @@ class SOLPSPLOT(object):
                     elif RawData.size == 7448:
                         self.PARAM[self.Parameter[p]].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
                         
-                    if RadSel == 'all':
-                        RadSel = self.PARAM.coords['Radial_Location'].values
-                    if RadSel == None:
-                        RadSel = [SEP]
-                    if PolSel == 'all':
-                        PolSel = self.PARAM.coords['Poloidal_Location'].values
-                    if PolSel == None:
-                        PolSel = [JXI,JXA]
+        if RadSlc == 'all':
+            RadSlc = self.PARAM.coords['Radial_Location'].values
+        if RadSlc == None:
+            RadSlc = [SEP]
+            
+        if PolSlc == 'all':
+            PolSlc = self.PARAM.coords['Poloidal_Location'].values
+        if PolSlc == None:
+            PolSlc = [JXI,JXA]
                 
         if Publish != []:
-            plt.rc('font',size=25)
+            plt.rc('font',size=30)
             plt.rc('lines',linewidth=5,markersize=15)
         else:
             plt.rc('font',size=14)
@@ -417,7 +406,9 @@ class SOLPSPLOT(object):
                 self.RadCoords['RmidAvg'] = RmidAvg
                 
     def GetRadCoords(self,RADC, Offset):
-        #Separate method to handle radial coordinate switching - Support (R-Rsep)?
+        #Separate method to handle radial coordinate switching
+        
+        #ADAPTIVE SEPARATRIX LOCATOR???
 
         PsinOffset = Offset[0]
         RadOffset = Offset[1]
@@ -439,6 +430,18 @@ class SOLPSPLOT(object):
             else:
                 print('No experimental radial coordinates available!')
             Rstr = 'm'
+        elif RADC == 'rrsep':
+            PsinSep=np.abs(self.RadCoords['PsinLoc']-1)
+            Sign = np.sign(self.RadCoords['PsinLoc']-1)
+            RADSEP=self.RadCoords['RadLoc'].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
+            RADSEP=RADSEP[~np.isnan(RADSEP)]
+            RRsepRad = self.RadCoords['RadLoc'][:,:,0] - RADSEP
+            VERTSEP=self.RadCoords['VertLoc'].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
+            VERTSEP=VERTSEP[~np.isnan(VERTSEP)]
+            RRsepVert = self.RadCoords['VertLoc'][:,:,0] - VERTSEP
+            RR = np.sqrt(RRsepRad**2 + RRsepVert**2)*Sign
+            Rexp = None
+            Rstr = '$R-R_{sep}$ (m)'           
         else:
             print('Invalid Radial Coordinate specified')
             
@@ -477,12 +480,15 @@ class SOLPSPLOT(object):
         Attempts = self.Attempts
         Shot = self.Shot
         VVFILE = self.VVFILE
+        PolVec = self.PolVec
+        Markers = kwargs['Markers']
+        POLC = kwargs['POLC']
         Publish = kwargs['Publish']
         CoreBound = kwargs['CoreBound']
         DIVREG = kwargs['DIVREG']
-        JXA = kwargs['JXA']-1
-        JXI = kwargs['JXI']-1
-        SEP = kwargs['SEP']-1
+        JXA = kwargs['JXA']
+        JXI = kwargs['JXI']
+        SEP = kwargs['SEP']
         Offset = [kwargs['PsinOffset'],kwargs['RadOffset']]             
         ContKW = kwargs
         
@@ -491,6 +497,16 @@ class SOLPSPLOT(object):
         XMin = self.RadCoords['XMin']
         
         RR, Rexp, Rstr = self.GetRadCoords(ContKW['RADC'], Offset)
+        
+        if POLC == 'theta':
+            PP = PolVec.loc[:,:,:,'Theta']
+            PolXLbl = r'Poloidal Angle $\theta$' 
+        elif POLC == 'X':
+            PP = PolVec.loc[:,:,:,'XXLoc']
+            PolXLbl = r'Poloidal Cell Index $X$'
+        elif POLC == 'djxa':
+            PP = PolVec.loc[:,:,:,'DJXA']
+            PolXLbl = r'Distance from Outer Midplane $m$'
         
         for pn in self.PltParams:
             try:
@@ -547,43 +563,58 @@ class SOLPSPLOT(object):
                 if ContKW['GEO'] is True:
                     if ContKW['LOG10'] == 2:
                         if DIVREG is True:
-                            IM2 = ax.contourf(RadLoc.values[:,0:CoreBound[0],n],VertLoc.values[:,0:CoreBound[0],n],PARAM.values[:,0:CoreBound[0],n],levs,cmap=CMAP,norm=colors.LogNorm())
-                            IM3 = ax.contourf(RadLoc.values[:,CoreBound[1]:,n],VertLoc.values[:,CoreBound[1]:,n],PARAM.values[:,CoreBound[1]:,n],levs,cmap=CMAP,norm=colors.LogNorm())
+                            IM2 = ax.contourf(RadLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],VertLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
+                            IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
 
-                        IM1 = ax.contourf(RadLoc.values[:,CoreBound[0]:CoreBound[1],n],VertLoc.values[:,CoreBound[0]:CoreBound[1],n],PARAM.values[:,CoreBound[0]:CoreBound[1],n],levs,cmap=CMAP,norm=colors.LogNorm())
+                        IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
                                             
                     else:
                         if DIVREG is True:
-                            IM2 = ax.contourf(RadLoc.values[:,0:CoreBound[0],n],VertLoc.values[:,0:CoreBound[0],n],PARAM.values[:,0:CoreBound[0],n],levs,cmap=CMAP)
-                            IM3 = ax.contourf(RadLoc.values[:,CoreBound[1]:,n],VertLoc.values[:,CoreBound[1]:,n],PARAM.values[:,CoreBound[1]:,n],levs,cmap=CMAP)
+                            IM2 = ax.contourf(RadLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],VertLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP)
+                            IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP)
 
-                        IM1 = ax.contourf(RadLoc.values[:,CoreBound[0]:CoreBound[1],n],VertLoc.values[:,CoreBound[0]:CoreBound[1],n],PARAM.values[:,CoreBound[0]:CoreBound[1],n],levs,cmap=CMAP)                      
-                                     
-                    ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
-                    ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=3)
+                        IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,cmap=CMAP)                      
+                    
+                    if Markers is True:                 
+                        ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
+                        ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=3)
+                    
                     ax.plot(RadLoc.values[SEP,:,n],VertLoc.values[SEP,:,n],color='Black',linewidth=3)
                     ax.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000)
                     ax.set_xlabel('Radial Location (m)')
-                    ax.set_ylabel('Vertical Location (m)')                
+                    ax.set_ylabel('Vertical Location (m)')
+                    ax.set_aspect('equal')
                 else:
                     if ContKW['LOG10'] == 2:
-                        IM1 = ax.contourf(Xx[:,:],Yy[:,:],PARAM.values[:,:,n],levs,norm=colors.LogNorm(),cmap=CMAP)
-                    else:
-                        IM1 = ax.contour(Xx[:,:],Yy[:,:],PARAM.values[:,:,n],levs,cmap=CMAP)
+                        if DIVREG is True and POLC != 'theta':
+                            IM2 = ax.contourf(PP.loc[:,1:CoreBound[0]-1,Attempts[n]],RR.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
+                            IM3 = ax.contourf(PP.loc[:,CoreBound[1]+1:,Attempts[n]],RR.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
                         
-                    ax.plot(Xx[:,(JXA-XMin)],Yy[:,(JXA-XMin)],color='Orange',linewidth=3)
-                    ax.plot(Xx[:,(JXI-XMin)],Yy[:,(JXI-XMin)],color='Red',linewidth=3)
-                    ax.plot(Xx[SEP,:],Yy[SEP,:],color='Black',linewidth=3)
-                    ax.set_xlabel('Poloidal Coordinate')
-                    ax.set_ylabel('Radial Coordinate') 
+                        IM1 = ax.contourf(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,norm=colors.LogNorm(),cmap=CMAP)
+                    else:
+                        if DIVREG is True and POLC != 'theta':
+                            IM2 = ax.contourf(PP.loc[:,1:CoreBound[0]-1,Attempts[n]],RR.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP)
+                            IM3 = ax.contourf(PP.loc[:,CoreBound[1]+1:,Attempts[n]],RR.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP)
+
+                        IM1 = ax.contour(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,cmap=CMAP)
+                    
+                    if Markers is True:
+                        ax.plot(PP.loc[:,JXA,Attempts[n]],RR.loc[:,JXA,Attempts[n]],color='Orange',linewidth=3)                         #Outer Midplane
+                        ax.plot(PP.loc[:,JXI,Attempts[n]],RR.loc[:,JXI,Attempts[n]],color='Red',linewidth=3)                            #Inner Midplane
+                    
+                    ax.plot(PP.loc[1:SEP,CoreBound[0],Attempts[n]],RR.loc[1:SEP,CoreBound[0],Attempts[n]],color='Black',linewidth=3)    #Inner PFR Boundary
+                    ax.plot(PP.loc[1:SEP,CoreBound[1],Attempts[n]],RR.loc[1:SEP,CoreBound[1],Attempts[n]],color='Black',linewidth=3)    #Outer PFR Boundary
+                    ax.plot(PP.loc[SEP,:,Attempts[n]],RR.loc[SEP,:,Attempts[n]],color='Black',linewidth=3)                              #Separatrix
+                    ax.set_xlabel(PolXLbl)
+                    ax.set_ylabel(Rstr) 
 
                 if ContKW['Publish'] != []:
                     ax.set_title('Attempt {} {}'.format(Publish[n], PARAM.name))
                 else:
                     ax.set_title('Discharge 0{} Attempt {} {}'.format(Shot, str(Attempts[n]), PARAM.name))
-                plt.colorbar(IM1)
-                ax.set_aspect('equal')
-                
+                    
+                plt.colorbar(IM1,ax=ax)
+
                 #a.set_xticklabels(['%.1f' % i for i in a.get_xticks()], fontsize='x-large')
                 #a.set_yticklabels(['%.1f' % j for j in a.get_yticks()], fontsize='x-large')
                 #a.tick_params(labelsize=20)
@@ -610,9 +641,9 @@ class SOLPSPLOT(object):
             Publish = kwargs['Publish']
             PlotScheme = kwargs['PlotScheme']
             Markers = kwargs['Markers']
-            JXA = kwargs['JXA']-1
-            JXI = kwargs['JXI'] -1
-            SEP = kwargs['SEP'] -1
+            JXA = kwargs['JXA']
+            JXI = kwargs['JXI']
+            SEP = kwargs['SEP']
             POLC = kwargs['POLC']
             CoreBound = kwargs['CoreBound']
             CoreBound[1] = CoreBound[1]-1
@@ -703,9 +734,10 @@ class SOLPSPLOT(object):
         Shot = self.Shot
         Attempts = self.Attempts
         Publish = kwargs['Publish']
-        JXA = kwargs['JXA']-1
-        SEP = kwargs['SEP'] -1
+        JXA = kwargs['JXA']
+        SEP = kwargs['SEP']
         RADC = kwargs['RADC']
+        PolSlc = kwargs['PolSlc']
         Markers = kwargs['Markers']
         PlotScheme = kwargs['PlotScheme']
         Offset = [kwargs['PsinOffset'],kwargs['RadOffset']]         
@@ -756,38 +788,63 @@ class SOLPSPLOT(object):
                         ax.semilogy(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n])
                     else:
                         ax.plot(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n],linewidth=3)
+                        
+                    if RadProfKW['EXP'] is True and RadProfKW['RADC'] != 'rrsep' and RadProfKW['RADC'] != 'Y':
+                        if 'd3d' not in Shot:
+                            if pn == 'Ne':
+                                NemidAvg = self.ExpDict['NemidAvg']
+                                ErrNe = self.ExpDict['ErrNe']
+                                ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[n][0])
+                            elif pn == 'Te':
+                                TemidAvg = self.ExpDict['TemidAvg']
+                                ErrTe = self.ExpDict['ErrTe']
+                                ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[n][0])
+                        
+                        if 'd3d' in Shot:
+                            if pn == 'Ne':
+                                PsinNe = Rexp[0]
+                                Ned3d = self.ExpDict['Ned3d']
+                                ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0])
+                            elif pn == 'Te':
+                                PsinTe = Rexp[1]
+                                Ted3d = self.ExpDict['Ted3d']
+                                ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0])
+                            elif pn == 'Ti':
+                                PsinTi = Rexp[2]
+                                Tid3d = self.ExpDict['Tid3d']
+                                ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0])
             else:
                 if RadProfKW['LOG10'] == 2:
                     ax.semilogy(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:])
                 else:
                     ax.plot(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:],linewidth=3)
 
-            if RadProfKW['EXP'] is True:
-                if 'd3d' not in Shot:
-                    if pn == 'Ne':
-                        NemidAvg = self.ExpDict['NemidAvg']
-                        ErrNe = self.ExpDict['ErrNe']
-                        ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7)
-                    elif pn == 'Te':
-                        TemidAvg = self.ExpDict['TemidAvg']
-                        ErrTe = self.ExpDict['ErrTe']
-                        ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7)
-                
-                if 'd3d' in Shot:
-                    if pn == 'Ne':
-                        PsinNe = Rexp[0]
-                        Ned3d = self.ExpDict['Ned3d']
-                        ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3)
-                    elif pn == 'Te':
-                        PsinTe = Rexp[1]
-                        Ted3d = self.ExpDict['Ted3d']
-                        ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3)
-                    elif pn == 'Ti':
-                        PsinTi = Rexp[2]
-                        Tid3d = self.ExpDict['Tid3d']
-                        ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3)
+                if RadProfKW['EXP'] is True and RadProfKW['RADC'] != 'rrsep' and RadProfKW['RADC'] != 'Y':
+                    if 'd3d' not in Shot:
+                        if pn == 'Ne':
+                            NemidAvg = self.ExpDict['NemidAvg']
+                            ErrNe = self.ExpDict['ErrNe']
+                            ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7)
+                        elif pn == 'Te':
+                            TemidAvg = self.ExpDict['TemidAvg']
+                            ErrTe = self.ExpDict['ErrTe']
+                            ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7)
+                    
+                    if 'd3d' in Shot:
+                        if pn == 'Ne':
+                            PsinNe = Rexp[0]
+                            Ned3d = self.ExpDict['Ned3d']
+                            ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3)
+                        elif pn == 'Te':
+                            PsinTe = Rexp[1]
+                            Ted3d = self.ExpDict['Ted3d']
+                            ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3)
+                        elif pn == 'Ti':
+                            PsinTi = Rexp[2]
+                            Tid3d = self.ExpDict['Tid3d']
+                            ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3)
             
-            ax.set_xlabel('Radial Coordinate {}'.format(Rstr))
+            ax.set_xlabel(Rstr)
             
             if RadProfKW['LOG10'] == 1:
                 ax.set_ylabel('Log_10 of {}'.format(PARAM.name))
@@ -798,7 +855,7 @@ class SOLPSPLOT(object):
                 ax.set_title('Discharge 0{} Attempt(s) {} Midplane Radial {}'.format(str(Shot), str(Attempts), PARAM.name))
             else:
                 ax.legend(Publish)
-                ax.set_title('Midplane Radial {}'.format(PARAM.name))
+                ax.set_title('Radial Midplane {}'.format(PARAM.name))
             Pmin = float(PARAM.loc[:,JXA,:].min())
             Pmax = float(PARAM.loc[:,JXA,:].max())
             if Markers == True:
@@ -825,13 +882,13 @@ class SOLPSPLOT(object):
             if GRAD == 1:
                 PARAM.values = np.gradient(PARAM.values,axis=0)
             if LOG10 == 2:
-                plt.semilogy(RR.loc[:,PolSel,Attempts[0]].values, PARAM.loc[:,PolSel,Attempts[0]].values)
+                plt.semilogy(RR.loc[:,PolSlc,Attempts[0]].values, PARAM.loc[:,PolSlc,Attempts[0]].values)
             else:
-                plt.plot(RR.loc[:,PolSel,Attempts[0]].values, PARAM.loc[:,PolSel,Attempts[0]].values)
-            if PolSel==[JXI,JXA]:
+                plt.plot(RR.loc[:,PolSlc,Attempts[0]].values, PARAM.loc[:,PolSlc,Attempts[0]].values)
+            if PolSlc==[JXI,JXA]:
                 plt.legend(['Inner Midplane','Outer Midplane'])
             else:
-                plt.legend(PolSel)
+                plt.legend(PolSlc)
             Pmin = float(PARAM.values.min())
             Pmax = float(PARAM.values.max())
             plt.plot([RR.loc[SEP,JXA,Attempt], RR.loc[SEP,JXA,Attempt]],[Pmin, Pmax],color='Black')
