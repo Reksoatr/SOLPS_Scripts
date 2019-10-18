@@ -14,8 +14,8 @@ from VesselPlotterNew import SOLPSPLOT
 plt.rc('font',size=25)
 plt.rc('lines',linewidth=5,markersize=15)
 
-Shot = 'gas012'
-Attempt = 17
+Shot = '12'
+Attempt = 65
 JXI = 40 - 1
 JXA = 56 - 1
 Crn = 48 - 1
@@ -33,7 +33,7 @@ fitplot = 1
 
 if fitplot == 1:
 
-    SOLPSOBJ = SOLPSPLOT(Shot,[Attempt],Parameter=['IonFlx','NeuDen'])
+    SOLPSOBJ = SOLPSPLOT(Shot,[Attempt],Parameter=['NeuDen'],RADC='rrsep')
     
     Rsep = SOLPSOBJ.RadCoords['RadLoc'].loc[sep,:,Attempt]
     Vsep = SOLPSOBJ.RadCoords['VertLoc'].loc[sep,:,Attempt]
@@ -45,16 +45,16 @@ if fitplot == 1:
     
     NeuDen = SOLPSOBJ.PARAM['NeuDen']
     NeuDen.values[NeuDen.values==0]=np.nan
-    
+    '''    
     IonFlx = SOLPSOBJ.PARAM['IonFlx']
     IonFlx.values[IonFlx.values==0]=np.nan
     IonFlxPlus = IonFlx.values[IonFlx.values>0]
     IonFlxMinus = np.abs(IonFlx.values[IonFlx.values<0])
-    
+    '''    
     SZ = len(SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'])
     
     NDFit = np.ones((SZ,2))
-    IFFit = np.ones((SZ,2))
+#    IFFit = np.ones((SZ,2))
     NDTrial = {}
     NDResiduals = np.ones((len(NDF),len(ND0)))
     
