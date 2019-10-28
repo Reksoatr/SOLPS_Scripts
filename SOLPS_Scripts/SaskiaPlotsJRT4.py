@@ -115,8 +115,8 @@ if Balloon == 1:
     
     NeuDenPolfig, NeuDenPolPlot = plt.subplots(nrows=1, ncols=1)
     
-    Bal012.PolPlot('NeuDen',AX=NeuDenPolPlot,LOG10=2)
-    Bal025.PolPlot('NeuDen',AX=NeuDenPolPlot,LOG10=2)
+    #Bal012.PolPlot('NeuDen',AX=NeuDenPolPlot,LOG10=0)
+    Bal025.PolPlot('NeuDen',AX=NeuDenPolPlot,LOG10=0)
     NeuDenPolPlot.set_ylabel('')
     #Bald3d.PolPlot('NeuDen',AX=NeuDenPolPlot,LOG10=2,Markers=False)
     

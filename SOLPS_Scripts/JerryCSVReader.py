@@ -155,10 +155,13 @@ TeRadPlot.set_ylabel('')
 
 if JND == 1:
     NeuDenfig, NeuDRadPlot = plt.subplots(nrows=1, ncols=1)
-    NeuDen025 = SOLPSPLOT('gas025',[19])
+    NeuDen025 = SOLPSPLOT('025',[153])
+    NeuDen025F = SOLPSPLOT('gas025',[19])
     NeuDen025.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,RADC='rrsep',Markers=False)
+    NeuDen025F.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,RADC='rrsep',Markers=False)
     NeuDRadPlot.semilogy(Jexp['R__R_LCFS_m'],Jexp['N_D_m3'],'--')
     NeuDRadPlot.semilogy(Jkn1d_H['R__R_LCFS_m'],Jkn1d_H['NH_m3'],':')
+    NeuDRadPlot.legend(['SOLPS-ITER','SOLPS-ITER w/fueling','Exp D dens', 'Exp H dens'])
 
 
 
