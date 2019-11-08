@@ -11,8 +11,8 @@ from scipy.io import loadmat
 from VesselPlotterNew import SOLPSPLOT
 from TOOLS import SET_WDIR
 
-Base012=SOLPSPLOT('gas012',[19])
-Base025=SOLPSPLOT('gas025',[19])
+Base012=SOLPSPLOT('012',[65])
+Base025=SOLPSPLOT('025',[153])
 
 BASEDRT, TOPDRT = SET_WDIR()
 
