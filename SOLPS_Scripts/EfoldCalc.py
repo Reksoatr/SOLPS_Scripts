@@ -16,11 +16,11 @@ plt.rc('lines',linewidth=5,markersize=15)
 
 Shot = '12'
 Attempt = 65
-JXI = 40 - 1
-JXA = 56 - 1
-Crn = 48 - 1
-Div1 = 24 - 1
-Div2 = 72 - 1
+JXI = 40
+JXA = 56
+Crn = 48
+Div1 = 24
+Div2 = 72
 sep = 21
 ND0 = np.arange(7,14) #Attempt 129 -> 14; Attempt 58 -> 9 
 NDF = np.arange(20,34) #Attempt 129 -> 30; Attempt 58 -> 33
@@ -34,7 +34,7 @@ fitplot = 1
 if fitplot == 1:
 
     SOLPSOBJ = SOLPSPLOT(Shot,[Attempt],Parameter=['NeuDen'],RADC='rrsep')
-    
+    '''
     Rsep = SOLPSOBJ.RadCoords['RadLoc'].loc[sep,:,Attempt]
     Vsep = SOLPSOBJ.RadCoords['VertLoc'].loc[sep,:,Attempt]
     
@@ -42,17 +42,17 @@ if fitplot == 1:
     for i in (SOLPSOBJ.RadCoords['RadLoc'].coords['Radial_Location'].values):
         for j in (SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'].values):
             RRsep.loc[i,j,Attempt] = np.sign(i-sep)*np.sqrt((SOLPSOBJ.RadCoords['RadLoc'].loc[i,j,Attempt]-Rsep.loc[j])**2 + (SOLPSOBJ.RadCoords['VertLoc'].loc[i,j,Attempt]-Vsep.loc[j])**2)
-    
+    '''
+    RR, Rexp, Rstr = SOLPSOBJ.GetRadCoords('rrsep',[0,0])
+    RRsep = xr.DataArray(RR, coords=[SOLPSOBJ.RadCoords['RadLoc'].coords['Radial_Location'].values,SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'].values,[Attempt]], dims=['Radial_Location','Poloidal_Location','Attempt'], name = Rstr)
     NeuDen = SOLPSOBJ.PARAM['NeuDen']
     NeuDen.values[NeuDen.values==0]=np.nan
 
     '''    
-
     IonFlx = SOLPSOBJ.PARAM['IonFlx']
     IonFlx.values[IonFlx.values==0]=np.nan
     IonFlxPlus = IonFlx.values[IonFlx.values>0]
     IonFlxMinus = np.abs(IonFlx.values[IonFlx.values<0])
-
     '''    
 
     SZ = len(SOLPSOBJ.RadCoords['RadLoc'].coords['Poloidal_Location'])
@@ -66,12 +66,12 @@ if fitplot == 1:
     print('Outer Midplane at Poloidal Grid Cell ' + str(JXA))
     print('')
     
-    for Xx in np.arange(24,72): #range(SZ): #24 to 72 covers entire core region
+    for Xx in np.arange(24,25): #range(SZ): #24 to 72 covers entire core region
         for n, N in enumerate(NDF):
             for m, M in enumerate(ND0):
                 NDTrial[n,m] = np.polyfit(RRsep.loc[M:N,Xx,Attempt],np.log(NeuDen.loc[M:N,Xx,Attempt]),1,full=True)
                 #print('Residual for exp fit from {} to {} at Xx={}: {}'.format(M, N, Xx, NDTrial[n,m][1][0]))
-                NDResiduals[n, m] = NDTrial[n,m][1][0] 
+                NDResiduals[n,m] = NDTrial[n,m][1][0] 
         Key = np.unravel_index(np.argmin(NDResiduals),NDResiduals.shape)
         NDFit[Xx,:] = NDTrial[Key][0]
         print(Xx, NDTrial[Key][0], NDTrial[Key][1], ND0[Key[1]], NDF[Key[0]])
