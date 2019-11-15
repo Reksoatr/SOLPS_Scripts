@@ -22,8 +22,8 @@ Crn = 48
 Div1 = 24
 Div2 = 72
 sep = 21
-ND0 = np.arange(7,14) #Attempt 129 -> 14; Attempt 58 -> 9 
-NDF = np.arange(20,34) #Attempt 129 -> 30; Attempt 58 -> 33
+ND0 = np.arange(10,14) #Attempt 129 -> 14; Attempt 58 -> 9 
+NDF = np.arange(30,34) #Attempt 129 -> 30; Attempt 58 -> 33
 IF0 = 19
 IFF = 35
 
@@ -66,7 +66,7 @@ if fitplot == 1:
     print('Outer Midplane at Poloidal Grid Cell ' + str(JXA))
     print('')
     
-    for Xx in np.arange(24,25): #range(SZ): #24 to 72 covers entire core region
+    for Xx in np.arange(JXA,JXA+1): #range(SZ): #24 to 72 covers entire core region
         for n, N in enumerate(NDF):
             for m, M in enumerate(ND0):
                 NDTrial[n,m] = np.polyfit(RRsep.loc[M:N,Xx,Attempt],np.log(NeuDen.loc[M:N,Xx,Attempt]),1,full=True)
