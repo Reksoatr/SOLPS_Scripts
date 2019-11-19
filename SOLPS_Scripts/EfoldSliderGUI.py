@@ -38,14 +38,16 @@ axcolor = 'lightgoldenrodyellow'
 axfreq = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
 #axamp = plt.axes([0.25, 0.15, 0.65, 0.03], facecolor=axcolor)
 
-sfreq = Slider(axfreq, 'Poloidal Surface', 24.0, 72.0, valinit=f0, valfmt='%0.0f')
+sfreq = Slider(axfreq, 'Poloidal Surface', 24.0, 71.0, valinit=f0, valfmt='%0.0f', valstep=1.0)
 #samp = Slider(axamp, 'Amp', 0.1, 10.0, valinit=a0)
 
 
 def update(val):
     #amp = samp.val
     freq = sfreq.val
-    l = ax.plot(RadLoc.loc[:,freq,Attempt],VertLoc.loc[:,freq,Attempt],color='Red',linewidth=3)
+    l.set_xdata(RadLoc.loc[:,freq,Attempt])
+    l.set_ydata(VertLoc.loc[:,freq,Attempt])
+    #ax.plot(RadLoc.loc[:,freq,Attempt],VertLoc.loc[:,freq,Attempt],color='Red',linewidth=3)
     fig.canvas.draw_idle()
 
 
