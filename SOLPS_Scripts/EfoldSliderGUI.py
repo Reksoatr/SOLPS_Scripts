@@ -10,8 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button, RadioButtons
 
-Shot = '12'
-Attempt = '65'
+Shot = '25'
+Attempt = '153'
 
 NeuDen = SOLPSPLOT(Shot,Attempt,'NeuDen')
 JXA = NeuDen.KW['JXA']
@@ -35,7 +35,7 @@ axprofile = fig.add_subplot(221) #plt.axes([0.25, 0.2, 0.4, 0.6], facecolor=axco
 NeuDen.RadProf('NeuDen',LOG10=2,AX=axprofile,Markers=False,JXA=f0)
 
 axslide = fig.add_subplot(223, facecolor=axcolor) #plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
-sslide = Slider(axslide, 'Poloidal Surface', 1, 98, valinit=f0, valfmt='%0.0f', valstep=1.0)
+sslide = Slider(axslide, 'Poloidal Surface', 1, 96, valinit=f0, valfmt='%0.0f', valstep=1.0)
 
 
 def update(val):
