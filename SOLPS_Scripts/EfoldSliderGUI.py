@@ -35,7 +35,7 @@ l, = axcontour.plot(RadLoc.loc[:,f0,Attempt],VertLoc.loc[:,f0,Attempt],color='Re
 axcontour.margins(x=0)
 
 axprofile = fig.add_subplot(gs[0]) #plt.axes([0.25, 0.2, 0.4, 0.6], facecolor=axcolor)
-NeuDen.RadProf('NeuDen',LOG10=2,AX=axprofile,Markers=False,RADC='rrsep',JXA=f0,PlotScheme=['x'])
+NeuDen.RadProf('NeuDen',LOG10=0,AX=axprofile,Markers=False,RADC='rrsep',JXA=f0,PlotScheme=['x'])
 
 axslide = fig.add_subplot(gs[2], facecolor=axcolor) #plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
 sslide = Slider(axslide, 'Poloidal Surface', 1, 96, valinit=f0, valfmt='%0.0f', valstep=1.0)
@@ -47,7 +47,7 @@ def update(val):
     l.set_xdata(RadLoc.loc[:,PolPos,Attempt])
     l.set_ydata(VertLoc.loc[:,PolPos,Attempt])
     axprofile.clear()
-    NeuDen.RadProf('NeuDen',LOG10=2,AX=axprofile,Markers=False,RADC='rrsep',JXA=PolPos,PlotScheme=['x'])
+    NeuDen.RadProf('NeuDen',LOG10=0,AX=axprofile,Markers=False,RADC='rrsep',JXA=PolPos,PlotScheme=['x'])
     fig.canvas.draw_idle()
 
 
