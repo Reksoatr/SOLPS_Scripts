@@ -128,7 +128,7 @@ class SOLPSPLOT(object):
                      'TC_Psin' : [],
                      'GRID': False,
                      'AX' : None,
-                     'BASEDRT': '',
+                     'BASEDRT': 'solps-iter/runs/',
                      'TOPDRT' : '' }
         
         for key, value in self.DefaultSettings.items():
