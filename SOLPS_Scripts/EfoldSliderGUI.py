@@ -8,10 +8,11 @@ Created on Wed Nov 13 16:15:42 2019
 from VesselPlotterNew import SOLPSPLOT
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider, Button, RadioButtons
 
-Shot = '25'
-Attempt = '153'
+Shot = '12'
+Attempt = '65'
 
 NeuDen = SOLPSPLOT(Shot,Attempt,'NeuDen')
 JXA = NeuDen.KW['JXA']
@@ -23,26 +24,30 @@ f0 = JXA
 axcolor = 'lightgoldenrodyellow'
 
 fig, ax = plt.subplots()
-plt.subplots_adjust(left=0.25, bottom=0.25)
+ax.set_frame_on(False)
+ax.set_axis_off()
+gs=gridspec.GridSpec(2,2,width_ratios=[5,3],height_ratios=[8,1])
 
-axcontour = fig.add_subplot(122)
+axcontour = fig.add_subplot(gs[:,1])
 NeuDen.Contour('NeuDen',LOG10=1,AX=axcontour, Markers=False)
-axcontour.set_title('Neutral Density')
+axcontour.set_title('Neutral Density Contour')
 l, = axcontour.plot(RadLoc.loc[:,f0,Attempt],VertLoc.loc[:,f0,Attempt],color='Red',linewidth=3)
 axcontour.margins(x=0)
 
-axprofile = fig.add_subplot(221) #plt.axes([0.25, 0.2, 0.4, 0.6], facecolor=axcolor)
-NeuDen.RadProf('NeuDen',LOG10=2,AX=axprofile,Markers=False,JXA=f0)
+axprofile = fig.add_subplot(gs[0]) #plt.axes([0.25, 0.2, 0.4, 0.6], facecolor=axcolor)
+NeuDen.RadProf('NeuDen',LOG10=2,AX=axprofile,Markers=False,RADC='rrsep',JXA=f0,PlotScheme=['x'])
 
-axslide = fig.add_subplot(223, facecolor=axcolor) #plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
+axslide = fig.add_subplot(gs[2], facecolor=axcolor) #plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
 sslide = Slider(axslide, 'Poloidal Surface', 1, 96, valinit=f0, valfmt='%0.0f', valstep=1.0)
-
+#axslide.set
 
 def update(val):
 
     PolPos = sslide.val
     l.set_xdata(RadLoc.loc[:,PolPos,Attempt])
     l.set_ydata(VertLoc.loc[:,PolPos,Attempt])
+    axprofile.clear()
+    NeuDen.RadProf('NeuDen',LOG10=2,AX=axprofile,Markers=False,RADC='rrsep',JXA=PolPos,PlotScheme=['x'])
     fig.canvas.draw_idle()
 
 
