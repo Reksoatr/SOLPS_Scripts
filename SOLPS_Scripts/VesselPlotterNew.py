@@ -186,7 +186,7 @@ class SOLPSPLOT(object):
         TOPDRT = self.KW['TOPDRT']
         DEV = self.KW['DEV']
         
-        BASEDRT, TOPDRT = SET_WDIR()
+        BASEDRT, TOPDRT = SET_WDIR(BASEDRT,TOPDRT)
         
         # Create Experiment Data Dictionary (ExpDict) -> d3d or cmod?
         
