@@ -23,8 +23,8 @@ VertLoc = NeuDen.RadCoords['VertLoc']
 fig, ax = plt.subplots()
 plt.subplots_adjust(left=0.25, bottom=0.25)
 
-NeuDen.Contour('NeuDen',LOG10=1,AX=ax, Markers=False)
-
+NeuDen.Contour('NeuDen',LOG10=2,AX=ax, Markers=False)
+ax.set_title('Neutral Density')
 #t = np.arange(0.0, 1.0, 0.001)
 
 #a0 = 5
