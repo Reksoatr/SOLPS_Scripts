@@ -521,7 +521,7 @@ class SOLPSPLOT(object):
                     print('Plot Parameter {} Does Not Exist Or Could Not Be Loaded! Skipping Plot...'.format(pn))
                     pass
             
-            print('Beginning Plot Sequence')
+            #print('Beginning Plot Sequence')
             
             if ContKW['SUBTRACT'] is True:
                 CMAP = cm.seismic
@@ -681,7 +681,7 @@ class SOLPSPLOT(object):
                 PP = PolVec.loc[:,:,:,'DJXA']
                 PolXLbl = r'Distance from Outer Midplane $m$'
 
-            print('Beginning Plot Sequence')                
+            #print('Beginning Plot Sequence')                
 
             if PolKW['AX'] is None: # if no axis was supplied to the function create our own
                 fig, ax = plt.subplots(nrows=1,ncols=1,figsize=(14,7))
@@ -765,7 +765,7 @@ class SOLPSPLOT(object):
                     print('Plot Parameter Does Not Exist Or Could Not Be Loaded! Skipping Plot...')
                     pass
 
-            print('Beginning Plot Sequence')
+            #print('Beginning Plot Sequence')
             
             if RadProfKW['AX'] is None: # if no axis was supplied to the function create our own
                 fig, ax = plt.subplots(nrows=1,ncols=1,figsize=(14,7))
