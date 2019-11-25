@@ -405,7 +405,7 @@ class SOLPSPLOT(object):
         if 'd3d' not in Shot:
                 self.RadCoords['RmidAvg'] = RmidAvg
                 
-    def GetRadCoords(self,RADC, Offset):
+    def GetRadCoords(self,RADC, Offset=[0,0]):
         #Separate method to handle radial coordinate switching
         
         #ADAPTIVE SEPARATRIX LOCATOR???

@@ -17,8 +17,11 @@ Attempt = '20'
 NeuDen = SOLPSPLOT(Shot,Attempt,'NeuDen')
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
+Rmax = 0.01
+Rmin = -0.01
 RadLoc = NeuDen.RadCoords['RadLoc']
 VertLoc = NeuDen.RadCoords['VertLoc']
+RR,Rexp,Rstr = NeuDen.GetRadCoords('rrsep',[0,0])
 
 f0 = JXA
 log = 2
@@ -37,6 +40,8 @@ axcontour.margins(x=0)
 
 axprofile = fig.add_subplot(gs[0]) #plt.axes([0.25, 0.2, 0.4, 0.6], facecolor=axcolor)
 NeuDen.RadProf('NeuDen',LOG10=log,AX=axprofile,Markers=False,RADC='rrsep',JXA=f0,PlotScheme=['x'])
+#rr = np.where(np.abs(RR.loc[:,f0,Attempt].values) < Rmax)[0]
+#NDTrial = np.polyfit(RR.loc[rr,f0,Attempt],np.log(NeuDen.loc[rr,f0,Attempt]),1,full=True)
 
 axslide = fig.add_subplot(gs[2], facecolor=axcolor) #plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
 sslide = Slider(axslide, 'Poloidal Surface', 1, 96, valinit=f0, valfmt='%0.0f', valstep=1.0)
@@ -66,10 +71,10 @@ def reset(event):
     sslide.reset()
     
 button.on_clicked(reset)
-
+'''
 rax = plt.axes([0.025, 0.025, 0.15, 0.15], facecolor=axcolor)
 radio = CheckButtons(rax, ['LOG10'],[1])
 radio.on_clicked(update)
-
+'''
 
 plt.show()
