@@ -11,10 +11,10 @@ from scipy.io import loadmat
 from VesselPlotterNew import SOLPSPLOT
 from TOOLS import SET_WDIR
 
-Base012=SOLPSPLOT('gas012',[22])
+Base012=SOLPSPLOT('25',[155])
 #Base025=SOLPSPLOT('025',[154])
 
-BASEDRT, TOPDRT = SET_WDIR()
+BASEDRT, TOPDRT = SET_WDIR('','')
 
 Probe012=loadmat('{}gfileProcessing/cmod_files/1160718012_ProbeData.mat'.format(TOPDRT))
 #Probe025=loadmat('{}gfileProcessing/cmod_files/1160718025_ProbeData.mat'.format(TOPDRT))
