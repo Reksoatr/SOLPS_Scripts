@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider, Button, CheckButtons
 
-Shot = 'gas12'
-Attempt = '20'
+Shot = '12'
+Attempt = '65'
 
 NeuDen = SOLPSPLOT(Shot,Attempt,'NeuDen')
 JXA = NeuDen.KW['JXA']
