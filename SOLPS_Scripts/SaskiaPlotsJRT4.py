@@ -10,8 +10,8 @@ from VesselPlotterNew import SOLPSPLOT
 import matplotlib.pyplot as plt
 import numpy as np
 
-Base=0
-Balloon=1
+Base=1
+Balloon=0
 Gas=0
 GasTime=0
 
@@ -19,8 +19,8 @@ GasTime=0
 
 if Base == 1:
 
-    Base012=SOLPSPLOT('12',[65],PlotScheme=['r-'])
-    Base025=SOLPSPLOT('25',[153],TimeRange=[0.9,1.0],PlotScheme=['b-'])
+    Base012=SOLPSPLOT('12',[70],PlotScheme=['r-'])
+    Base025=SOLPSPLOT('25',[156],TimeRange=[0.9,1.0],PlotScheme=['b-'])
     #Based3d=SOLPSPLOT('d3d',[86])
     
     ContFig, ContPlot = plt.subplots(nrows=1,ncols=2,sharey=True)
