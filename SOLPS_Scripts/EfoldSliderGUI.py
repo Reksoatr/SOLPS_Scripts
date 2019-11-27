@@ -12,12 +12,12 @@ import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider, Button, CheckButtons
 
 Shot = '12'
-Attempt = '65'
+Attempt = '70'
 
 NeuDen = SOLPSPLOT(Shot,Attempt,'NeuDen')
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
-CoreBounds = NeuDen.KW['CoreBounds']
+CoreBound = NeuDen.KW['CoreBound']
 Rmax = 0.01
 Rmin = -0.01
 RadLoc = NeuDen.RadCoords['RadLoc']
@@ -46,7 +46,7 @@ rf = np.where(np.abs(RR.loc[:,f0,Attempt].values) < Rmax)[0][-1]
 NDTrial = np.polyfit(RR.loc[ri:rf,f0,Attempt],np.log(NeuDen.PARAM['NeuDen'].loc[ri:rf,f0,Attempt]),1,full=True)
 
 axslide = fig.add_subplot(gs[2], facecolor=axcolor) #plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
-sslide = Slider(axslide, 'Poloidal Surface', 1, 96, valinit=f0, valfmt='%0.0f', valstep=1.0)
+sslide = Slider(axslide, 'Poloidal Surface', CoreBound[0]-1, CoreBound[1]-1, valinit=f0, valfmt='%0.0f', valstep=1.0)
 #axslide.set
 
 def update(val):
