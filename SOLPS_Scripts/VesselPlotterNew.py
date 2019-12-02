@@ -7,6 +7,7 @@ Created on Thu Jun 27 14:00:00 2019
 import os
 import numpy as np
 import xarray as xr
+import glob
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import colors, cm
@@ -129,7 +130,8 @@ class SOLPSPLOT(object):
                      'GRID': False,
                      'AX' : None,
                      'BASEDRT': 'solps-iter/runs/',
-                     'TOPDRT' : '' }
+                     'TOPDRT' : '',
+                     'ROOTSHOT' : '1160718'}
         
         for key, value in self.DefaultSettings.items():
             if key not in kwargs.keys():
@@ -185,6 +187,7 @@ class SOLPSPLOT(object):
         BASEDRT = self.KW['BASEDRT']
         TOPDRT = self.KW['TOPDRT']
         DEV = self.KW['DEV']
+        ROOTSHOT = self.KW['ROOTSHOT']
         
         BASEDRT, TOPDRT = SET_WDIR(BASEDRT,TOPDRT)
         
@@ -233,14 +236,30 @@ class SOLPSPLOT(object):
             
         elif DEV=='cmod':
             
-            BASEDRT = '{}cmod/0{}home'.format(BASEDRT, Shot[-2:])
+            if ROOTSHOT == '':
+                
+                BASEDRT = '{}cmod/{}home'.format(BASEDRT,Shot)
+                GFILE = glob.glob('{}gfileProcessing/cmod_files/g{}*'.format(TOPDRT,Shot))
+                print(GFILE)
+                GF = eq.equilibrium(gfile=GFILE[0])
+                
+                ExpFile = Shot
+                ExpData = loadmat('{}gfileProcessing/cmod_files/{}.mat'.format(TOPDRT, ExpFile))
             
-            GFILE = '{}gfileProcessing/cmod_files/g11607180{}.01209_974'.format(TOPDRT, Shot[-2:])
-            GF = eq.equilibrium(gfile=GFILE)
-            
-            ExpFile = '11607180{}'.format(Shot[-2:])
-            ExpData = loadmat('{}gfileProcessing/cmod_files/{}.mat'.format(TOPDRT, ExpFile))    
-            
+            else: 
+                
+                BASEDRT = '{}cmod/0{}home'.format(BASEDRT, Shot[-2:])
+                
+                #GFILE = '{}gfileProcessing/cmod_files/g11607180{}.01209_974'.format(TOPDRT, Shot[-2:])
+                GFILE = glob.glob('{}gfileProcessing/cmod_files/g{}*{}*'.format(TOPDRT,ROOTSHOT,Shot[-2:]))
+                print(GFILE)
+                GF = eq.equilibrium(gfile=GFILE[0])
+                
+                #ExpFile = '11607180{}'.format(Shot[-2:])
+                ExpFile = glob.glob('{}gfileProcessing/cmod_files/{}*{}.mat'.format(TOPDRT,ROOTSHOT,Shot[-2:]))
+                print(ExpFile)
+                ExpData = loadmat(ExpFile[0])    
+                
             ti = 0
             while TimeRange[0] > ExpData['time'].flatten()[ti]:
                 ti = ti+1           
@@ -248,11 +267,15 @@ class SOLPSPLOT(object):
             while TimeRange[1] > ExpData['time'].flatten()[tf]:
                 tf = tf+1
             
-            Psin = ExpData['psin'][:,ti:tf]
-            PsinAvg = np.mean(Psin, axis=1)
-            
             Rmid = ExpData['rmid'][:,ti:tf]
             RmidAvg = np.mean(Rmid, axis=1)
+
+            try:
+                Psin = ExpData['psin'][:,ti:tf]
+                PsinAvg = np.mean(Psin, axis=1)
+            except:
+                print('Psin coordinates not found. Attempting to approximate experimental psin from gfile')
+                PsinAvg = GF.psiN(RmidAvg,np.zeros(RmidAvg.shape))
             
             Nemid = ExpData['ne'][:,ti:tf]
             Nemid[Nemid == 0] = np.nan
