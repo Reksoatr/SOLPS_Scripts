@@ -23,7 +23,7 @@ PsinOffset=-0.01
 JJ=0
 JND=1
 
-BASEDRT, TOPDRT = SET_WDIR()
+BASEDRT, TOPDRT = SET_WDIR('','')
 
 Wdir = "{}MatData".format(TOPDRT)
 
@@ -61,107 +61,107 @@ if JJ == 1:
     plt.legend(('Exp_NeuDen','KN1D_H','KN1D_H2'))
     plt.title('Neutral Densities')
 
-ExpData={}
-PsinAvg={}
-RmidAvg={}
-NemidAvg={}
-ErrNe={}
-TemidAvg={}
-ErrTe={}
-
-if os.environ['OS'] == 'Windows_NT':
-    if os.environ['USERNAME'] == 'rmreksoatmodjo':
-        BASEDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-        TOPDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
-    elif os.environ['USERNAME'] == '18313':
-        BASEDRT = r"C:/Users/18313/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-        TOPDRT = r"C:/Users/18313/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
-    elif os.environ['USERNAME'] == 'Richard':
-        BASEDRT = r"C:/Users/Richard/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-        TOPDRT = r"C:/Users/Richard/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
-
-
-for Shot in ExpID:
-#    BASEDRT = '{}cmod/0{}home'.format(BASEDRT, Shot)
+    ExpData={}
+    PsinAvg={}
+    RmidAvg={}
+    NemidAvg={}
+    ErrNe={}
+    TemidAvg={}
+    ErrTe={}
     
-#    GFILE = '{}gfileProcessing/cmod_files/g11607180{}.01209_974'.format(TOPDRT, Shot)
-#    GF = eq.equilibrium(gfile=GFILE)
+    if os.environ['OS'] == 'Windows_NT':
+        if os.environ['USERNAME'] == 'rmreksoatmodjo':
+            BASEDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
+            TOPDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
+        elif os.environ['USERNAME'] == '18313':
+            BASEDRT = r"C:/Users/18313/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
+            TOPDRT = r"C:/Users/18313/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
+        elif os.environ['USERNAME'] == 'Richard':
+            BASEDRT = r"C:/Users/Richard/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
+            TOPDRT = r"C:/Users/Richard/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
     
-    ExpFile = '11607180{}'.format(Shot)
-    ExpData[Shot] = loadmat('{}gfileProcessing/cmod_files/{}.mat'.format(TOPDRT, ExpFile))    
     
-    Times = ExpData[Shot]['time'].flatten()
+    for Shot in ExpID:
+    #    BASEDRT = '{}cmod/0{}home'.format(BASEDRT, Shot)
+        
+    #    GFILE = '{}gfileProcessing/cmod_files/g11607180{}.01209_974'.format(TOPDRT, Shot)
+    #    GF = eq.equilibrium(gfile=GFILE)
+        
+        ExpFile = '11607180{}'.format(Shot)
+        ExpData[Shot] = loadmat('{}gfileProcessing/cmod_files/{}.mat'.format(TOPDRT, ExpFile))    
+        
+        Times = ExpData[Shot]['time'].flatten()
+        
+        ti = 0
+        while TimeRange[0] > Times[ti]:
+            ti = ti+1           
+        tf = 0
+        while TimeRange[1] > Times[tf]:
+            tf = tf+1
+        
+        Psin = ExpData[Shot]['psin'][:,ti:tf]
+        PsinAvg[Shot] = np.mean(Psin, axis=1)
+        
+        Rmid = ExpData[Shot]['rmid'][:,ti:tf]
+        RmidAvg[Shot] = np.mean(Rmid, axis=1)
+        
+        Nemid = ExpData[Shot]['ne'][:,ti:tf]
+        Nemid[Nemid == 0] = np.nan
+        NemidAvg[Shot] = np.nanmean(Nemid, axis=1)
+        ErrNe[Shot] = np.nanmean(ExpData[Shot]['nerr'][:,ti:tf])
+        NeThresh = (ErrNe[Shot]*2)/NemidAvg[Shot]
+        '''for NT in range(len(NeThresh)):
+            if np.abs(NeThresh[NT]) > 0.5:
+                NemidAvg[Shot][NT] = np.nan
+                ErrNe[Shot][NT] = np.nan
+        '''
+        Temid = ExpData[Shot]['te'][:,ti:tf]
+        Temid[Temid == 0] = np.nan
+        TemidAvg[Shot] = np.nanmean(Temid, axis=1)
+        ErrTe[Shot] = np.nanmean(ExpData[Shot]['terr'][:,ti:tf])
+        TeThresh = (ErrTe[Shot]*2)/TemidAvg[Shot]
+        '''for TT in range(len(TeThresh)):
+            if np.abs(TeThresh[TT]) > 0.5:
+                TemidAvg[Shot][TT] = np.nan
+                ErrTe[Shot][TT] = np.nan
+        '''        
+        
+    Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
+    Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
     
-    ti = 0
-    while TimeRange[0] > Times[ti]:
-        ti = ti+1           
-    tf = 0
-    while TimeRange[1] > Times[tf]:
-        tf = tf+1
+    if Shot == 12:              
+        Gas012 = SOLPSPLOT('gas012',[19,18,17,8],Publish=['77.8 TorrL total D2','39.5 TorrL total D2','8.25 TorrL total D2','No D2 puff'],PsinOffset=PsinOffset,Markers=False,PlotScheme=COLORS,EXP=False)
+        Gas012.RadProf('Ne',AX=NeRadPlot)
+        Gas012.RadProf('Te',AX=TeRadPlot)
+        
+        for n, Shot in enumerate(ExpID):
+            NeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
+            TeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
+    elif Shot == 25:
+        Gas025=SOLPSPLOT('gas025',[19,16,1],Publish=['72.2 TorrL total D2','6.77 TorrL total D2','No D2 puff'],Markers=False,PlotScheme=COLORS,EXP=False)
+        
+        Gas025.RadProf('Ne',AX=NeRadPlot)
+        Gas025.RadProf('Te',AX=TeRadPlot)
+        
+        for n, Shot in enumerate(ExpID):
+            NeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n][0],markersize=7,linewidth=3,capsize=7)
+            TeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n][0],markersize=7,linewidth=3,capsize=7)
     
-    Psin = ExpData[Shot]['psin'][:,ti:tf]
-    PsinAvg[Shot] = np.mean(Psin, axis=1)
+    NeRadPlot.set_title(r'Outer Midplane Electron Density $n_e\;(m^{-3})$')
+    NeRadPlot.set_ylabel('')
     
-    Rmid = ExpData[Shot]['rmid'][:,ti:tf]
-    RmidAvg[Shot] = np.mean(Rmid, axis=1)
-    
-    Nemid = ExpData[Shot]['ne'][:,ti:tf]
-    Nemid[Nemid == 0] = np.nan
-    NemidAvg[Shot] = np.nanmean(Nemid, axis=1)
-    ErrNe[Shot] = np.nanmean(ExpData[Shot]['nerr'][:,ti:tf])
-    NeThresh = (ErrNe[Shot]*2)/NemidAvg[Shot]
-    '''for NT in range(len(NeThresh)):
-        if np.abs(NeThresh[NT]) > 0.5:
-            NemidAvg[Shot][NT] = np.nan
-            ErrNe[Shot][NT] = np.nan
-    '''
-    Temid = ExpData[Shot]['te'][:,ti:tf]
-    Temid[Temid == 0] = np.nan
-    TemidAvg[Shot] = np.nanmean(Temid, axis=1)
-    ErrTe[Shot] = np.nanmean(ExpData[Shot]['terr'][:,ti:tf])
-    TeThresh = (ErrTe[Shot]*2)/TemidAvg[Shot]
-    '''for TT in range(len(TeThresh)):
-        if np.abs(TeThresh[TT]) > 0.5:
-            TemidAvg[Shot][TT] = np.nan
-            ErrTe[Shot][TT] = np.nan
-    '''        
-    
-Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
-Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
-
-if Shot == 12:              
-    Gas012 = SOLPSPLOT('gas012',[19,18,17,8],Publish=['77.8 TorrL total D2','39.5 TorrL total D2','8.25 TorrL total D2','No D2 puff'],PsinOffset=PsinOffset,Markers=False,PlotScheme=COLORS,EXP=False)
-    Gas012.RadProf('Ne',AX=NeRadPlot)
-    Gas012.RadProf('Te',AX=TeRadPlot)
-    
-    for n, Shot in enumerate(ExpID):
-        NeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
-        TeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
-elif Shot == 25:
-    Gas025=SOLPSPLOT('gas025',[19,16,1],Publish=['72.2 TorrL total D2','6.77 TorrL total D2','No D2 puff'],Markers=False,PlotScheme=COLORS,EXP=False)
-    
-    Gas025.RadProf('Ne',AX=NeRadPlot)
-    Gas025.RadProf('Te',AX=TeRadPlot)
-    
-    for n, Shot in enumerate(ExpID):
-        NeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n][0],markersize=7,linewidth=3,capsize=7)
-        TeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n][0],markersize=7,linewidth=3,capsize=7)
-
-NeRadPlot.set_title(r'Outer Midplane Electron Density $n_e\;(m^{-3})$')
-NeRadPlot.set_ylabel('')
-
-TeRadPlot.set_title(r'Outer Midplane Electron Temperature $T_e\;(eV)$')
-TeRadPlot.set_ylabel('')
+    TeRadPlot.set_title(r'Outer Midplane Electron Temperature $T_e\;(eV)$')
+    TeRadPlot.set_ylabel('')
 
 if JND == 1:
     NeuDenfig, NeuDRadPlot = plt.subplots(nrows=1, ncols=1)
-    NeuDen025 = SOLPSPLOT('025',[153])
-    NeuDen025F = SOLPSPLOT('gas025',[19])
-    NeuDen025.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,RADC='rrsep',Markers=False)
-    NeuDen025F.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,RADC='rrsep',Markers=False)
+    NeuDen104 = SOLPSPLOT('1040122027',[1],ROOTSHOT='',JXA=59,JXI=35,RADC='rrsep')
+    #NeuDen025F = SOLPSPLOT('gas025',[19])
+    NeuDen104.RadProf('MolDen',LOG10=2,AX=NeuDRadPlot,Markers=False)
+    #NeuDen025F.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,RADC='rrsep',Markers=False)
     NeuDRadPlot.semilogy(Jexp['R__R_LCFS_m'],Jexp['N_D_m3'],'--')
     NeuDRadPlot.semilogy(Jkn1d_H['R__R_LCFS_m'],Jkn1d_H['NH_m3'],':')
-    NeuDRadPlot.legend(['SOLPS-ITER','SOLPS-ITER w/fueling','Exp D dens', 'Exp H dens'])
+    NeuDRadPlot.legend(['SOLPS-ITER','Exp D dens', 'Exp H dens'])
 
 
 
