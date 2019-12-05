@@ -20,6 +20,7 @@ def SOLPSDataSpread(Shot, Attempt):
 	Shot = str(Shot)
 	
 	if '1040122027' in Shot:
+		PsinOffset = 0
 		RADC = 'radial'
 		JXA = 59
 		JXI = 35
