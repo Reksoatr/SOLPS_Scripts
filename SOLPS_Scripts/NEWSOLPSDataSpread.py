@@ -19,14 +19,31 @@ def SOLPSDataSpread(Shot, Attempt):
 	
 	Shot = str(Shot)
 	
-	if '12' in Shot:
+ if '1040122027' in Shot:
+  RADC = 'radial'
+  JXA = 59
+  JXI = 35
+  ROOTSHOT=''   
+	elif '12' in Shot:
 		PsinOffset = -0.005
+  RADC = 'psin'
+  JXA = 57
+  JXI = 38
+  ROOTSHOT='1160718'
 	elif '25' in Shot:
-		PsinOffset = -0.015
+		PsinOffset = -0.015 
+  RADC = 'psin'
+  JXA = 57
+  JXI = 38
+  ROOTSHOT='1160718'
 	else:
-		PsinOffset = 0
+  RADC = 'psin'
+  JXA = 56
+  JXI = 40
+  ROOTSHOT='175060'
+  PsinOffset = 0
 
-	SOLPSOBJ = SOLPSPLOT(Shot, Attempt, PsinOffset=PsinOffset, GRID=True, BASEDRT= 'solps-iter/runs/', TOPDRT='')
+	SOLPSOBJ = SOLPSPLOT(Shot, Attempt, PsinOffset=PsinOffset, GRID=True, BASEDRT= 'solps-iter/runs/', TOPDRT='',RADC=RADC,JXA=JXA,JXI=JXI,ROOTSHOT=ROOTSHOT)
 
 	plt.rc('font',size=20)
 	plt.rc('lines',linewidth=5,markersize=5)
@@ -73,9 +90,11 @@ def SOLPSDataSpread(Shot, Attempt):
 	for i in Attempt:
 
 		if 'd3d' in Shot:
-			dirT = BDRT + 'd3d/Attempt' + str(i) + '/Output/'
+			dirT = '{}d3d/Attempt{}/Output/'.format(BDRT,i)
+  elif ROOTSHOT == '':
+   dirT = '{}cmod/{}/Attempt{}/Output/'.format(BDRT,Shot,i)   
 		else:
-			dirT = BDRT + 'cmod/0' + Shot[-2:] + 'home/Attempt' + str(i) + '/Output/'
+			dirT = '{}cmod/0{}home/Attempt{}/Output/'.format(BDRT,Shot[-2:],i)
 
 		TimeS[i] = np.loadtxt(dirT+'TimeStamps',unpack=1)  
     
