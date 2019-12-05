@@ -155,13 +155,14 @@ if JJ == 1:
 
 if JND == 1:
     NeuDenfig, NeuDRadPlot = plt.subplots(nrows=1, ncols=1)
-    NeuDen104 = SOLPSPLOT('1040122027',[4],ROOTSHOT='',JXA=59,JXI=35,RADC='rrsep')
+    NeuDRadPlot.semilogy(Jexp['R__R_LCFS_m'],Jexp['N_D_m3'],'--')
+    NeuDRadPlot.semilogy(Jkn1d_H['R__R_LCFS_m'],Jkn1d_H['NH_m3'],':')
+    NeuDen104 = SOLPSPLOT('1040122027',[5],ROOTSHOT='',JXA=59,JXI=35,RADC='rrsep')
     #NeuDen025F = SOLPSPLOT('gas025',[19])
     NeuDen104.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,Markers=False)
     #NeuDen025F.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,RADC='rrsep',Markers=False)
-    NeuDRadPlot.semilogy(Jexp['R__R_LCFS_m'],Jexp['N_D_m3'],'--')
-    NeuDRadPlot.semilogy(Jkn1d_H['R__R_LCFS_m'],Jkn1d_H['NH_m3'],':')
-    NeuDRadPlot.legend(['SOLPS-ITER','Exp D dens', 'Exp H dens'])
+
+    NeuDRadPlot.legend(['Exp D Density', 'Exp H Density','SOLPS-ITER'])
 
 
 
