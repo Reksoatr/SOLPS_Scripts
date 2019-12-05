@@ -93,7 +93,7 @@ def SOLPSDataSpread(Shot, Attempt):
 		if 'd3d' in Shot:
 			dirT = '{}d3d/Attempt{}/Output/'.format(BDRT,i)
 		elif ROOTSHOT == '':
-			dirT = '{}cmod/{}/Attempt{}/Output/'.format(BDRT,Shot,i)   
+			dirT = '{}cmod/{}home/Attempt{}/Output/'.format(BDRT,Shot,i)   
 		else:
 			dirT = '{}cmod/0{}home/Attempt{}/Output/'.format(BDRT,Shot[-2:],i)
 
