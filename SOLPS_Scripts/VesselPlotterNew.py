@@ -105,8 +105,8 @@ class SOLPSPLOT(object):
                      'GRAD' : False,
                      'ELEV' : 75,
                      'AZIM' : 270,
-                     'JXI' : 38,
-                     'JXA' : 57,
+                     'JXI' : 37,
+                     'JXA' : 56,
                      'SEP' : 20,
                      'XDIM' : 98,
                      'YDIM' : 38,
@@ -125,6 +125,7 @@ class SOLPSPLOT(object):
                      'DIVREG' : True,
                      'SAVE' : False,
                      'SUBTRACT' : False,
+                     'AVG' : False,
                      'TC_Flux' : [], 
                      'TC_Psin' : [],
                      'GRID': False,
@@ -240,7 +241,7 @@ class SOLPSPLOT(object):
                 
                 BASEDRT = '{}cmod/{}home'.format(BASEDRT,Shot)
                 GFILE = glob.glob('{}gfileProcessing/cmod_files/g{}*'.format(TOPDRT,Shot))
-                print(GFILE)
+                #print(GFILE)
                 GF = eq.equilibrium(gfile=GFILE[0])
                 
                 ExpFile = Shot
@@ -252,12 +253,12 @@ class SOLPSPLOT(object):
                 
                 #GFILE = '{}gfileProcessing/cmod_files/g11607180{}.01209_974'.format(TOPDRT, Shot[-2:])
                 GFILE = glob.glob('{}gfileProcessing/cmod_files/g{}*{}*'.format(TOPDRT,ROOTSHOT,Shot[-2:]))
-                print(GFILE)
+                #print(GFILE)
                 GF = eq.equilibrium(gfile=GFILE[0])
                 
                 #ExpFile = '11607180{}'.format(Shot[-2:])
                 ExpFile = glob.glob('{}gfileProcessing/cmod_files/{}*{}.mat'.format(TOPDRT,ROOTSHOT,Shot[-2:]))
-                print(ExpFile)
+                #print(ExpFile)
                 ExpData = loadmat(ExpFile[0])    
                 
             ti = 0
@@ -500,7 +501,7 @@ class SOLPSPLOT(object):
         N = self.N
         Xx = self.Xx
         Yy = self.Yy
-        Attempts = self.Attempts
+        Attempts = self.Attempts.copy()
         Shot = self.Shot
         VVFILE = self.VVFILE
         PolVec = self.PolVec
@@ -509,6 +510,7 @@ class SOLPSPLOT(object):
         Publish = kwargs['Publish']
         CoreBound = kwargs['CoreBound']
         DIVREG = kwargs['DIVREG']
+        AVG = kwargs['AVG']
         JXA = kwargs['JXA']
         JXI = kwargs['JXI']
         SEP = kwargs['SEP']
@@ -520,6 +522,8 @@ class SOLPSPLOT(object):
         XMin = self.RadCoords['XMin']
         
         RR, Rexp, Rstr = self.GetRadCoords(ContKW['RADC'], Offset)
+        
+        N = np.arange(0,N)
         
         if POLC == 'theta':
             PP = PolVec.loc[:,:,:,'Theta']
@@ -545,6 +549,12 @@ class SOLPSPLOT(object):
                     pass
             
             #print('Beginning Plot Sequence')
+            if ContKW['AVG'] is True:
+                Average = PARAM.mean(dim='Attempt').assign_coords(Attempt='AVG').expand_dims('Attempt',2)
+                PARAM = xr.concat([PARAM,Average],dim='Attempt')
+                if 'AVG' not in Attempts:
+                    Attempts.append('AVG')
+                N=[-1]            
             
             if ContKW['SUBTRACT'] is True:
                 CMAP = cm.seismic
@@ -576,8 +586,8 @@ class SOLPSPLOT(object):
                 levs = np.power(10, lev_exp)   
             else:
                 levs = np.linspace(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()),ContKW['LVN'])
-                
-            for n in range(N):
+            
+            for n in N:
                 if ContKW['AX'] is None:
                     fig, ax = plt.subplots(nrows=1, ncols=1,figsize=(14,10))
                 else:
@@ -659,7 +669,7 @@ class SOLPSPLOT(object):
                     kwargs[key] = value
 
             Shot = self.Shot
-            Attempts = self.Attempts
+            Attempts = self.Attempts.copy()
             PolVec = self.PolVec
             Publish = kwargs['Publish']
             PlotScheme = kwargs['PlotScheme']
@@ -754,9 +764,11 @@ class SOLPSPLOT(object):
             if key not in kwargs.keys():
                 kwargs[key] = value
         
+        N = self.N
         Shot = self.Shot
-        Attempts = self.Attempts
+        Attempts = self.Attempts.copy()
         Publish = kwargs['Publish']
+        AVG = kwargs['AVG']
         JXA = kwargs['JXA']
         SEP = kwargs['SEP']
         RADC = kwargs['RADC']
@@ -787,7 +799,14 @@ class SOLPSPLOT(object):
                 except:
                     print('Plot Parameter Does Not Exist Or Could Not Be Loaded! Skipping Plot...')
                     pass
-
+            
+            if RadProfKW['AVG'] is True:
+                Average = PARAM.mean(dim='Attempt').assign_coords(Attempt='AVG').expand_dims('Attempt',2)
+                PARAM = xr.concat([PARAM,Average],dim='Attempt')
+                if 'AVG' not in Attempts:
+                    Attempts.append('AVG')
+                N+=1
+                
             #print('Beginning Plot Sequence')
             
             if RadProfKW['AX'] is None: # if no axis was supplied to the function create our own
@@ -805,8 +824,8 @@ class SOLPSPLOT(object):
                 y_exp = np.arange(np.floor(np.nanmin(PARAM.values)), np.ceil(np.nanmax(PARAM.values))+1,2)    
             
             
-            if len(PlotScheme) == self.N:
-                for n in range(self.N):
+            if len(PlotScheme) == N:
+                for n in range(N):
                     if RadProfKW['LOG10'] == 2:
                         ax.semilogy(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n])
                     else:
