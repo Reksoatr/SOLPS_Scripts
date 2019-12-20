@@ -204,6 +204,8 @@ class SOLPSPLOT(object):
         
         BASEDRT, TOPDRT = SET_WDIR(BASEDRT,TOPDRT)
         
+        Attempts = [str(i) for i in Attempts]
+        print('Attempts {} Requested...'.format(Attempts))
         # Create Experiment Data Dictionary (ExpDict) -> d3d or cmod?
         
         if 'gas' in Shot:
@@ -319,10 +321,10 @@ class SOLPSPLOT(object):
         
         if AVG is True and 'AVG' not in Attempts:
             Attempts.append('AVG')
-            print(Attempts)
+            print('Attempts {} Requested...'.format(Attempts))
         
         N = len(Attempts)
-        print(N)
+        print('{} Attempt(s) Entered'.format(N))
         P = len(self.Parameter)
         
         XGrid=XDIM-2
@@ -352,7 +354,7 @@ class SOLPSPLOT(object):
 
         for n in range(N):
             Attempt = Attempts[n]
-            print(Attempt)
+            print('Loading data for Attempt {} now...'.format(Attempt))
             if Attempt == 'AVG':
                 YYLoc.values[:,:,n] = Yy
                 RadLoc.values[:,:,n] = RadLoc.values[:,:,0:n-1].mean(2)
@@ -360,7 +362,6 @@ class SOLPSPLOT(object):
                 PsinLoc.values[:,:,n] = PsinLoc.values[:,:,0:n-1].mean(2)
                 PolVec.values[:,:,n,:] = PolVec.values[:,:,0:n-1,:].mean(2) 
             else:
-                Attempt = int(Attempt)
                 DRT = '{}/Attempt{}/Output'.format(BASEDRT, str(Attempt))     # MAINPATH DIRECTORY STRING
                 #DRT2 = 'SOLPS_2D_prof/Shot0' + Shot + '/Attempt' + str(Attempt) + '/Output2'     #Generate Mesh path
                             
@@ -395,31 +396,30 @@ class SOLPSPLOT(object):
                 self.Parameter.append(AddNew)
                 P = len(self.Parameter)
         
-        for p in range(P):
-            if self.Parameter[p] not in self.PARAM.keys(): 
-                self.PARAM[self.Parameter[p]] = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,self.Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = self.PARAMDICT[self.Parameter[p]])
+        for p in self.Parameter:
+            if p not in self.PARAM.keys() or 'AVG' in Attempts: 
+                self.PARAM[p] = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = self.PARAMDICT[p])
                 for n in range(N):
-                    Attempt = self.Attempts[n]
+                    Attempt = Attempts[n]
                     if Attempt == 'AVG':
-                        Average = self.PARAM.mean(dim='Attempt').assign_coords(Attempt='AVG').expand_dims('Attempt',2)
-                        self.PARAM = xr.concat([self.PARAM,Average],dim='Attempt')
+                        self.PARAM[p].values[:,:,n] = self.PARAM[p].values[:,:,:-1].mean(2)
                     else:    
                         DRT = '{}/Attempt{}'.format(BASEDRT, str(Attempt))   #Generate path
                         try:
-                            RawData = np.loadtxt('{}/Output/{}{}'.format(DRT, self.Parameter[p], str(Attempt)),usecols = (3))
+                            RawData = np.loadtxt('{}/Output/{}{}'.format(DRT, p, str(Attempt)),usecols = (3))
                         except Exception as err:
                             print(err)
                             try:
-                                 RawData = np.loadtxt('{}/Output2/{}{}'.format(DRT, self.Parameter[p], str(Attempt)),usecols = (3))
+                                 RawData = np.loadtxt('{}/Output2/{}{}'.format(DRT, p, str(Attempt)),usecols = (3))
                             except Exception as err:
                                 print(err)
-                                print('Parameter {} not found for Attempt {}. Creating NAN Array'.format(self.Parameter[p], str(Attempt)))
-                                self.PARAM[self.Parameter[p]].values[:,:,n] = np.nan
+                                print('Parameter {} not found for Attempt {}. Creating NAN Array'.format(p, str(Attempt)))
+                                self.PARAM[p].values[:,:,n] = np.nan
                                 
                         if RawData.size == 3724:
-                            self.PARAM[self.Parameter[p]].values[:,:,n] = RawData.reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                            self.PARAM[p].values[:,:,n] = RawData.reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
                         elif RawData.size == 7448:
-                            self.PARAM[self.Parameter[p]].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
+                            self.PARAM[p].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
                             
         if RadSlc == 'all':
             RadSlc = self.PARAM.coords['Radial_Location'].values
@@ -441,6 +441,7 @@ class SOLPSPLOT(object):
         
         self.KW['BASEDRT'] = BASEDRT
         self.KW['TOPDRT'] = TOPDRT
+        self.Attempts = Attempts
         self.VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
         self.Xx = Xx
         self.Yy = Yy
@@ -581,6 +582,9 @@ class SOLPSPLOT(object):
                     print('Taking Average over Attempts')
                     Attempts.append('AVG')
                     self._LoadSOLPSData()
+                    PARAM = self.PARAM[pn].copy()
+                    RadLoc = self.RadCoords['RadLoc']
+                    VertLoc = self.RadCoords['VertLoc']
                 N=[-1]            
             
             if ContKW['SUBTRACT'] is True:
@@ -732,12 +736,13 @@ class SOLPSPLOT(object):
                         print('Plot Parameter Does Not Exist Or Could Not Be Loaded! Skipping Plot...')
                         pass
 
-            if PolKW['AVG'] is True:
-                if 'AVG' not in Attempts:
-                    print('Taking Average over Attempts')
-                    Attempts.append('AVG')
-                    self._LoadSOLPSData()
-                N=[-1]  
+                if PolKW['AVG'] is True:
+                    if 'AVG' not in Attempts:
+                        print('Taking Average over Attempts')
+                        Attempts.append('AVG')
+                        self._LoadSOLPSData()
+                        PARAM = self.PARAM[pn].copy()
+                    N=[-1]  
 
             if POLC == 'theta':
                 PP = PolVec.loc[:,:,:,'Theta']
@@ -840,7 +845,7 @@ class SOLPSPLOT(object):
                     print('Taking Average over Attempts')
                     Attempts.append('AVG')
                     self._LoadSOLPSData()
-                    N=[-1]  
+                    PARAM = self.PARAM[pn].copy()
                 
             #print('Beginning Plot Sequence')
             
