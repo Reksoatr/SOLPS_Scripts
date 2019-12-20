@@ -39,32 +39,41 @@ class SOLPSPLOT(object):
     
     OPTIONAL:
 
-    SAVE = False > Save plot to a .png file        
-    GRID = False > Turn on plot grid
-    SUBTRACT = False > For a series of Attempts, subtract the matrix data of each Attempt from the first declared Attempt, to compare difference 
-    GRAD = False > Calculate Gradient of Parameter Data    
+    TimeRange = [0.90,1.00] > Time range (in sec) over which experimental data is averaged    
+    DEV = 'cmod' > Tokamak device being investigated
     EXP = True > Plot Experimental Data Points
-    GEO = True > Map Contour to Vessel Geometry 
-    DIVREG = True > Include Divertor Region Data (May cause loss of resolution)        
     LOG10 = 0 > Plot Base-10 Logarithm of Parameter Data (0, 1, or 2)
-    PsinOffset = 0 > Psi_n offset of Experimental Data Points
-    RadOffset = 0 > Radial (in meters) offset of Experimental Data Points
+    GRAD = False > Calculate Gradient of Parameter Data
+    ELEV = 75 > Elevation of viewing angle
+    AZIM = 270 > Azimuthal viewing angle for Surface Plot
     JXI = 37 > Poloidal position of Inner Midplane - default is 37
     JXA = 55 > Poloidal position of Outer Midplane - default is 55
-    SEP = 20 > Radial position of SEParatrix - default is 18
-    AZIM = 270 > Azimuthal viewing angle for Surface Plot
-    ELEV = 75 > Elevation of viewing angle
+    SEP = 20 > Radial position of Separatrix - default is 18    
     XDIM = 98 > Dimension of computational grid in the x (poloidal) direction
     YDIM = 38 > Dimension of computational grid in the y (radial) direction
-    LVN = 100 > Number of colorbar levels for contour plots
     CoreBound = [25,72] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
-    TimeRange = [0.90,1.00] > Time range (in sec) over which experimental data is averaged
     Publish = [] > List of strings to use in legends of publication-quality plots; if not [], changes plotting rc.params 
+    Markers = True > Plot separatrix, outer midplane, and/or inner midplane marker line
+    PlotScheme = [] > List of matplotlib plot style flags for line plots; must either be empty or a list of strings as long as the number of Attempts    
+    PsinOffset = 0 > Psi_n offset of Experimental Data Points
+    RadOffset = 0 > Radial (in meters) offset of Experimental Data Points
     RADC = 'psin' > Set radial coordinate convention - Either 'psin', 'radial', 'rrsep' or 'Y'    
-    BASEDRT = 'SOLPS_2D_prof/' > Local home directory
+    POLC = 'theta' > Set poloidal coordinate convention - Either 'theta', 'djxa' or 'X'
     RadSlc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
     PolSlc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
+    GEO = True > Map Contour to Vessel Geometry; if False, plots on rectangular grid     
+    LVN = 100 > Number of colorbar levels for contour plots
+    DIVREG = True > Include Divertor Region Data (May cause loss of logarithmic resolution)   
+    SAVE = False > Save plot to a .png file 
+    SUBTRACT = False > For a series of Attempts, subtract the matrix data of each Attempt from the first declared Attempt, to compare difference 
+    AVG = False > Take Average of each parameter dataset over all supplied Attempts, append averaged data to end of matrix dataset
+    TC_Flux = [] > For d3d cases only; allows specification of ONETWO-calculated Radial Flux values
+    TC_Psin = [] > For d3d cases only; allows specification of Psin coordinates of ONETWO-calculated Radial Flux values
+    GRID = False > Turn on plot grid
     AX = None > Pass the name of a matplotlib axis for the SOLPSPLOT object to plot on; by default SOLPSPLOT plots on a new axis
+    BASEDRT = 'SOLPS_2D_prof/' > Local base directory for all stored SOLPS simulation run data
+    TOPDRT = '' > Local home directory, parent of BASEDRT and 'gfileProcessing' directories
+    ROOTSHOT = '1160718' > Optional numerical prefix that designate the experimental campaign that a series of shots may share in common 
         
     PLOT TYPES:
         
@@ -74,7 +83,7 @@ class SOLPSPLOT(object):
     SOLPSPLOT.RadPlot() > Plot Radial Contours for every Poloidal grid point (ONLY TAKES 1 ATTEMPT INPUT)
     SOLPSPLOT.RadProf() > Plot Radial Profile of Parameter at Outer Midplane
     SOLPSPLOT.SumPlot() > Plot Poloidally-Summed Parameter values vs Radial location
-    SOLPSPLOT.VeslMesh() > Plot SOLPS DG Mesh Grid
+    SOLPSPLOT.VeslMesh() > Plot SOLPS Carre Curvilinear Grid
     SOLPSPLOT.Export() > No Plot, Save Data to a Variable [PARAM, RR]
     
     '''
