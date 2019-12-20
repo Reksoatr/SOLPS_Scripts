@@ -360,6 +360,7 @@ class SOLPSPLOT(object):
                 PsinLoc.values[:,:,n] = PsinLoc.values[:,:,0:n-1].mean(2)
                 PolVec.values[:,:,n,:] = PolVec.values[:,:,0:n-1,:].mean(2) 
             else:
+                Attempt = int(Attempt)
                 DRT = '{}/Attempt{}/Output'.format(BASEDRT, str(Attempt))     # MAINPATH DIRECTORY STRING
                 #DRT2 = 'SOLPS_2D_prof/Shot0' + Shot + '/Attempt' + str(Attempt) + '/Output2'     #Generate Mesh path
                             
