@@ -51,7 +51,7 @@ class SOLPSPLOT(object):
     SEP = 20 > Radial position of Separatrix - default is 18    
     XDIM = 98 > Dimension of computational grid in the x (poloidal) direction
     YDIM = 38 > Dimension of computational grid in the y (radial) direction
-    CoreBound = [25,72] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
+    CoreBound = [24,71] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
     Publish = [] > List of strings to use in legends of publication-quality plots; if not [], changes plotting rc.params 
     Markers = True > Plot separatrix, outer midplane, and/or inner midplane marker line
     PlotScheme = [] > List of matplotlib plot style flags for line plots; must either be empty or a list of strings as long as the number of Attempts    
@@ -78,12 +78,12 @@ class SOLPSPLOT(object):
     PLOT TYPES:
         
     SOLPSPLOT.Contour() > Plot 2D spatial Contour Plot
-    SOLPSPLOT.Surface() > Plot 3D spatial Suface Plot
-    SOLPSPLOT.PolPlot() > Plot Poloidal Contours for every Radial grid point (ONLY TAKES 1 ATTEMPT INPUT) 
-    SOLPSPLOT.RadPlot() > Plot Radial Contours for every Poloidal grid point (ONLY TAKES 1 ATTEMPT INPUT)
-    SOLPSPLOT.RadProf() > Plot Radial Profile of Parameter at Outer Midplane
-    SOLPSPLOT.SumPlot() > Plot Poloidally-Summed Parameter values vs Radial location
-    SOLPSPLOT.VeslMesh() > Plot SOLPS Carre Curvilinear Grid
+    ! SOLPSPLOT.Surface() > Plot 3D spatial Suface Plot
+    SOLPSPLOT.PolPlot() > Plot Poloidal Contour along Separatrix (SEP) 
+    ! SOLPSPLOT.RadPlot() > Plot Radial Contours for every Poloidal grid point (ONLY TAKES 1 ATTEMPT INPUT)
+    SOLPSPLOT.RadProf() > Plot Radial Profile of Parameter at Outer Midplane (JXA)
+    ! SOLPSPLOT.SumPlot() > Plot Poloidally-Summed Parameter values vs Radial location
+    ! SOLPSPLOT.VeslMesh() > Plot SOLPS Carre Curvilinear Grid
     SOLPSPLOT.Export() > No Plot, Save Data to a Variable [PARAM, RR]
     
     '''
@@ -119,7 +119,7 @@ class SOLPSPLOT(object):
                      'SEP' : 20,
                      'XDIM' : 98,
                      'YDIM' : 38,
-                     'CoreBound' : [25,72],
+                     'CoreBound' : [24,71],
                      'Publish' : [],
                      'Markers' : True,
                      'PlotScheme' : [],
@@ -215,9 +215,9 @@ class SOLPSPLOT(object):
             
             BASEDRT = '{}d3d'.format(BASEDRT)
             
-            JXI = 40
-            JXA = 56
-            SEP = 22
+            JXI = 39
+            JXA = 55
+            SEP = 17
             
             GFILE = '{}gfileProcessing/d3d_files/g175060.02512'.format(TOPDRT)
             GF = eq.equilibrium(gfile=GFILE)
@@ -441,6 +441,9 @@ class SOLPSPLOT(object):
         
         self.KW['BASEDRT'] = BASEDRT
         self.KW['TOPDRT'] = TOPDRT
+        self.KW['JXA'] = JXA
+        self.KW['JXI'] = JXI
+        self.KW['SEP'] = SEP
         self.Attempts = Attempts
         self.VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
         self.Xx = Xx
@@ -480,18 +483,21 @@ class SOLPSPLOT(object):
                 Rexp = self.RadCoords['RmidAvg']
                 Rexp = Rexp + RadOffset*np.ones(len(Rexp))
             else:
+                Rexp=[]
                 print('No experimental radial coordinates available!')
             Rstr = 'm'
         elif RADC == 'rrsep':
-            PsinSep=np.abs(self.RadCoords['PsinLoc']-1)
-            Sign = np.sign(self.RadCoords['PsinLoc']-1)
-            RADSEP=self.RadCoords['RadLoc'].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
-            RADSEP=RADSEP[~np.isnan(RADSEP)]
-            RRsepRad = self.RadCoords['RadLoc'][:,:,0] - RADSEP
-            VERTSEP=self.RadCoords['VertLoc'].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
-            VERTSEP=VERTSEP[~np.isnan(VERTSEP)]
-            RRsepVert = self.RadCoords['VertLoc'][:,:,0] - VERTSEP
-            RR = np.sqrt(RRsepRad**2 + RRsepVert**2)*Sign
+            RR = self.RadCoords['RadLoc'].copy()
+            for n in range(self.N):
+                PsinSep=np.abs(self.RadCoords['PsinLoc'].loc[:,:,self.Attempts[n]]-1)
+                Sign = np.sign(self.RadCoords['PsinLoc'].loc[:,:,self.Attempts[n]]-1)
+                RADSEP=self.RadCoords['RadLoc'].loc[:,:,self.Attempts[n]].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
+                RADSEP=RADSEP[~np.isnan(RADSEP)]
+                RRsepRad = self.RadCoords['RadLoc'].loc[:,:,self.Attempts[n]] - RADSEP
+                VERTSEP=self.RadCoords['VertLoc'].loc[:,:,self.Attempts[n]].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
+                VERTSEP=VERTSEP[~np.isnan(VERTSEP)]
+                RRsepVert = self.RadCoords['VertLoc'].loc[:,:,self.Attempts[n]] - VERTSEP
+                RR.loc[:,:,self.Attempts[n]] = np.sqrt(RRsepRad**2 + RRsepVert**2)*Sign
             Rexp = None
             Rstr = '$R-R_{sep}$ (m)'           
         else:
@@ -666,9 +672,9 @@ class SOLPSPLOT(object):
                         ax.plot(PP.loc[:,JXA,Attempts[n]],RR.loc[:,JXA,Attempts[n]],color='Orange',linewidth=3)                         #Outer Midplane
                         ax.plot(PP.loc[:,JXI,Attempts[n]],RR.loc[:,JXI,Attempts[n]],color='Red',linewidth=3)                            #Inner Midplane
                     
-                    ax.plot(PP.loc[1:SEP,CoreBound[0],Attempts[n]],RR.loc[1:SEP,CoreBound[0],Attempts[n]],color='Black',linewidth=3)    #Inner PFR Boundary
-                    ax.plot(PP.loc[1:SEP,CoreBound[1],Attempts[n]],RR.loc[1:SEP,CoreBound[1],Attempts[n]],color='Black',linewidth=3)    #Outer PFR Boundary
-                    ax.plot(PP.loc[SEP,:,Attempts[n]],RR.loc[SEP,:,Attempts[n]],color='Black',linewidth=3)                              #Separatrix
+                    ax.plot(PP.loc[1:SEP,CoreBound[0],Attempts[n]],RR.loc[1:SEP,CoreBound[0],Attempts[n]],color='Blue',linewidth=3)    #Inner PFR Boundary
+                    ax.plot(PP.loc[1:SEP,CoreBound[1],Attempts[n]],RR.loc[1:SEP,CoreBound[1],Attempts[n]],color='Blue',linewidth=3)    #Outer PFR Boundary
+                    ax.plot(PP.loc[SEP,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[SEP,CoreBound[0]:CoreBound[1],Attempts[n]],color='Black',linewidth=3)  #Separatrix line                              #Separatrix
                     ax.set_xlabel(PolXLbl)
                     ax.set_ylabel(Rstr) 
 
