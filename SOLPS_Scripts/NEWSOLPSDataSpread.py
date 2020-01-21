@@ -18,7 +18,8 @@ from textwrap import wrap
 def SOLPSDataSpread(Shot, Attempt):
 	
 	Shot = str(Shot)
-	
+ TimeRange=[1.1,1.3]
+
 	if '1040122027' in Shot:
 		PsinOffset = 0
 		RADC = 'radial'
@@ -37,6 +38,7 @@ def SOLPSDataSpread(Shot, Attempt):
 		JXA = 57
 		JXI = 38
 		ROOTSHOT='1160718'
+  TimeRange=[0.9,1.0]
 	else:
 		RADC = 'psin'
 		JXA = 56
@@ -44,7 +46,7 @@ def SOLPSDataSpread(Shot, Attempt):
 		ROOTSHOT='175060'
 		PsinOffset = 0
 
-	SOLPSOBJ = SOLPSPLOT(Shot, Attempt, PsinOffset=PsinOffset, GRID=True, BASEDRT= 'solps-iter/runs/', TOPDRT='',RADC=RADC,JXA=JXA,JXI=JXI,ROOTSHOT=ROOTSHOT)
+	SOLPSOBJ = SOLPSPLOT(Shot, Attempt, PsinOffset=PsinOffset, TimeRange=TimeRange, GRID=True, BASEDRT= 'solps-iter/runs/', TOPDRT='',RADC=RADC,JXA=JXA,JXI=JXI,ROOTSHOT=ROOTSHOT)
 
 	plt.rc('font',size=20)
 	plt.rc('lines',linewidth=5,markersize=5)
