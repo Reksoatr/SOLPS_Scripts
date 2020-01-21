@@ -39,42 +39,51 @@ class SOLPSPLOT(object):
     
     OPTIONAL:
 
-    SAVE = False > Save plot to a .png file        
-    GRID = False > Turn on plot grid
-    SUBTRACT = False > For a series of Attempts, subtract the matrix data of each Attempt from the first declared Attempt, to compare difference 
-    GRAD = False > Calculate Gradient of Parameter Data    
+    TimeRange = [0.90,1.00] > Time range (in sec) over which experimental data is averaged    
+    DEV = 'cmod' > Tokamak device being investigated
     EXP = True > Plot Experimental Data Points
-    GEO = True > Map Contour to Vessel Geometry 
-    DIVREG = True > Include Divertor Region Data (May cause loss of resolution)        
     LOG10 = 0 > Plot Base-10 Logarithm of Parameter Data (0, 1, or 2)
-    PsinOffset = 0 > Psi_n offset of Experimental Data Points
-    RadOffset = 0 > Radial (in meters) offset of Experimental Data Points
+    GRAD = False > Calculate Gradient of Parameter Data
+    ELEV = 75 > Elevation of viewing angle
+    AZIM = 270 > Azimuthal viewing angle for Surface Plot
     JXI = 37 > Poloidal position of Inner Midplane - default is 37
     JXA = 55 > Poloidal position of Outer Midplane - default is 55
-    SEP = 20 > Radial position of SEParatrix - default is 18
-    AZIM = 270 > Azimuthal viewing angle for Surface Plot
-    ELEV = 75 > Elevation of viewing angle
+    SEP = 20 > Radial position of Separatrix - default is 18    
     XDIM = 98 > Dimension of computational grid in the x (poloidal) direction
     YDIM = 38 > Dimension of computational grid in the y (radial) direction
-    LVN = 100 > Number of colorbar levels for contour plots
-    CoreBound = [25,72] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
-    TimeRange = [0.90,1.00] > Time range (in sec) over which experimental data is averaged
+    CoreBound = [24,71] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
     Publish = [] > List of strings to use in legends of publication-quality plots; if not [], changes plotting rc.params 
+    Markers = True > Plot separatrix, outer midplane, and/or inner midplane marker line
+    PlotScheme = [] > List of matplotlib plot style flags for line plots; must either be empty or a list of strings as long as the number of Attempts    
+    PsinOffset = 0 > Psi_n offset of Experimental Data Points
+    RadOffset = 0 > Radial (in meters) offset of Experimental Data Points
     RADC = 'psin' > Set radial coordinate convention - Either 'psin', 'radial', 'rrsep' or 'Y'    
-    BASEDRT = 'SOLPS_2D_prof/' > Local home directory
+    POLC = 'theta' > Set poloidal coordinate convention - Either 'theta', 'djxa' or 'X'
     RadSlc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
     PolSlc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
+    GEO = True > Map Contour to Vessel Geometry; if False, plots on rectangular grid     
+    LVN = 100 > Number of colorbar levels for contour plots
+    DIVREG = True > Include Divertor Region Data (May cause loss of logarithmic resolution)   
+    SAVE = False > Save plot to a .png file 
+    SUBTRACT = False > For a series of Attempts, subtract the matrix data of each Attempt from the first declared Attempt, to compare difference 
+    AVG = False > Take Average of each parameter dataset over all supplied Attempts, append averaged data to end of matrix dataset
+    TC_Flux = [] > For d3d cases only; allows specification of ONETWO-calculated Radial Flux values
+    TC_Psin = [] > For d3d cases only; allows specification of Psin coordinates of ONETWO-calculated Radial Flux values
+    GRID = False > Turn on plot grid
     AX = None > Pass the name of a matplotlib axis for the SOLPSPLOT object to plot on; by default SOLPSPLOT plots on a new axis
+    BASEDRT = 'SOLPS_2D_prof/' > Local base directory for all stored SOLPS simulation run data
+    TOPDRT = '' > Local home directory, parent of BASEDRT and 'gfileProcessing' directories
+    ROOTSHOT = '1160718' > Optional numerical prefix that designate the experimental campaign that a series of shots may share in common 
         
     PLOT TYPES:
         
     SOLPSPLOT.Contour() > Plot 2D spatial Contour Plot
-    SOLPSPLOT.Surface() > Plot 3D spatial Suface Plot
-    SOLPSPLOT.PolPlot() > Plot Poloidal Contours for every Radial grid point (ONLY TAKES 1 ATTEMPT INPUT) 
-    SOLPSPLOT.RadPlot() > Plot Radial Contours for every Poloidal grid point (ONLY TAKES 1 ATTEMPT INPUT)
-    SOLPSPLOT.RadProf() > Plot Radial Profile of Parameter at Outer Midplane
-    SOLPSPLOT.SumPlot() > Plot Poloidally-Summed Parameter values vs Radial location
-    SOLPSPLOT.VeslMesh() > Plot SOLPS DG Mesh Grid
+    ! SOLPSPLOT.Surface() > Plot 3D spatial Suface Plot
+    SOLPSPLOT.PolPlot() > Plot Poloidal Contour along Separatrix (SEP) 
+    ! SOLPSPLOT.RadPlot() > Plot Radial Contours for every Poloidal grid point (ONLY TAKES 1 ATTEMPT INPUT)
+    SOLPSPLOT.RadProf() > Plot Radial Profile of Parameter at Outer Midplane (JXA)
+    ! SOLPSPLOT.SumPlot() > Plot Poloidally-Summed Parameter values vs Radial location
+    ! SOLPSPLOT.VeslMesh() > Plot SOLPS Carre Curvilinear Grid
     SOLPSPLOT.Export() > No Plot, Save Data to a Variable [PARAM, RR]
     
     '''
@@ -110,7 +119,7 @@ class SOLPSPLOT(object):
                      'SEP' : 20,
                      'XDIM' : 98,
                      'YDIM' : 38,
-                     'CoreBound' : [25,72],
+                     'CoreBound' : [24,71],
                      'Publish' : [],
                      'Markers' : True,
                      'PlotScheme' : [],
@@ -195,6 +204,8 @@ class SOLPSPLOT(object):
         
         BASEDRT, TOPDRT = SET_WDIR(BASEDRT,TOPDRT)
         
+        Attempts = [str(i) for i in Attempts]
+        print('Attempts {} Requested...'.format(Attempts))
         # Create Experiment Data Dictionary (ExpDict) -> d3d or cmod?
         
         if 'gas' in Shot:
@@ -204,9 +215,9 @@ class SOLPSPLOT(object):
             
             BASEDRT = '{}d3d'.format(BASEDRT)
             
-            JXI = 40
-            JXA = 56
-            SEP = 22
+            JXI = 39
+            JXA = 55
+            SEP = 17
             
             GFILE = '{}gfileProcessing/d3d_files/g175060.02512'.format(TOPDRT)
             GF = eq.equilibrium(gfile=GFILE)
@@ -310,10 +321,10 @@ class SOLPSPLOT(object):
         
         if AVG is True and 'AVG' not in Attempts:
             Attempts.append('AVG')
-            print(Attempts)
+            print('Attempts {} Requested...'.format(Attempts))
         
         N = len(Attempts)
-        print(N)
+        print('{} Attempt(s) Entered'.format(N))
         P = len(self.Parameter)
         
         XGrid=XDIM-2
@@ -343,7 +354,7 @@ class SOLPSPLOT(object):
 
         for n in range(N):
             Attempt = Attempts[n]
-            print(Attempt)
+            print('Loading data for Attempt {} now...'.format(Attempt))
             if Attempt == 'AVG':
                 YYLoc.values[:,:,n] = Yy
                 RadLoc.values[:,:,n] = RadLoc.values[:,:,0:n-1].mean(2)
@@ -385,31 +396,30 @@ class SOLPSPLOT(object):
                 self.Parameter.append(AddNew)
                 P = len(self.Parameter)
         
-        for p in range(P):
-            if self.Parameter[p] not in self.PARAM.keys(): 
-                self.PARAM[self.Parameter[p]] = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,self.Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = self.PARAMDICT[self.Parameter[p]])
+        for p in self.Parameter:
+            if p not in self.PARAM.keys() or 'AVG' in Attempts: 
+                self.PARAM[p] = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = self.PARAMDICT[p])
                 for n in range(N):
-                    Attempt = self.Attempts[n]
+                    Attempt = Attempts[n]
                     if Attempt == 'AVG':
-                        Average = self.PARAM.mean(dim='Attempt').assign_coords(Attempt='AVG').expand_dims('Attempt',2)
-                        self.PARAM = xr.concat([self.PARAM,Average],dim='Attempt')
+                        self.PARAM[p].values[:,:,n] = self.PARAM[p].values[:,:,:-1].mean(2)
                     else:    
                         DRT = '{}/Attempt{}'.format(BASEDRT, str(Attempt))   #Generate path
                         try:
-                            RawData = np.loadtxt('{}/Output/{}{}'.format(DRT, self.Parameter[p], str(Attempt)),usecols = (3))
+                            RawData = np.loadtxt('{}/Output/{}{}'.format(DRT, p, str(Attempt)),usecols = (3))
                         except Exception as err:
                             print(err)
                             try:
-                                 RawData = np.loadtxt('{}/Output2/{}{}'.format(DRT, self.Parameter[p], str(Attempt)),usecols = (3))
+                                 RawData = np.loadtxt('{}/Output2/{}{}'.format(DRT, p, str(Attempt)),usecols = (3))
                             except Exception as err:
                                 print(err)
-                                print('Parameter {} not found for Attempt {}. Creating NAN Array'.format(self.Parameter[p], str(Attempt)))
-                                self.PARAM[self.Parameter[p]].values[:,:,n] = np.nan
+                                print('Parameter {} not found for Attempt {}. Creating NAN Array'.format(p, str(Attempt)))
+                                self.PARAM[p].values[:,:,n] = np.nan
                                 
                         if RawData.size == 3724:
-                            self.PARAM[self.Parameter[p]].values[:,:,n] = RawData.reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                            self.PARAM[p].values[:,:,n] = RawData.reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
                         elif RawData.size == 7448:
-                            self.PARAM[self.Parameter[p]].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
+                            self.PARAM[p].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
                             
         if RadSlc == 'all':
             RadSlc = self.PARAM.coords['Radial_Location'].values
@@ -431,6 +441,10 @@ class SOLPSPLOT(object):
         
         self.KW['BASEDRT'] = BASEDRT
         self.KW['TOPDRT'] = TOPDRT
+        self.KW['JXA'] = JXA
+        self.KW['JXI'] = JXI
+        self.KW['SEP'] = SEP
+        self.Attempts = Attempts
         self.VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
         self.Xx = Xx
         self.Yy = Yy
@@ -469,18 +483,21 @@ class SOLPSPLOT(object):
                 Rexp = self.RadCoords['RmidAvg']
                 Rexp = Rexp + RadOffset*np.ones(len(Rexp))
             else:
+                Rexp=[]
                 print('No experimental radial coordinates available!')
             Rstr = 'm'
         elif RADC == 'rrsep':
-            PsinSep=np.abs(self.RadCoords['PsinLoc']-1)
-            Sign = np.sign(self.RadCoords['PsinLoc']-1)
-            RADSEP=self.RadCoords['RadLoc'].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
-            RADSEP=RADSEP[~np.isnan(RADSEP)]
-            RRsepRad = self.RadCoords['RadLoc'][:,:,0] - RADSEP
-            VERTSEP=self.RadCoords['VertLoc'].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
-            VERTSEP=VERTSEP[~np.isnan(VERTSEP)]
-            RRsepVert = self.RadCoords['VertLoc'][:,:,0] - VERTSEP
-            RR = np.sqrt(RRsepRad**2 + RRsepVert**2)*Sign
+            RR = self.RadCoords['RadLoc'].copy()
+            for n in range(self.N):
+                PsinSep=np.abs(self.RadCoords['PsinLoc'].loc[:,:,self.Attempts[n]]-1)
+                Sign = np.sign(self.RadCoords['PsinLoc'].loc[:,:,self.Attempts[n]]-1)
+                RADSEP=self.RadCoords['RadLoc'].loc[:,:,self.Attempts[n]].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
+                RADSEP=RADSEP[~np.isnan(RADSEP)]
+                RRsepRad = self.RadCoords['RadLoc'].loc[:,:,self.Attempts[n]] - RADSEP
+                VERTSEP=self.RadCoords['VertLoc'].loc[:,:,self.Attempts[n]].where(PsinSep==PsinSep.min(axis=0)).values.flatten('F')
+                VERTSEP=VERTSEP[~np.isnan(VERTSEP)]
+                RRsepVert = self.RadCoords['VertLoc'].loc[:,:,self.Attempts[n]] - VERTSEP
+                RR.loc[:,:,self.Attempts[n]] = np.sqrt(RRsepRad**2 + RRsepVert**2)*Sign
             Rexp = None
             Rstr = '$R-R_{sep}$ (m)'           
         else:
@@ -571,6 +588,9 @@ class SOLPSPLOT(object):
                     print('Taking Average over Attempts')
                     Attempts.append('AVG')
                     self._LoadSOLPSData()
+                    PARAM = self.PARAM[pn].copy()
+                    RadLoc = self.RadCoords['RadLoc']
+                    VertLoc = self.RadCoords['VertLoc']
                 N=[-1]            
             
             if ContKW['SUBTRACT'] is True:
@@ -652,9 +672,9 @@ class SOLPSPLOT(object):
                         ax.plot(PP.loc[:,JXA,Attempts[n]],RR.loc[:,JXA,Attempts[n]],color='Orange',linewidth=3)                         #Outer Midplane
                         ax.plot(PP.loc[:,JXI,Attempts[n]],RR.loc[:,JXI,Attempts[n]],color='Red',linewidth=3)                            #Inner Midplane
                     
-                    ax.plot(PP.loc[1:SEP,CoreBound[0],Attempts[n]],RR.loc[1:SEP,CoreBound[0],Attempts[n]],color='Black',linewidth=3)    #Inner PFR Boundary
-                    ax.plot(PP.loc[1:SEP,CoreBound[1],Attempts[n]],RR.loc[1:SEP,CoreBound[1],Attempts[n]],color='Black',linewidth=3)    #Outer PFR Boundary
-                    ax.plot(PP.loc[SEP,:,Attempts[n]],RR.loc[SEP,:,Attempts[n]],color='Black',linewidth=3)                              #Separatrix
+                    ax.plot(PP.loc[1:SEP,CoreBound[0],Attempts[n]],RR.loc[1:SEP,CoreBound[0],Attempts[n]],color='Blue',linewidth=3)    #Inner PFR Boundary
+                    ax.plot(PP.loc[1:SEP,CoreBound[1],Attempts[n]],RR.loc[1:SEP,CoreBound[1],Attempts[n]],color='Blue',linewidth=3)    #Outer PFR Boundary
+                    ax.plot(PP.loc[SEP,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[SEP,CoreBound[0]:CoreBound[1],Attempts[n]],color='Black',linewidth=3)  #Separatrix line                              #Separatrix
                     ax.set_xlabel(PolXLbl)
                     ax.set_ylabel(Rstr) 
 
@@ -722,12 +742,13 @@ class SOLPSPLOT(object):
                         print('Plot Parameter Does Not Exist Or Could Not Be Loaded! Skipping Plot...')
                         pass
 
-            if PolKW['AVG'] is True:
-                if 'AVG' not in Attempts:
-                    print('Taking Average over Attempts')
-                    Attempts.append('AVG')
-                    self._LoadSOLPSData()
-                N=[-1]  
+                if PolKW['AVG'] is True:
+                    if 'AVG' not in Attempts:
+                        print('Taking Average over Attempts')
+                        Attempts.append('AVG')
+                        self._LoadSOLPSData()
+                        PARAM = self.PARAM[pn].copy()
+                    N=[-1]  
 
             if POLC == 'theta':
                 PP = PolVec.loc[:,:,:,'Theta']
@@ -830,7 +851,7 @@ class SOLPSPLOT(object):
                     print('Taking Average over Attempts')
                     Attempts.append('AVG')
                     self._LoadSOLPSData()
-                    N=[-1]  
+                    PARAM = self.PARAM[pn].copy()
                 
             #print('Beginning Plot Sequence')
             
