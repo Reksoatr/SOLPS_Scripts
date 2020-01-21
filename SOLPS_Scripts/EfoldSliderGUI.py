@@ -12,8 +12,8 @@ import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider, Button, CheckButtons
 
 Shot = '12'
-Attempt = ['80', '81', '82', '83', '84', '85', '86', '87', '88', '89']
-PS=['.','.','.','.','.','.','.','.','.','.','-']
+Attempt = ['95','96','97','98','99']
+PS=['.','.','.','.','.','-']
 
 NeuDen = SOLPSPLOT(Shot,Attempt,'NeuDen',AVG=True,PlotScheme=PS)
 JXA = NeuDen.KW['JXA']
