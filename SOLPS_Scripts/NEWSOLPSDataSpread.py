@@ -18,7 +18,7 @@ from textwrap import wrap
 def SOLPSDataSpread(Shot, Attempt):
 	
 	Shot = str(Shot)
- TimeRange=[1.1,1.3]
+	TimeRange=[1.1,1.3]
 
 	if '1040122027' in Shot:
 		PsinOffset = 0
@@ -38,7 +38,7 @@ def SOLPSDataSpread(Shot, Attempt):
 		JXA = 57
 		JXI = 38
 		ROOTSHOT='1160718'
-  TimeRange=[0.9,1.0]
+		TimeRange=[0.9,1.0]
 	else:
 		RADC = 'psin'
 		JXA = 56
