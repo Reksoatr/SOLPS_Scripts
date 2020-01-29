@@ -38,7 +38,7 @@ def SOLPSDataSpread(Shot, Attempt):
 		JXA = 57
 		JXI = 38
 		ROOTSHOT='1160718'
-		TimeRange=[0.9,1.0]
+		#TimeRange=[0.9,1.0]
 	else:
 		RADC = 'psin'
 		JXA = 56
