@@ -61,6 +61,7 @@ class SOLPSPLOT(object):
     POLC = 'theta' > Set poloidal coordinate convention - Either 'theta', 'djxa' or 'X'
     RadSlc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
     PolSlc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
+    SURF = 17 > Same purpose as PolSlc
     GEO = True > Map Contour to Vessel Geometry; if False, plots on rectangular grid     
     LVN = 100 > Number of colorbar levels for contour plots
     DIVREG = True > Include Divertor Region Data (May cause loss of logarithmic resolution)   
@@ -128,7 +129,8 @@ class SOLPSPLOT(object):
                      'RADC' : 'psin',
                      'POLC' : 'theta',
                      'RadSlc' : None,
-                     'PolSlc' : None, 
+                     'PolSlc' : None,
+                     'SURF' : 17,
                      'GEO' : True,
                      'LVN' : 100,
                      'DIVREG' : True,
@@ -599,7 +601,7 @@ class SOLPSPLOT(object):
                     PARAM.values[:,:,n] = (PARAM.values[:,:,0]-PARAM[:,:,n])
                 PARAM.values[:,:,0] = PARAM.values[:,:,0]-PARAM[:,:,0]
             else:
-                CMAP = cm.viridis
+                CMAP = cm.seismic
             
             # NEED TO FIX -> PREVENT PARAM FROM BEING OVERWRITTEN EVERY TIME
             
@@ -716,11 +718,10 @@ class SOLPSPLOT(object):
             JXI = kwargs['JXI']
             SEP = kwargs['SEP']
             POLC = kwargs['POLC']
+            SURF = kwargs['SURF']
             CoreBound = kwargs['CoreBound']
             CoreBound[1] = CoreBound[1]-1
             PolKW = kwargs
-            
-            SURF = 17
             
             if Parameter is None:
                 self.PltParams = self.Parameter
