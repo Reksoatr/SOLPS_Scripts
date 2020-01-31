@@ -11,7 +11,7 @@ from scipy.io import loadmat
 from VesselPlotterNew import SOLPSPLOT
 from TOOLS import SET_WDIR
 
-Base012=SOLPSPLOT('12',[105])
+Base012=SOLPSPLOT('12',[97,101,120])
 #Base025=SOLPSPLOT('025',[154])
 
 BASEDRT, TOPDRT = SET_WDIR('','')
@@ -53,7 +53,7 @@ Rad025Plot[1,1].get_legend().remove()
 Base012.RadProf('Ne',JXA=1,RADC='rrsep',AX=Rad012Plot[0,0],PlotScheme=['r'],Markers=False,LOG10=2)
 Rad012Plot[0,0].semilogy(Probe012['rho_IN']/1000,Probe012['Ne_I'],'.',color='orange',markersize=1)
 Rad012Plot[0,0].set_title('High Ip Inner Divertor Ne')
-Rad012Plot[0,0].get_legend().remove()
+#Rad012Plot[0,0].get_legend().remove()
 '''
 Base025.RadProf('Ne',JXA=1,RADC='rrsep',AX=Rad025Plot[0,0],PlotScheme=['b'],Markers=False)
 Rad025Plot[0,0].plot(Probe025['rho_IN']/1000,Probe025['Ne_I'],'.',markersize=1)
