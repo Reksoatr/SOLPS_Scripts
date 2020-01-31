@@ -601,7 +601,7 @@ class SOLPSPLOT(object):
                     PARAM.values[:,:,n] = (PARAM.values[:,:,0]-PARAM[:,:,n])
                 PARAM.values[:,:,0] = PARAM.values[:,:,0]-PARAM[:,:,0]
             else:
-                CMAP = cm.seismic
+                CMAP = cm.viridis
             
             # NEED TO FIX -> PREVENT PARAM FROM BEING OVERWRITTEN EVERY TIME
             
