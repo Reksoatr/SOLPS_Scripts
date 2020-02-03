@@ -12,7 +12,7 @@ import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider, Button, CheckButtons
 
 Shot = '12'
-Attempt = ['101','102','103','104','105']
+Attempt = ['120','121','122','123','124']
 PS=['.','.','.','.','.','-']
 
 #Attempt = ['80', '81', '82', '83', '84', '85', '86', '87', '88', '89']

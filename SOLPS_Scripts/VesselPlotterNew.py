@@ -206,6 +206,9 @@ class SOLPSPLOT(object):
         
         BASEDRT, TOPDRT = SET_WDIR(BASEDRT,TOPDRT)
         
+        #print(BASEDRT)
+        #print(TOPDRT)
+        
         Attempts = [str(i) for i in Attempts]
         print('Attempts {} Requested...'.format(Attempts))
         # Create Experiment Data Dictionary (ExpDict) -> d3d or cmod?
