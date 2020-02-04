@@ -61,7 +61,7 @@ class SOLPSPLOT(object):
     POLC = 'theta' > Set poloidal coordinate convention - Either 'theta', 'djxa' or 'X'
     RadSlc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
     PolSlc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
-    SURF = 17 > Same purpose as PolSlc
+    SURF = 20 > Same purpose as PolSlc
     GEO = True > Map Contour to Vessel Geometry; if False, plots on rectangular grid     
     LVN = 100 > Number of colorbar levels for contour plots
     DIVREG = True > Include Divertor Region Data (May cause loss of logarithmic resolution)   
@@ -130,7 +130,7 @@ class SOLPSPLOT(object):
                      'POLC' : 'theta',
                      'RadSlc' : None,
                      'PolSlc' : None,
-                     'SURF' : 17,
+                     'SURF' : 20,
                      'GEO' : True,
                      'LVN' : 100,
                      'DIVREG' : True,
@@ -623,11 +623,14 @@ class SOLPSPLOT(object):
                     levs = np.sign(lev_exp)*np.power(10, np.abs(lev_exp))
                     np.set_printoptions(threshold=np.inf)
                     print(levs)
+                    CMAP = cm.seismic
                 else:
                     lev_exp = np.arange(np.floor(np.log10(np.nanmin(PARAM.values)))-1, np.ceil(np.log10(np.nanmax(PARAM.values)))+1)
                 levs = np.power(10, lev_exp)   
             else:
                 levs = np.linspace(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()),ContKW['LVN'])
+                if any(x<0 for x in levs):
+                    CMAP = cm.seismic
             
             for n in N:
                 if ContKW['AX'] is None:
@@ -807,6 +810,8 @@ class SOLPSPLOT(object):
             plt.xlabel(PolXLbl)
             plt.ylabel(PARAM.name)
             plt.grid()
+            
+            self.PolKW = PolKW
     
     def RadProf(self,Parameter=None,**kwargs):
         
