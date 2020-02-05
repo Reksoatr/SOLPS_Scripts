@@ -623,14 +623,14 @@ class SOLPSPLOT(object):
                     levs = np.sign(lev_exp)*np.power(10, np.abs(lev_exp))
                     np.set_printoptions(threshold=np.inf)
                     print(levs)
-                    CMAP = cm.seismic
+                    CMAP = cm.coolwarm
                 else:
                     lev_exp = np.arange(np.floor(np.log10(np.nanmin(PARAM.values)))-1, np.ceil(np.log10(np.nanmax(PARAM.values)))+1)
                 levs = np.power(10, lev_exp)   
             else:
                 levs = np.linspace(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()),ContKW['LVN'])
                 if any(x<0 for x in levs):
-                    CMAP = cm.seismic
+                    CMAP = cm.coolwarm
             
             for n in N:
                 if ContKW['AX'] is None:
