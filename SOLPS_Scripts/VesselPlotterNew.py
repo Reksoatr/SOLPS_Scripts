@@ -614,6 +614,8 @@ class SOLPSPLOT(object):
                 PARAM.values[PARAM.values<-1] = -1*np.log10(np.abs(PARAM.values[PARAM.values<-1]))    
                 y_exp = np.arange(np.floor(np.nanmin(PARAM.values)), np.ceil(np.nanmax(PARAM.values))+1,2)
                 levs = np.arange(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()))
+                if any(x<0 for x in levs):
+                    CMAP = cm.coolwarm
             elif ContKW['LOG10'] == 2:
                 NPARAM = np.abs(PARAM.values[PARAM.values<0])
                 NPARAM[NPARAM<=1] = np.nan
