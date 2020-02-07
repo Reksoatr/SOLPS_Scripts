@@ -158,23 +158,24 @@ if JND == 1:
     NeuDRadPlot.semilogy(Jexp['R__R_LCFS_m'],Jexp['N_D_m3'],'--')
     NeuDRadPlot.semilogy(Jkn1d_H['R__R_LCFS_m'],Jkn1d_H['NH_m3'],':')
     NeuDRadPlot.semilogy(Jkn1d_H2['R__R_LCFS_m'],Jkn1d_H2['NH2_m3'],':')
-    NeuDen_2 = SOLPSPLOT('12',[70],RADC='rrsep')
-    NeuDen_3 = SOLPSPLOT('25',[156],RADC='rrsep')
-    #NeuDen_4 = SOLPSPLOT('1040122027',[4],ROOTSHOT='',JXA=59,JXI=35,RADC='rrsep')
+    NeuDen_2 = SOLPSPLOT('12',[120],RADC='rrsep')
+    NeuDen_3 = SOLPSPLOT('25',[158],RADC='rrsep')
+    NeuDen_4 = SOLPSPLOT('12',[101],RADC='rrsep')
     #NeuDen_5 = SOLPSPLOT('1040122027',[5],ROOTSHOT='',JXA=59,JXI=35,RADC='rrsep')
     #NeuDen_6 = SOLPSPLOT('1040122027',[6],ROOTSHOT='',JXA=59,JXI=35,RADC='rrsep')
     #NeuDen_7 = SOLPSPLOT('1040122027',[7],ROOTSHOT='',JXA=59,JXI=35,RADC='rrsep')
     #NeuDen025F = SOLPSPLOT('gas025',[19])
     NeuDen_2.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,Markers=False,PlotScheme=['r-'])
     NeuDen_3.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,Markers=False,PlotScheme=['b-'])
-    #NeuDen_3.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,Markers=False)
-    #NeuDen_4.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,Markers=False)    
+    NeuDen_4.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,Markers=False,PlotScheme=['g-'])    
     #NeuDen_5.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,Markers=False)  
     #NeuDen_6.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,Markers=False)  
     #NeuDen_7.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,Markers=False)   
     #NeuDen025F.RadProf('NeuDen',LOG10=2,AX=NeuDRadPlot,RADC='rrsep',Markers=False)
 
-    NeuDRadPlot.legend(['Exp D Density', 'KN1D_H', 'KN1D_H2','High Opacity','Low Opacity'])
+    NeuDRadPlot.legend(['Exp D Density', 'KN1D_H', 'KN1D_H2','Ballooned High Opacity','Unballooned Low Opacity','Unballooned High Opacity'])
+    
+    NeuDRadPlot.grid()
 
 
 

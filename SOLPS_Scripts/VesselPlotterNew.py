@@ -39,7 +39,7 @@ class SOLPSPLOT(object):
     
     OPTIONAL:
 
-    TimeRange = [0.90,1.00] > Time range (in sec) over which experimental data is averaged    
+    TimeRange = [1.10,1.30] > Time range (in sec) over which experimental data is averaged    
     DEV = 'cmod' > Tokamak device being investigated
     EXP = True > Plot Experimental Data Points
     LOG10 = 0 > Plot Base-10 Logarithm of Parameter Data (0, 1, or 2)
