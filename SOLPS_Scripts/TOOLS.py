@@ -10,7 +10,7 @@ import os
 
 def SET_WDIR(BASEDRT,TOPDRT):
     if os.environ['OS'] == 'Windows_NT':
-        if os.environ['USERNAME'] == 'rmreksoatmodjo':
+        if os.environ['USERNAME'] == 'Rmreksoatmodjo':
             BASEDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
             TOPDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
         elif os.environ['USERNAME'] == '18313':

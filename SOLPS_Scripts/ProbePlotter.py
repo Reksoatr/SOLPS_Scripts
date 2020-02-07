@@ -11,7 +11,7 @@ from scipy.io import loadmat
 from VesselPlotterNew import SOLPSPLOT
 from TOOLS import SET_WDIR
 
-Base012=SOLPSPLOT('12',[97])
+Base012=SOLPSPLOT('12',[97,101,120])
 #Base025=SOLPSPLOT('025',[154])
 
 BASEDRT, TOPDRT = SET_WDIR('','')
@@ -24,8 +24,8 @@ AVG = np.mean(Probe012['Ne_O'],axis=0)
 Fig1, Rad012Plot = plt.subplots(nrows=2,ncols=2,sharex=True,sharey='row')
 #Fig2, Rad025Plot = plt.subplots(nrows=2,ncols=2,sharex=True,sharey='row')
 
-Base012.RadProf('Ne',JXA=96,RADC='rrsep',AX=Rad012Plot[0,1],PlotScheme=['r'],Markers=False)
-Rad012Plot[0,1].plot(Probe012['rho_ON']/1000,Probe012['Ne_O'],'.',color='orange',markersize=1)
+Base012.RadProf('Ne',JXA=96,RADC='rrsep',AX=Rad012Plot[0,1],PlotScheme=['r'],Markers=False,LOG10=2)
+Rad012Plot[0,1].semilogy(Probe012['rho_ON']/1000,Probe012['Ne_O'],'.',color='orange',markersize=1)
 Rad012Plot[0,1].set_title('High Ip Outer Divertor Ne')
 Rad012Plot[0,1].set_ylabel('Electron Density $m^{-3}$')
 Rad012Plot[0,1].get_legend().remove()
@@ -50,10 +50,10 @@ Rad025Plot[1,1].set_ylabel('Electron Temperature $eV$')
 Rad025Plot[1,1].set_xlabel('R-Rsep (m)')
 Rad025Plot[1,1].get_legend().remove()
 '''
-Base012.RadProf('Ne',JXA=1,RADC='rrsep',AX=Rad012Plot[0,0],PlotScheme=['r'],Markers=False)
-Rad012Plot[0,0].plot(Probe012['rho_IN']/1000,Probe012['Ne_I'],'.',color='orange',markersize=1)
+Base012.RadProf('Ne',JXA=1,RADC='rrsep',AX=Rad012Plot[0,0],PlotScheme=['r'],Markers=False,LOG10=2)
+Rad012Plot[0,0].semilogy(Probe012['rho_IN']/1000,Probe012['Ne_I'],'.',color='orange',markersize=1)
 Rad012Plot[0,0].set_title('High Ip Inner Divertor Ne')
-Rad012Plot[0,0].get_legend().remove()
+#Rad012Plot[0,0].get_legend().remove()
 '''
 Base025.RadProf('Ne',JXA=1,RADC='rrsep',AX=Rad025Plot[0,0],PlotScheme=['b'],Markers=False)
 Rad025Plot[0,0].plot(Probe025['rho_IN']/1000,Probe025['Ne_I'],'.',markersize=1)
