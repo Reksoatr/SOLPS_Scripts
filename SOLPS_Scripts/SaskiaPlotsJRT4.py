@@ -19,8 +19,8 @@ GasTime=0
 
 if Base == 1:
 
-    Base012=SOLPSPLOT('12',[70],PlotScheme=['r-'])
-    Base025=SOLPSPLOT('25',[156],PlotScheme=['b-'])
+    Base012=SOLPSPLOT('12',[101],PlotScheme=['r-'],PsinOffset=-0.005)
+    Base025=SOLPSPLOT('25',[161],PlotScheme=['b-'],PsinOffset=-0.0125)
     #Based3d=SOLPSPLOT('d3d',[86])
     
     ContFig, ContPlot = plt.subplots(nrows=1,ncols=2,sharey=True)
@@ -38,8 +38,8 @@ if Base == 1:
     
     #Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
     
-    Base012.RadProf('Ne',AX=RadPlot[0],PsinOffset=-0.01,Markers=False)
-    Base025.RadProf('Ne',AX=RadPlot[0],PsinOffset=-0.01,Markers=False,Publish=['High Ip','Low Ip'])
+    Base012.RadProf('Ne',AX=RadPlot[0],Markers=False)
+    Base025.RadProf('Ne',AX=RadPlot[0],Markers=False,Publish=['High Ip','Low Ip'])
     RadPlot[0].set_xlabel('')
     RadPlot[0].set_ylabel('')
     RadPlot[0].get_legend().remove()
@@ -48,8 +48,8 @@ if Base == 1:
     
     #Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
     
-    Base012.RadProf('Te',AX=RadPlot[2],PsinOffset=-0.01,Markers=False)
-    Base025.RadProf('Te',AX=RadPlot[2],PsinOffset=-0.01,Markers=False,Publish=['High Ip','Low Ip'])
+    Base012.RadProf('Te',AX=RadPlot[2],Markers=False)
+    Base025.RadProf('Te',AX=RadPlot[2],Markers=False,Publish=['High Ip','Low Ip'])
     RadPlot[2].set_xlabel('')
     RadPlot[2].set_ylabel('')
     RadPlot[2].get_legend().remove()
