@@ -106,7 +106,7 @@ class SOLPSPLOT(object):
         elif Parameters is not None:
             self.Parameter = [Parameters]
         else:
-            self.Parameter = ['Ne','Te','Ti','DN','KYE','KYI','NeuDen','IonFlx']
+            self.Parameter = ['Ne','Te','Ti','DN','KYE','KYI','NeuDen','IonFlx','IonPol']
             
         self.DefaultSettings = {'TimeRange' : [1.10,1.30],  
                      'DEV': 'cmod',
@@ -302,21 +302,25 @@ class SOLPSPLOT(object):
             NemidAvg = np.nanmean(Nemid, axis=1)
             ErrNe = np.nanmean(ExpData['nerr'][:,ti:tf], axis=1)
             NeThresh = (ErrNe*2)/NemidAvg
+            
             for NT in range(len(NeThresh)):
-                if np.abs(NeThresh[NT]) > 0.5:
+                if np.abs(NeThresh[NT]) > 2.0:
                     NemidAvg[NT] = np.nan
                     ErrNe[NT] = np.nan
+            
             
             Temid = ExpData['te'][:,ti:tf]
             Temid[Temid == 0] = np.nan
             TemidAvg = np.nanmean(Temid, axis=1)
             ErrTe = np.nanmean(ExpData['terr'][:,ti:tf], axis=1)
             TeThresh = (ErrTe*2)/TemidAvg
+            
             for TT in range(len(TeThresh)):
-                if np.abs(TeThresh[TT]) > 0.5:
+                if np.abs(TeThresh[TT]) > 2.0:
                     TemidAvg[TT] = np.nan
                     ErrTe[TT] = np.nan
-                    
+            
+            
             self.ExpDict['NemidAvg'] = NemidAvg
             self.ExpDict['ErrNe'] = ErrNe
             self.ExpDict['TemidAvg'] = TemidAvg
