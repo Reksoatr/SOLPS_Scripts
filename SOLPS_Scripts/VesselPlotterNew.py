@@ -169,7 +169,8 @@ class SOLPSPLOT(object):
                      'SX': r'Poloidal Contact Area SX $(m^{2})$',
                      'SY': r'Radial Contact Area SY $(m^{2})$',
                      'SZ': r'Poloidal Cross-Sectional Area SZ $(m^{2})$',
-                     'VOL': r'Cell Volume VOL $(m^{2})$'}
+                     'VOL': r'Cell Volume VOL $(m^{2})$',
+                     'RadPinch': r'Radial Pinch Velocity $v_y (m/s)$'}
         
         self._LoadSOLPSData()
         
@@ -424,6 +425,7 @@ class SOLPSPLOT(object):
                                 print(err)
                                 print('Parameter {} not found for Attempt {}. Creating NAN Array'.format(p, str(Attempt)))
                                 self.PARAM[p].values[:,:,n] = np.nan
+                                RawData=[]
                                 
                         if RawData.size == 3724:
                             self.PARAM[p].values[:,:,n] = RawData.reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
