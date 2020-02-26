@@ -106,7 +106,7 @@ class SOLPSPLOT(object):
         elif Parameters is not None:
             self.Parameter = [Parameters]
         else:
-            self.Parameter = ['Ne','Te','Ti','DN','KYE','KYI','NeuDen','IonFlx','IonPol']
+            self.Parameter = ['Ne','Te','Ti','DN','KYE','KYI','NeuDen','IonFlx','IonPol','RadPinch']
             
         self.DefaultSettings = {'TimeRange' : [1.10,1.30],  
                      'DEV': 'cmod',
