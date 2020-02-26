@@ -60,7 +60,7 @@ def SOLPSDataSpread(Shot, Attempt):
 
 	Spreadfig = plt.figure(figsize=(48,27))
 	gs = GridSpec(4, (3+(2*R)))
-	for i, item in enumerate(['IonFlx', 'NeuDen', 'Ne', 'Te', 'Ti', 'DN', 'KYE', 'KYI']):
+	for i, item in enumerate(['IonFlx', 'NeuDen', 'Ne', 'Te', 'Ti', 'DN', 'KYE', 'RadPinch']):
 
 		if item == 'NeuDen':
 			LG = 2
