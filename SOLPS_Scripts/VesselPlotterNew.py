@@ -170,7 +170,7 @@ class SOLPSPLOT(object):
                      'SY': r'Radial Contact Area SY $(m^{2})$',
                      'SZ': r'Poloidal Cross-Sectional Area SZ $(m^{2})$',
                      'VOL': r'Cell Volume VOL $(m^{2})$',
-                     'RadPinch': r'Radial Pinch Velocity $v_y (m/s)$'}
+                     'RadPinch': r'Anomalous Radial Pinch Velocity $v_y\;(m/s)$'}
         
         self._LoadSOLPSData()
         
