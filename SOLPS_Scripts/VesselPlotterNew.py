@@ -876,12 +876,6 @@ class SOLPSPLOT(object):
                 fig, ax = plt.subplots(nrows=1,ncols=1,figsize=(14,7))
             else:
                 ax = RadProfKW['AX']
-            
-            if RadProfKW['GRAD'] is True:
-                if RADC == 'rrsep':
-                    PARAM.values = np.gradient(PARAM.values,RR.values,axis=0)
-                else:
-                    print('Gradient can not be calculated unless radial coordinate is in meters (RADC=rrsep)')
                     
             if RadProfKW['LOG10'] == 1:
                 #PARAM.values[PARAM.values<0] = 0
@@ -892,6 +886,12 @@ class SOLPSPLOT(object):
             
             if len(PlotScheme) == N:
                 for n in range(N):
+                    if RadProfKW['GRAD'] is True: #Needs To Be Debugged, think it's a problem with PARAM.values not being copied
+                        if RADC == 'rrsep':
+                            PARAM.values = np.gradient(PARAM.loc[:,JXA,Attempts[n]].values,RR.loc[:,JXA,Attempts[n]].values,axis=0)
+                        else:
+                            print('Gradient can not be calculated unless radial coordinate is in meters (RADC=rrsep)')
+                    
                     if RadProfKW['LOG10'] == 2:
                         ax.semilogy(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n])
                     else:
