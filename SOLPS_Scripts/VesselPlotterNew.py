@@ -878,8 +878,11 @@ class SOLPSPLOT(object):
                 ax = RadProfKW['AX']
             
             if RadProfKW['GRAD'] is True:
-                PARAM.values = np.gradient(PARAM.values,axis=0)
-                
+                if RADC == 'rrsep':
+                    PARAM.values = np.gradient(PARAM.values,RR.values,axis=0)
+                else:
+                    print('Gradient can not be calculated unless radial coordinate is in meters (RADC=rrsep)')
+                    
             if RadProfKW['LOG10'] == 1:
                 #PARAM.values[PARAM.values<0] = 0
                 PARAM.values[PARAM.values>1] = np.log10(PARAM.values[PARAM.values>1])
