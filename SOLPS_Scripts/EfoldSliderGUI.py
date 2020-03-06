@@ -11,11 +11,11 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider, Button, CheckButtons
 
-Shot = '12'
-Attempt = ['101','102','103','104','105']
+Shot = '25'
+Attempt = ['161'] #,'102','103','104','105']
 PS=['.','.','.','.','.','-']
 
-NeuDen = SOLPSPLOT(Shot,Attempt,'NeuDen',AVG=True,PlotScheme=PS)
+NeuDen = SOLPSPLOT(Shot,Attempt,'NeuDen',PlotScheme='x') #,AVG=True,PlotScheme=PS)
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
 CoreBound = NeuDen.KW['CoreBound']
@@ -42,6 +42,9 @@ axcontour.margins(x=0)
 
 axprofile = fig.add_subplot(gs[0]) #plt.axes([0.25, 0.2, 0.4, 0.6], facecolor=axcolor)
 NeuDen.RadProf('NeuDen',LOG10=log,AX=axprofile,Markers=False,RADC='rrsep',JXA=f0)  #,PlotScheme=['x'])
+
+XLim = axprofile.get_xlim()
+YLim = axprofile.get_ylim()
 #ri = np.where(np.abs(RR.loc[:,f0,Attempt].values) > Rmin)[0][0]
 #rf = np.where(np.abs(RR.loc[:,f0,Attempt].values) < Rmax)[0][-1]
 #NDTrial = np.polyfit(RR.loc[ri:rf,f0,Attempt],np.log(NeuDen.PARAM['NeuDen'].loc[ri:rf,f0,Attempt]),1,full=True)
@@ -51,33 +54,36 @@ sslide = Slider(axslide, 'Poloidal Surface', CoreBound[0]-1, CoreBound[1]-1, val
 #axslide.set
 
 def update(val):
-    '''
-    if radio.get_status() is True:
+    
+    log=2
+    
+    if radio.get_status()[0] is True:
         log = 2
-    elif radio.get_status() is False:
+    elif radio.get_status()[0] is False:
         log = 0
-    '''
+        
     PolPos = sslide.val
     l.set_xdata(RadLoc.loc[:,PolPos,Attempt[-1]])
     l.set_ydata(VertLoc.loc[:,PolPos,Attempt[-1]])
     axprofile.clear()
     NeuDen.RadProf('NeuDen',LOG10=log,AX=axprofile,Markers=False,RADC='rrsep',JXA=PolPos) #,PlotScheme=['x'])
+    axprofile.set_xlim(XLim)
+    axprofile.set_ylim(YLim)
     fig.canvas.draw_idle()
 
 
 sslide.on_changed(update)
 
-resetax = plt.axes([0.8, 0.025, 0.1, 0.04])
-button = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
+rax = plt.axes([0.125, 0.025, 0.1, 0.06], facecolor=axcolor)
+radio = CheckButtons(rax, ['Log 10 Scale'],[1])
+radio.on_clicked(update)
+
+resetax = plt.axes([0.25, 0.025, 0.1, 0.06])
+Reset = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
 
 def reset(event):
     sslide.reset()
     
-button.on_clicked(reset)
-'''
-rax = plt.axes([0.025, 0.025, 0.15, 0.15], facecolor=axcolor)
-radio = CheckButtons(rax, ['LOG10'],[1])
-radio.on_clicked(update)
-'''
+Reset.on_clicked(reset)
 
 plt.show()
