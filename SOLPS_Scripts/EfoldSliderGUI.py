@@ -6,7 +6,9 @@ Created on Wed Nov 13 16:15:42 2019
 """
 
 from VesselPlotterNew import SOLPSPLOT
+from TOOLS import TANH
 import numpy as np
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider, Button, CheckButtons
@@ -26,8 +28,11 @@ VertLoc = NeuDen.RadCoords['VertLoc']
 RR,Rexp,Rstr = NeuDen.GetRadCoords('rrsep',[0,0])
 
 f0 = JXA
+p0 = [0,3.5e20,0.005,1e18,1e21]
 log = 2
 axcolor = 'lightgoldenrodyellow'
+FIT=0
+#yfit = np.zeros(RR.shape[0],CoreBound[1]-CoreBound[0])
 
 fig, ax = plt.subplots()
 ax.set_frame_on(False)
@@ -96,5 +101,25 @@ def reset(event):
     sslide.reset()
     
 Reset.on_clicked(reset)
+
+tanhfitax = plt.axes([0.375, 0.025, 0.1, 0.06])
+TanhFit = Button(tanhfitax, 'Create Tanh Fit', color=axcolor, hovercolor='0.975')
+
+def tanhfit(event):
+    PolPos=sslide.val
+    if FIT == 0:
+        RR_SOLPS = RR.loc[:,PolPos,Attempt[0]].values
+        Ne_SOLPS = NeuDen.PARAM['Ne'].loc[:,PolPos,Attempt[0]].values
+        yfit=curve_fit(TANH, RR_SOLPS, Ne_SOLPS,p0)
+        print(yfit)
+        yparam = yfit[0]
+        neprofile.plot(RR_SOLPS,TANH(RR_SOLPS,*yparam))
+        
+        '''
+        for n, i in enumerate(range(CoreBound[0],CoreBound[1])):
+            yfit[:,n]=curve_fit(TANH, RR.loc[:,i,Attempt[0]].values, NeuDen.PARAM['Ne'].loc[:,i,Attempt[0]].values)
+        '''
+        
+TanhFit.on_clicked(tanhfit)
 
 plt.show()

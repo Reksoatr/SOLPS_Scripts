@@ -7,6 +7,7 @@ Created on Thu Oct  3 14:59:41 2019
 Function to set correct Working Directory Path depending on which machine is in use
 """
 import os
+import numpy as np
 
 def SET_WDIR(BASEDRT,TOPDRT):
     if os.environ['OS'] == 'Windows_NT':
@@ -24,3 +25,6 @@ def SET_WDIR(BASEDRT,TOPDRT):
         TOPDRT=TOPDRT
     
     return BASEDRT, TOPDRT
+
+def TANH(r,r0,h,d,b,m):
+    return b+(h/2)*(np.tanh((r0-r)/d)+1) + m*(r0-r-d)*np.heaviside(r0-r-d, 1)
