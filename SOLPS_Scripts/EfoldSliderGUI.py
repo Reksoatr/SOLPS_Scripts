@@ -111,9 +111,11 @@ def tanhfit(event):
         RR_SOLPS = RR.loc[:,PolPos,Attempt[0]].values
         Ne_SOLPS = NeuDen.PARAM['Ne'].loc[:,PolPos,Attempt[0]].values
         yfit=curve_fit(TANH, RR_SOLPS, Ne_SOLPS,p0)
-        print(yfit)
         yparam = yfit[0]
+        print('Poloidal Slice {:0.0f}: r0={:.3f}m, h={:.3e}m^-3, d={:.3f}m, b={:.3e}m^-3, m={:.3e}m^-4'.format(PolPos,*yparam))
         neprofile.plot(RR_SOLPS,TANH(RR_SOLPS,*yparam))
+        neprofile.axvline(yparam[0]+yparam[2])
+        neudenprofile.axvline(yparam[0]+yparam[2])
         
         '''
         for n, i in enumerate(range(CoreBound[0],CoreBound[1])):

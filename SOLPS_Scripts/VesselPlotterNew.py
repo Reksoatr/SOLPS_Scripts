@@ -808,12 +808,10 @@ class SOLPSPLOT(object):
             else:
                 plt.legend(Publish)
                 plt.title('Poloidal ' + PARAM.name + ' along Separatrix')
-            Pmin = float(PARAM.loc[SURF,CoreBound[0]:CoreBound[1],:].min())
-            Pmax = float(PARAM.loc[SURF,CoreBound[0]:CoreBound[1],:].max())    
-            
+
             if Markers == True:
-                plt.plot([PP.loc[SURF,JXI,Attempts[0]], PP.loc[SURF,JXI,Attempts[0]]],[Pmin, Pmax],'r--')
-                plt.plot([PP.loc[SURF,JXA,Attempts[0]], PP.loc[SURF,JXA,Attempts[0]]],[Pmin, Pmax],'--')
+                plt.axvline(PP.loc[SURF,JXI,Attempts[0]],'r--')
+                plt.axvline(PP.loc[SURF,JXA,Attempts[0]],'--')
             
             plt.xlabel(PolXLbl)
             plt.ylabel(PARAM.name)
@@ -964,10 +962,8 @@ class SOLPSPLOT(object):
             else:
                 ax.legend(Publish)
                 ax.set_title('Radial Midplane {}'.format(PARAM.name))
-            Pmin = float(PARAM.loc[:,JXA,:].min())
-            Pmax = float(PARAM.loc[:,JXA,:].max())
             if Markers == True:
-                ax.plot([RR.loc[SEP,JXA,Attempts[0]], RR.loc[SEP,JXA,Attempts[0]]],[Pmin, Pmax],color='Black',linewidth=3)
+                ax.axvline(RR.loc[SEP,JXA,Attempts[0]],color='Black',linewidth=3)
             
             if RadProfKW['GRID'] is True:
                 ax.grid(b=1)
