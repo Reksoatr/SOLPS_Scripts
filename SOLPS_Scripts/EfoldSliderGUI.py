@@ -29,6 +29,7 @@ RR,Rexp,Rstr = NeuDen.GetRadCoords('rrsep',[0,0])
 
 f0 = JXA
 p0 = [0,3.5e20,0.005,1e18,1e21]
+x0 = []
 log = 2
 axcolor = 'lightgoldenrodyellow'
 FIT=0
@@ -112,10 +113,11 @@ def tanhfit(event):
         Ne_SOLPS = NeuDen.PARAM['Ne'].loc[:,PolPos,Attempt[0]].values
         yfit=curve_fit(TANH, RR_SOLPS, Ne_SOLPS,p0)
         yparam = yfit[0]
-        print('Poloidal Slice {:0.0f}: r0={:.3f}m, h={:.3e}m^-3, d={:.3f}m, b={:.3e}m^-3, m={:.3e}m^-4'.format(PolPos,*yparam))
+        print('Poloidal Slice {:0.0f}: r0={:.3f}m, h={:.3e}m^-3, d={:.3e}m, b={:.3e}m^-3, m={:.3e}m^-4'.format(PolPos,*yparam))
         neprofile.plot(RR_SOLPS,TANH(RR_SOLPS,*yparam))
-        neprofile.axvline(yparam[0]+yparam[2])
-        neudenprofile.axvline(yparam[0]+yparam[2])
+        x0.append(yparam[0]+yparam[2])
+        neprofile.axvline(x0)
+        neudenprofile.axvline(x0)
         
         '''
         for n, i in enumerate(range(CoreBound[0],CoreBound[1])):
@@ -123,5 +125,20 @@ def tanhfit(event):
         '''
         
 TanhFit.on_clicked(tanhfit)
+'''
+expfitax = plt.axes([0.5, 0.025, 0.1, 0.06])
+ExpFit = Button(expfitax, 'Create Exponential Fit', color=axcolor, hovercolor='0.975')
 
+def expfit(event):
+    PolPos=sslide.val
+    if FIT == 0:
+        RR_SOLPS = RR.loc[:,PolPos,Attempt[0]].values
+        NeuDen_SOLPS = NeuDen.PARAM['NeuDen'].loc[:,PolPos,Attempt[0]].values
+        efold=curve_fit(TANH, RR_SOLPS, Ne_SOLPS,p0)
+        yparam = yfit[0]
+        print('Poloidal Slice {:0.0f}: r0={:.3f}m, h={:.3e}m^-3, d={:.3f}m, b={:.3e}m^-3, m={:.3e}m^-4'.format(PolPos,*yparam))
+        neudenprofile.plot(RR_SOLPS,TANH(RR_SOLPS,*yparam))
+        
+ExpFit.on_clicked(expfit)
+'''
 plt.show()
