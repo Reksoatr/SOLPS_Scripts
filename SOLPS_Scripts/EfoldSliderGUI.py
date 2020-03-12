@@ -33,6 +33,7 @@ x0 = []
 log = 2
 axcolor = 'lightgoldenrodyellow'
 FIT=0
+depth=0.02
 #yfit = np.zeros(RR.shape[0],CoreBound[1]-CoreBound[0])
 
 fig, ax = plt.subplots()
@@ -116,8 +117,8 @@ def tanhfit(event):
         print('Poloidal Slice {:0.0f}: r0={:.3f}m, h={:.3e}m^-3, d={:.3e}m, b={:.3e}m^-3, m={:.3e}m^-4'.format(PolPos,*yparam))
         neprofile.plot(RR_SOLPS,TANH(RR_SOLPS,*yparam))
         x0.append(yparam[0]+yparam[2])
-        neprofile.axvline(x0)
-        neudenprofile.axvline(x0)
+        neprofile.axvline(x0[-1])
+        neudenprofile.axvline(x0[-1])
         
         '''
         for n, i in enumerate(range(CoreBound[0],CoreBound[1])):
@@ -125,20 +126,27 @@ def tanhfit(event):
         '''
         
 TanhFit.on_clicked(tanhfit)
-'''
+
 expfitax = plt.axes([0.5, 0.025, 0.1, 0.06])
 ExpFit = Button(expfitax, 'Create Exponential Fit', color=axcolor, hovercolor='0.975')
 
 def expfit(event):
     PolPos=sslide.val
     if FIT == 0:
+        xr = x0[-1]
         RR_SOLPS = RR.loc[:,PolPos,Attempt[0]].values
-        NeuDen_SOLPS = NeuDen.PARAM['NeuDen'].loc[:,PolPos,Attempt[0]].values
-        efold=curve_fit(TANH, RR_SOLPS, Ne_SOLPS,p0)
-        yparam = yfit[0]
-        print('Poloidal Slice {:0.0f}: r0={:.3f}m, h={:.3e}m^-3, d={:.3f}m, b={:.3e}m^-3, m={:.3e}m^-4'.format(PolPos,*yparam))
-        neudenprofile.plot(RR_SOLPS,TANH(RR_SOLPS,*yparam))
+        RR_i = np.where((RR_SOLPS>(xr-depth)) & (RR_SOLPS<(xr)))[0]
+        RR_SOLPS=RR_SOLPS[RR_i]
+        NeuDen_SOLPS = NeuDen.PARAM['NeuDen'].loc[RR_i,PolPos,Attempt[0]].values
+        efold=np.polyfit(RR_SOLPS,np.log(NeuDen_SOLPS),1,full=True)
+        eparam = efold[0]
+        print('Poloidal Slice {:0.0f}: e-folding length={}m'.format(PolPos,eparam[0]))
+        print('Exponential fit from r-r_sep={}m to r-r_sep={}m'.format(RR_SOLPS[0],RR_SOLPS[-1]))
+        NeuDenFit = np.exp(eparam[1]) * np.exp(eparam[0]*RR_SOLPS)
+        neudenprofile.plot(RR_SOLPS, NeuDenFit)
+        neprofile.axvline(RR_SOLPS[0])
+        neudenprofile.axvline(RR_SOLPS[0])
         
 ExpFit.on_clicked(expfit)
-'''
+
 plt.show()
