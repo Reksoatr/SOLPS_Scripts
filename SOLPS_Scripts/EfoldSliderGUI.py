@@ -114,7 +114,7 @@ def tanhfit(event):
         Ne_SOLPS = NeuDen.PARAM['Ne'].loc[:,PolPos,Attempt[0]].values
         yfit=curve_fit(TANH, RR_SOLPS, Ne_SOLPS,p0)
         yparam = yfit[0]
-        print('Poloidal Slice {:0.0f}: r0={:.3f}m, h={:.3e}m^-3, d={:.3e}m, b={:.3e}m^-3, m={:.3e}m^-4'.format(PolPos,*yparam))
+        print('Poloidal Slice {:0.0f}: r0={:.3f}m, h={:.3e}m^-3, d={:.3f}m, b={:.3e}m^-3, m={:.3e}m^-4'.format(PolPos,*yparam))
         neprofile.plot(RR_SOLPS,TANH(RR_SOLPS,*yparam))
         x0.append(yparam[0]+yparam[2])
         neprofile.axvline(x0[-1])
@@ -140,8 +140,8 @@ def expfit(event):
         NeuDen_SOLPS = NeuDen.PARAM['NeuDen'].loc[RR_i,PolPos,Attempt[0]].values
         efold=np.polyfit(RR_SOLPS,np.log(NeuDen_SOLPS),1,full=True)
         eparam = efold[0]
-        print('Poloidal Slice {:0.0f}: e-folding length={}m'.format(PolPos,eparam[0]))
-        print('Exponential fit from r-r_sep={}m to r-r_sep={}m'.format(RR_SOLPS[0],RR_SOLPS[-1]))
+        print('Poloidal Slice {:0.0f}: e-folding length={:.3f}mm'.format(PolPos,1000/eparam[0]))
+        print('Exponential fit from r-r_sep={:.3f}m to r-r_sep={:.3f}m'.format(RR_SOLPS[0],RR_SOLPS[-1]))
         NeuDenFit = np.exp(eparam[1]) * np.exp(eparam[0]*RR_SOLPS)
         neudenprofile.plot(RR_SOLPS, NeuDenFit)
         neprofile.axvline(RR_SOLPS[0])
