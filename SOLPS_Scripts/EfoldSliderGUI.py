@@ -30,10 +30,11 @@ RR,Rexp,Rstr = NeuDen.GetRadCoords('rrsep',[0,0])
 f0 = JXA
 p0 = [0,3.5e20,0.005,1e18,1e21]
 x0 = []
+xi = []
 log = 2
 axcolor = 'lightgoldenrodyellow'
 FIT=0
-depth=0.02
+#depth=0.02
 #yfit = np.zeros(RR.shape[0],CoreBound[1]-CoreBound[0])
 
 fig, ax = plt.subplots()
@@ -117,8 +118,11 @@ def tanhfit(event):
         print('Poloidal Slice {:0.0f}: r0={:.3f}m, h={:.3e}m^-3, d={:.3f}m, b={:.3e}m^-3, m={:.3e}m^-4'.format(PolPos,*yparam))
         neprofile.plot(RR_SOLPS,TANH(RR_SOLPS,*yparam))
         x0.append(yparam[0]+yparam[2])
+        xi.append(yparam[0]-yparam[2])
         neprofile.axvline(x0[-1])
         neudenprofile.axvline(x0[-1])
+        neprofile.axvline(xi[-1])
+        neudenprofile.axvline(xi[-1])
         
         '''
         for n, i in enumerate(range(CoreBound[0],CoreBound[1])):
@@ -134,8 +138,9 @@ def expfit(event):
     PolPos=sslide.val
     if FIT == 0:
         xr = x0[-1]
+        xri = xi[-1]
         RR_SOLPS = RR.loc[:,PolPos,Attempt[0]].values
-        RR_i = np.where((RR_SOLPS>(xr-depth)) & (RR_SOLPS<(xr)))[0]
+        RR_i = np.where((RR_SOLPS>(xri)) & (RR_SOLPS<(xr)))[0]
         RR_SOLPS=RR_SOLPS[RR_i]
         NeuDen_SOLPS = NeuDen.PARAM['NeuDen'].loc[RR_i,PolPos,Attempt[0]].values
         efold=np.polyfit(RR_SOLPS,np.log(NeuDen_SOLPS),1,full=True)
@@ -144,8 +149,8 @@ def expfit(event):
         print('Exponential fit from r-r_sep={:.3f}m to r-r_sep={:.3f}m'.format(RR_SOLPS[0],RR_SOLPS[-1]))
         NeuDenFit = np.exp(eparam[1]) * np.exp(eparam[0]*RR_SOLPS)
         neudenprofile.plot(RR_SOLPS, NeuDenFit)
-        neprofile.axvline(RR_SOLPS[0])
-        neudenprofile.axvline(RR_SOLPS[0])
+        #neprofile.axvline(RR_SOLPS[0])
+        #neudenprofile.axvline(RR_SOLPS[0])
         
 ExpFit.on_clicked(expfit)
 
