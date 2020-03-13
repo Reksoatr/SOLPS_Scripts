@@ -14,7 +14,7 @@ import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider, Button, CheckButtons
 
 Shot = '12'
-Attempt = ['161'] #,'102','103','104','105']
+Attempt = ['101'] #,'102','103','104','105']
 PS=['.','.','.','.','.','-']
 
 NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],PlotScheme='x',EXP=False) #,AVG=True,PlotScheme=PS)
