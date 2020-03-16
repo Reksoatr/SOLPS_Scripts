@@ -132,7 +132,7 @@ def tanhfit(event):
 TanhFit.on_clicked(tanhfit)
 
 expfitax = plt.axes([0.5, 0.025, 0.1, 0.06])
-ExpFit = Button(expfitax, 'Create Exponential Fit', color=axcolor, hovercolor='0.975')
+ExpFit = Button(expfitax, 'Create Exp. Fit', color=axcolor, hovercolor='0.975')
 
 def expfit(event):
     PolPos=sslide.val
