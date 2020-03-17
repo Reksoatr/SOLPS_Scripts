@@ -83,21 +83,28 @@ def update(val):
     neprofile.clear()
     NeuDen.RadProf('NeuDen',LOG10=log,AX=neudenprofile,Markers=False,RADC='rrsep',JXA=PolPos) #,PlotScheme=['x'])
     NeuDen.RadProf('Ne',AX=neprofile,Markers=False,RADC='rrsep',JXA=PolPos)
-    neudenprofile.set_xlim(XLim)
-    neudenprofile.set_ylim(YLim)
-    neprofile.set_xlim(XLim)
-    neprofile.set_ylim(NeYLim)
+    
+    if Fixed.get_status()[0] is True:
+        neudenprofile.set_xlim(XLim)
+        neudenprofile.set_ylim(YLim)
+        neprofile.set_xlim(XLim)
+        neprofile.set_ylim(NeYLim)
+
     neprofile.set_title('')
     fig.canvas.draw_idle()
 
 
 sslide.on_changed(update)
 
-logonax = plt.axes([0.125, 0.025, 0.1, 0.06], facecolor=axcolor)
-LogOn = CheckButtons(logonax, ['Log 10 Scale'],[1])
+logonax = plt.axes([0.125, 0.025, 0.075, 0.06], facecolor=axcolor)
+LogOn = CheckButtons(logonax, [r'Log$_{10}$ Scale'],[1])
 LogOn.on_clicked(update)
 
-resetax = plt.axes([0.25, 0.025, 0.1, 0.06])
+fixedax = plt.axes([0.225, 0.025, 0.075, 0.06], facecolor=axcolor)
+Fixed = CheckButtons(fixedax, ['Fix Axes'],[1])
+Fixed.on_clicked(update)
+
+resetax = plt.axes([0.325, 0.025, 0.05, 0.06])
 Reset = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
 
 def reset(event):
@@ -105,7 +112,7 @@ def reset(event):
     
 Reset.on_clicked(reset)
 
-tanhfitax = plt.axes([0.375, 0.025, 0.1, 0.06])
+tanhfitax = plt.axes([0.4, 0.025, 0.1, 0.06])
 TanhFit = Button(tanhfitax, 'Create Tanh Fit', color=axcolor, hovercolor='0.975')
 
 def tanhfit(event):
@@ -131,7 +138,7 @@ def tanhfit(event):
         
 TanhFit.on_clicked(tanhfit)
 
-expfitax = plt.axes([0.5, 0.025, 0.1, 0.06])
+expfitax = plt.axes([0.525, 0.025, 0.1, 0.06])
 ExpFit = Button(expfitax, 'Create Exp. Fit', color=axcolor, hovercolor='0.975')
 
 def expfit(event):
