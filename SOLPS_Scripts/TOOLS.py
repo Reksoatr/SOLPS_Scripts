@@ -28,3 +28,6 @@ def SET_WDIR(BASEDRT,TOPDRT):
 
 def TANH(r,r0,h,d,b,m):
     return b+(h/2)*(np.tanh((r0-r)/d)+1) + m*(r0-r-d)*np.heaviside(r0-r-d, 1)
+
+def EXPFIT(x,A,l,B):
+    return A*np.exp(l*x) + B

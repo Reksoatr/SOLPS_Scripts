@@ -7,6 +7,7 @@ Created on Wed Nov 13 16:15:42 2019
 
 from VesselPlotterNew import SOLPSPLOT
 from TOOLS import TANH
+from TOOLS import EXPFIT
 import numpy as np
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
@@ -29,6 +30,7 @@ RR,Rexp,Rstr = NeuDen.GetRadCoords('rrsep',[0,0])
 
 f0 = JXA
 p0 = [0,3.5e20,0.005,1e18,1e21]
+e0 = [1e15,100,1e14]
 x0 = []
 xi = []
 log = 2
@@ -150,13 +152,14 @@ def expfit(event):
         RR_i = np.where((RR_SOLPS>(xri)) & (RR_SOLPS<(xr)))[0]
         RR_SOLPS=RR_SOLPS[RR_i]
         NeuDen_SOLPS = NeuDen.PARAM['NeuDen'].loc[RR_i,PolPos,Attempt[0]].values
-        efold=np.polyfit(RR_SOLPS,np.log(NeuDen_SOLPS),1,full=True)
-        eparam = efold[0]
-        print('Poloidal Slice {:0.0f}: e-folding length={:.3f}mm'.format(PolPos,1000/eparam[0]))
+        exfit=curve_fit(EXPFIT,RR_SOLPS,NeuDen_SOLPS,e0)
+        eparam=exfit[0]
+        efold = 1000/eparam[1]
+        print('Poloidal Slice {:0.0f}: e-folding length={:.3f}mm'.format(PolPos,efold))
         print('Exponential fit from r-r_sep={:.3f}m to r-r_sep={:.3f}m'.format(RR_SOLPS[0],RR_SOLPS[-1]))
-        NeuDenFit = np.exp(eparam[1]) * np.exp(eparam[0]*RR_SOLPS)
+        NeuDenFit = eparam[0] * np.exp(eparam[1]*RR_SOLPS) + eparam[2]
         neudenprofile.plot(RR_SOLPS, NeuDenFit)
-        neudenprofile.text(RR_SOLPS[0],NeuDenFit[0],'e-folding length={:.3f}mm'.format(1000/eparam[0]),horizontalalignment='center',verticalalignment='top')
+        neudenprofile.text(RR_SOLPS[0],NeuDenFit[0],'e-folding length={:.3f}mm'.format(efold),horizontalalignment='center',verticalalignment='top')
         #neprofile.axvline(RR_SOLPS[0])
         #neudenprofile.axvline(RR_SOLPS[0])
         
