@@ -156,6 +156,7 @@ def expfit(event):
         print('Exponential fit from r-r_sep={:.3f}m to r-r_sep={:.3f}m'.format(RR_SOLPS[0],RR_SOLPS[-1]))
         NeuDenFit = np.exp(eparam[1]) * np.exp(eparam[0]*RR_SOLPS)
         neudenprofile.plot(RR_SOLPS, NeuDenFit)
+        neudenprofile.text(RR_SOLPS[0],NeuDenFit[0],'e-folding length={:.3f}mm'.format(1000/eparam[0]),horizontalalignment='center',verticalalignment='top')
         #neprofile.axvline(RR_SOLPS[0])
         #neudenprofile.axvline(RR_SOLPS[0])
         
