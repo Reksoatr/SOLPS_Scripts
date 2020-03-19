@@ -30,7 +30,7 @@ RR,Rexp,Rstr = NeuDen.GetRadCoords('rrsep',[0,0])
 
 f0 = JXA
 p0 = [0,3.5e20,0.005,1e18,1e21]
-e0 = [1e15,100,1e14]
+e0 = [1e15,100]
 x0 = []
 xi = []
 log = 2
@@ -155,9 +155,10 @@ def expfit(event):
         exfit=curve_fit(EXPFIT,RR_SOLPS,NeuDen_SOLPS,e0)
         eparam=exfit[0]
         efold = 1000/eparam[1]
+        print(eparam)
         print('Poloidal Slice {:0.0f}: e-folding length={:.3f}mm'.format(PolPos,efold))
         print('Exponential fit from r-r_sep={:.3f}m to r-r_sep={:.3f}m'.format(RR_SOLPS[0],RR_SOLPS[-1]))
-        NeuDenFit = eparam[0] * np.exp(eparam[1]*RR_SOLPS) + eparam[2]
+        NeuDenFit = eparam[0] * np.exp(eparam[1]*RR_SOLPS)
         neudenprofile.plot(RR_SOLPS, NeuDenFit)
         neudenprofile.text(RR_SOLPS[0],NeuDenFit[0],'e-folding length={:.3f}mm'.format(efold),horizontalalignment='center',verticalalignment='top')
         #neprofile.axvline(RR_SOLPS[0])
