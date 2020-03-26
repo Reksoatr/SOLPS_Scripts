@@ -33,13 +33,17 @@ f0 = JXA
 p0 = [0,3.5e20,0.005,1e18,1e21]
 e0 = [1e15,100]
 efold={}
+efold_adj={}
 yparam={}
 eparam={}
 x0 = {}
 xi = {}
 fluxpsn = {}
+fluxpsnparam={}
 log = 2
-axcolor = 'lightgoldenrodyellow'
+
+props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+axcolor = 'wheat'
 
 fig, ax = plt.subplots()
 ax.set_frame_on(False)
@@ -92,6 +96,7 @@ def update(val):
     neudenprofile.clear()
     neprofile.clear()
     fluxpsnprofile.clear()
+    
     NeuDen.RadProf('NeuDen',LOG10=log,AX=neudenprofile,Markers=False,RADC='rrsep',JXA=PolPos) #,PlotScheme=['x'])
     NeuDen.RadProf('Ne',AX=neprofile,Markers=False,RADC='rrsep',JXA=PolPos)
     fluxpsnprofile.plot(RR.loc[:,PolPos,Attempt[0]].values,Psin.loc[:,PolPos,Attempt[0]].values,'*')
@@ -113,7 +118,10 @@ def update(val):
         
     if PolPos in eparam.keys():
         neudenprofile.plot(RR_SOLPS, EXPFIT(RR_SOLPS,*eparam[PolPos]))
-        neudenprofile.text(RR_SOLPS[0],EXPFIT(RR_SOLPS[0],*eparam[PolPos]),'e-folding length={:.3f}mm'.format(efold[PolPos]),horizontalalignment='center',verticalalignment='top')
+        neudenprofile.text(0.01,0.85,'e-folding length={:.3f}mm'.format(efold[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
+        neudenprofile.text(0.01,0.75,'Adjusted e-folding length={:.3f}mm'.format(efold_adj[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
+        fluxpsnprofile.plot(RR_SOLPS,(fluxpsnparam[PolPos][0]*RR_SOLPS+fluxpsnparam[PolPos][1]))
+        fluxpsnprofile.text(0.01,0.95,'Flux Expansion={:.3f}mm'.format(fluxpsn[PolPos]),transform=fluxpsnprofile.transAxes,verticalalignment='top', bbox=props)
     
     if Fixed.get_status()[0] is True:
         neudenprofile.set_xlim(XLim)
@@ -139,16 +147,16 @@ def arrowclick(event):
 
 cid = fig.canvas.mpl_connect('key_press_event', arrowclick)
 
-logonax = plt.axes([0.125, 0.025, 0.075, 0.06], facecolor=axcolor)
+resetax = plt.axes([0.125, 0.025, 0.05, 0.06])
+Reset = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
+
+logonax = plt.axes([0.185, 0.025, 0.075, 0.06], facecolor=axcolor)
 LogOn = CheckButtons(logonax, [r'Log$_{10}$ Scale'],[True])
 LogOn.on_clicked(update)
 
-fixedax = plt.axes([0.210, 0.025, 0.075, 0.06], facecolor=axcolor)
+fixedax = plt.axes([0.270, 0.025, 0.075, 0.06], facecolor=axcolor)
 Fixed = CheckButtons(fixedax, ['Fix Axes'],[True])
 Fixed.on_clicked(update)
-
-resetax = plt.axes([0.295, 0.025, 0.05, 0.06])
-Reset = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
 
 def reset(event):
     sslide.reset()
@@ -198,15 +206,22 @@ def expfit(event):
         eparam[PolPos] = exfit[0]
         efold[PolPos] = 1000/eparam[PolPos][1]
         
+        Psin_SOLPS = Psin.loc[RR_i,PolPos,Attempt[0]].values
+        fluxpsnparam[PolPos] = np.polyfit(RR_SOLPS,Psin_SOLPS,1)
+        fluxpsn[PolPos] = fluxpsnparam[PolPos][0]/fluxpsnparam[JXA][0]
+        efold_adj[PolPos] = fluxpsn[PolPos]*efold[PolPos]
+                
     print('Exponential fit from r-r_sep={:.3f}m to r-r_sep={:.3f}m'.format(RR_SOLPS[0],RR_SOLPS[-1]))
     print('A0={:.3e}, lambda={:.3f}'.format(*eparam[PolPos]))
     print('Poloidal Slice {:0.0f}: e-folding length={:.3f}mm'.format(PolPos,efold[PolPos]))
-    #NeuDenFit = eparam[0] * np.exp(eparam[1]*RR_SOLPS)
+    print('Slope={:.3f}, Flux Expansion={:.3f}, Adjusted e-folding length={:.3f}'.format(fluxpsnparam[PolPos][0],fluxpsn[PolPos],efold_adj[PolPos]))
+
     neudenprofile.plot(RR_SOLPS, EXPFIT(RR_SOLPS,*eparam[PolPos]))
-    neudenprofile.text(RR_SOLPS[0],EXPFIT(RR_SOLPS[0],*eparam[PolPos]),'e-folding length={:.3f}mm'.format(efold[PolPos]),horizontalalignment='center',verticalalignment='top')
-    #neprofile.axvline(RR_SOLPS[0])
-    #neudenprofile.axvline(RR_SOLPS[0])
-        
+    neudenprofile.text(0.01,0.85,'e-folding length={:.3f}mm'.format(efold[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
+    neudenprofile.text(0.01,0.75,'Adjusted e-folding length={:.3f}mm'.format(efold_adj[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
+    fluxpsnprofile.plot(RR_SOLPS,(fluxpsnparam[PolPos][0]*RR_SOLPS+fluxpsnparam[PolPos][1]))
+    fluxpsnprofile.text(0.01,0.95,'Flux Expansion={:.3f}mm'.format(fluxpsn[PolPos]),transform=fluxpsnprofile.transAxes,verticalalignment='top', bbox=props)
+
 ExpFit.on_clicked(expfit)
 
 plt.show()
