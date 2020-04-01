@@ -14,11 +14,11 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider, Button, CheckButtons
 
-Shot = 'gas025'
-Attempt = ['46'] #,'102','103','104','105']
+Shot = '12'
+Attempt = ['101','102','103','104','105']
 PS=['.','.','.','.','.','-']
 
-NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],PlotScheme='x',EXP=False) #,AVG=True,PlotScheme=PS)
+NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],EXP=False,AVG=True,PlotScheme=PS)
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
 CoreBound = NeuDen.KW['CoreBound']
@@ -45,6 +45,9 @@ log = 2
 props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
 axcolor = 'wheat'
 
+if 'AVG' in NeuDen.Attempts:
+    Attempt.append('AVG')
+
 fig, ax = plt.subplots()
 ax.set_frame_on(False)
 ax.set_axis_off()
@@ -68,7 +71,7 @@ NeYLim = neprofile.get_ylim()
 neprofile.set_title('')
 
 fluxpsnprofile = fig.add_subplot(gs[6:9,0])
-fluxpsnprofile.plot(RR.loc[:,f0,Attempt[0]].values,Psin.loc[:,f0,Attempt[0]].values,'*')
+fluxpsnprofile.plot(RR.loc[:,f0,Attempt[-1]].values,Psin.loc[:,f0,Attempt[-1]].values,'*')
 fluxpsnprofile.axvline(0.0,color='k')
 fluxpsnprofile.axhline(1.0,color='k')
 fluxpsnprofile.set_xlim(XLim)
@@ -90,7 +93,7 @@ def update(val):
         log = 0
         
     PolPos = sslide.val
-    RR_SOLPS = RR.loc[:,PolPos,Attempt[0]].values
+    RR_SOLPS = RR.loc[:,PolPos,Attempt[-1]].values
     l.set_xdata(RadLoc.loc[:,PolPos,Attempt[-1]])
     l.set_ydata(VertLoc.loc[:,PolPos,Attempt[-1]])
     neudenprofile.clear()
@@ -99,7 +102,7 @@ def update(val):
     
     NeuDen.RadProf('NeuDen',LOG10=log,AX=neudenprofile,Markers=False,RADC='rrsep',JXA=PolPos) #,PlotScheme=['x'])
     NeuDen.RadProf('Ne',AX=neprofile,Markers=False,RADC='rrsep',JXA=PolPos)
-    fluxpsnprofile.plot(RR.loc[:,PolPos,Attempt[0]].values,Psin.loc[:,PolPos,Attempt[0]].values,'*')
+    fluxpsnprofile.plot(RR.loc[:,PolPos,Attempt[-1]].values,Psin.loc[:,PolPos,Attempt[-1]].values,'*')
     fluxpsnprofile.axvline(0.0,color='k')
     fluxpsnprofile.axhline(1.0,color='k')
     fluxpsnprofile.set_xlabel(r'$R-R_{sep}$ (m)')
@@ -138,9 +141,9 @@ def update(val):
 sslide.on_changed(update)
 
 def arrowclick(event):
-    if event.key == 'right':
+    if event.key == 'right' and sslide.val<CoreBound[1]:
         sslide.set_val(sslide.val+1)
-    elif event.key == 'left':
+    elif event.key == 'left' and sslide.val>CoreBound[0]:
         sslide.set_val(sslide.val-1)
     else:
         pass        
@@ -168,11 +171,11 @@ TanhFit = Button(tanhfitax, 'Create Tanh Fit', color=axcolor, hovercolor='0.975'
 
 def tanhfit(event):
     PolPos=sslide.val
-    RR_SOLPS = RR.loc[:,PolPos,Attempt[0]].values
+    RR_SOLPS = RR.loc[:,PolPos,Attempt[-1]].values
     
     if PolPos not in yparam.keys():
-        RR_SOLPS = RR.loc[:,PolPos,Attempt[0]].values
-        Ne_SOLPS = NeuDen.PARAM['Ne'].loc[:,PolPos,Attempt[0]].values
+        RR_SOLPS = RR.loc[:,PolPos,Attempt[-1]].values
+        Ne_SOLPS = NeuDen.PARAM['Ne'].loc[:,PolPos,Attempt[-1]].values
         yfit=curve_fit(TANH, RR_SOLPS, Ne_SOLPS,p0)
         yparam[PolPos] = yfit[0]
         x0[PolPos] = yparam[PolPos][0]+yparam[PolPos][2]
@@ -196,17 +199,17 @@ def expfit(event):
     PolPos=sslide.val
     xr = x0[PolPos]
     xri = xi[PolPos]
-    RR_SOLPS = RR.loc[:,PolPos,Attempt[0]].values
+    RR_SOLPS = RR.loc[:,PolPos,Attempt[-1]].values
     RR_i = np.where((RR_SOLPS>(xri)) & (RR_SOLPS<(xr)))[0]
     RR_SOLPS=RR_SOLPS[RR_i]
         
     if PolPos not in eparam.keys():
-        NeuDen_SOLPS = NeuDen.PARAM['NeuDen'].loc[RR_i,PolPos,Attempt[0]].values
+        NeuDen_SOLPS = NeuDen.PARAM['NeuDen'].loc[RR_i,PolPos,Attempt[-1]].values
         exfit=curve_fit(EXPFIT,RR_SOLPS,NeuDen_SOLPS,e0)
         eparam[PolPos] = exfit[0]
         efold[PolPos] = 1000/eparam[PolPos][1]
         
-        Psin_SOLPS = Psin.loc[RR_i,PolPos,Attempt[0]].values
+        Psin_SOLPS = Psin.loc[RR_i,PolPos,Attempt[-1]].values
         fluxpsnparam[PolPos] = np.polyfit(RR_SOLPS,Psin_SOLPS,1)
         fluxpsn[PolPos] = fluxpsnparam[PolPos][0]/fluxpsnparam[JXA][0]
         efold_adj[PolPos] = fluxpsn[PolPos]*efold[PolPos]
@@ -223,5 +226,36 @@ def expfit(event):
     fluxpsnprofile.text(0.01,0.95,'Flux Expansion={:.3f}mm'.format(fluxpsn[PolPos]),transform=fluxpsnprofile.transAxes,verticalalignment='top', bbox=props)
 
 ExpFit.on_clicked(expfit)
+
+wholeax = plt.axes([0.75, 0.025, 0.1, 0.06])
+WholeFit = Button(wholeax, 'WHOLE POLOIDAL PLOT', color=axcolor, hovercolor='0.975')
+
+def wholefit(event):
+    wholeFig, wholeAx = plt.subplots(1,1)
+    reset(event)
+    tanhfit(event)
+    expfit(event)
+    for n in range(CoreBound[0],CoreBound[1]+1):
+        sslide.set_val(n)
+        print('Calculating e-fold length for Poloidal Position {}'.format(n))
+        tanhfit(event)
+        expfit(event)
+    x,y = zip(*sorted(efold.items()))    
+    x_adj,y_adj = zip(*sorted(efold_adj.items()))
+    wholeAx.plot(x,y,'r')
+    wholeAx.plot(x_adj,y_adj,'b')
+    wholeAx.set_title('Shot {} Attempt {} neutral e-folding lengths'.format(Shot,Attempt[-1]))
+    wholeAx.set_xlabel('Poloidal Grid Index')
+    wholeAx.set_ylabel('e_folding length (mm)')
+    wholeAx.axvline(JXA,color='black')
+    wholeAx.axvline(JXI,color='orange')    
+    wholeAx.legend(['Raw e-folding length','Adjusted e-folding length','Outer Midplane', 'Inner Midplane'])
+    wholeAx.xaxis.set_ticks(np.arange(20,75,5))
+    starty, endy = wholeAx.get_ylim()
+    wholeAx.yaxis.set_ticks(np.arange(0,np.round(endy),5))
+    wholeAx.grid()
+    plt.show
+    
+WholeFit.on_clicked(wholefit)
 
 plt.show()
