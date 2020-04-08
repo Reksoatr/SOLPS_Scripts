@@ -14,9 +14,9 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider, Button, CheckButtons
 
-Shot = '12'
-Attempt = ['101','102','103','104','105']
-PS=['.','.','.','.','.','-']
+Shot = '25'
+Attempt = ['161','162','163','164','165']
+PS=['.','.','.','.','.','x']
 
 NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],EXP=False,AVG=True,PlotScheme=PS)
 JXA = NeuDen.KW['JXA']
@@ -121,10 +121,10 @@ def update(val):
         
     if PolPos in eparam.keys():
         neudenprofile.plot(RR_SOLPS, EXPFIT(RR_SOLPS,*eparam[PolPos]))
-        neudenprofile.text(0.01,0.85,'e-folding length={:.3f}mm'.format(efold[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
-        neudenprofile.text(0.01,0.75,'Adjusted e-folding length={:.3f}mm'.format(efold_adj[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
+        neudenprofile.text(0.02,0.85,'e-folding length={:.3f}mm'.format(efold[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
+        neudenprofile.text(0.02,0.7,'Adjusted e-folding length={:.3f}mm'.format(efold_adj[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
         fluxpsnprofile.plot(RR_SOLPS,(fluxpsnparam[PolPos][0]*RR_SOLPS+fluxpsnparam[PolPos][1]))
-        fluxpsnprofile.text(0.01,0.95,'Flux Expansion={:.3f}mm'.format(fluxpsn[PolPos]),transform=fluxpsnprofile.transAxes,verticalalignment='top', bbox=props)
+        fluxpsnprofile.text(0.02,0.95,'Flux Expansion={:.3f}mm'.format(fluxpsn[PolPos]),transform=fluxpsnprofile.transAxes,verticalalignment='top', bbox=props)
     
     if Fixed.get_status()[0] is True:
         neudenprofile.set_xlim(XLim)
@@ -150,14 +150,14 @@ def arrowclick(event):
 
 cid = fig.canvas.mpl_connect('key_press_event', arrowclick)
 
-resetax = plt.axes([0.125, 0.025, 0.05, 0.06])
+resetax = plt.axes([0.125, 0.025, 0.05, 0.05])
 Reset = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
 
-logonax = plt.axes([0.185, 0.025, 0.075, 0.06], facecolor=axcolor)
-LogOn = CheckButtons(logonax, [r'Log$_{10}$ Scale'],[True])
+logonax = plt.axes([0.185, 0.025, 0.075, 0.05], facecolor=axcolor)
+LogOn = CheckButtons(logonax, [r'Log$_{10}$(Y)'],[True])
 LogOn.on_clicked(update)
 
-fixedax = plt.axes([0.270, 0.025, 0.075, 0.06], facecolor=axcolor)
+fixedax = plt.axes([0.270, 0.025, 0.075, 0.05], facecolor=axcolor)
 Fixed = CheckButtons(fixedax, ['Fix Axes'],[True])
 Fixed.on_clicked(update)
 
@@ -166,7 +166,7 @@ def reset(event):
     
 Reset.on_clicked(reset)
 
-tanhfitax = plt.axes([0.355, 0.025, 0.1, 0.06])
+tanhfitax = plt.axes([0.355, 0.025, 0.1, 0.05])
 TanhFit = Button(tanhfitax, 'Create Tanh Fit', color=axcolor, hovercolor='0.975')
 
 def tanhfit(event):
@@ -192,7 +192,7 @@ def tanhfit(event):
         
 TanhFit.on_clicked(tanhfit)
 
-expfitax = plt.axes([0.465, 0.025, 0.1, 0.06])
+expfitax = plt.axes([0.465, 0.025, 0.1, 0.05])
 ExpFit = Button(expfitax, 'Create Exp. Fit', color=axcolor, hovercolor='0.975')
 
 def expfit(event):
@@ -202,6 +202,9 @@ def expfit(event):
     RR_SOLPS = RR.loc[:,PolPos,Attempt[-1]].values
     RR_i = np.where((RR_SOLPS>(xri)) & (RR_SOLPS<(xr)))[0]
     RR_SOLPS=RR_SOLPS[RR_i]
+    if len(RR_SOLPS) < 3:
+        RR_i = np.arange((RR_i[0]-1),(RR_i[-1]+2),1)
+        RR_SOLPS= RR.loc[RR_i,PolPos,Attempt[-1]].values
         
     if PolPos not in eparam.keys():
         NeuDen_SOLPS = NeuDen.PARAM['NeuDen'].loc[RR_i,PolPos,Attempt[-1]].values
@@ -220,15 +223,18 @@ def expfit(event):
     print('Slope={:.3f}, Flux Expansion={:.3f}, Adjusted e-folding length={:.3f}'.format(fluxpsnparam[PolPos][0],fluxpsn[PolPos],efold_adj[PolPos]))
 
     neudenprofile.plot(RR_SOLPS, EXPFIT(RR_SOLPS,*eparam[PolPos]))
-    neudenprofile.text(0.01,0.85,'e-folding length={:.3f}mm'.format(efold[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
-    neudenprofile.text(0.01,0.75,'Adjusted e-folding length={:.3f}mm'.format(efold_adj[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
+    neudenprofile.text(0.02,0.85,'e-folding length={:.3f}mm'.format(efold[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
+    neudenprofile.text(0.02,0.7,'Adjusted e-folding length={:.3f}mm'.format(efold_adj[PolPos]),transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
     fluxpsnprofile.plot(RR_SOLPS,(fluxpsnparam[PolPos][0]*RR_SOLPS+fluxpsnparam[PolPos][1]))
-    fluxpsnprofile.text(0.01,0.95,'Flux Expansion={:.3f}mm'.format(fluxpsn[PolPos]),transform=fluxpsnprofile.transAxes,verticalalignment='top', bbox=props)
+    fluxpsnprofile.text(0.02,0.95,'Flux Expansion={:.3f}mm'.format(fluxpsn[PolPos]),transform=fluxpsnprofile.transAxes,verticalalignment='top', bbox=props)
 
 ExpFit.on_clicked(expfit)
 
-wholeax = plt.axes([0.75, 0.025, 0.1, 0.06])
+wholeax = plt.axes([0.635, 0.025, 0.135, 0.05])
 WholeFit = Button(wholeax, 'WHOLE POLOIDAL PLOT', color=axcolor, hovercolor='0.975')
+
+bothax = plt.axes([0.780, 0.025, 0.125, 0.05], facecolor=axcolor)
+BothPlot = CheckButtons(bothax, ['Plot Raw e-Fold'],[True])
 
 def wholefit(event):
     wholeFig, wholeAx = plt.subplots(1,1)
@@ -240,19 +246,24 @@ def wholefit(event):
         print('Calculating e-fold length for Poloidal Position {}'.format(n))
         tanhfit(event)
         expfit(event)
-    x,y = zip(*sorted(efold.items()))    
+  
     x_adj,y_adj = zip(*sorted(efold_adj.items()))
-    wholeAx.plot(x,y,'r')
     wholeAx.plot(x_adj,y_adj,'b')
     wholeAx.set_title('Shot {} Attempt {} neutral e-folding lengths'.format(Shot,Attempt[-1]))
     wholeAx.set_xlabel('Poloidal Grid Index')
     wholeAx.set_ylabel('e_folding length (mm)')
     wholeAx.axvline(JXA,color='black')
     wholeAx.axvline(JXI,color='orange')    
-    wholeAx.legend(['Raw e-folding length','Adjusted e-folding length','Outer Midplane', 'Inner Midplane'])
+    if BothPlot.get_status()[0] == True:
+        x,y = zip(*sorted(efold.items()))  
+        wholeAx.plot(x,y,'r')
+        wholeAx.legend(['Adjusted e-folding length','Outer Midplane', 'Inner Midplane','Raw e-folding length'])
+    else:
+        wholeAx.legend(['Adjusted e-folding length','Outer Midplane', 'Inner Midplane'])
+    
     wholeAx.xaxis.set_ticks(np.arange(20,75,5))
     starty, endy = wholeAx.get_ylim()
-    wholeAx.yaxis.set_ticks(np.arange(0,np.round(endy),5))
+    wholeAx.yaxis.set_ticks(np.linspace(0,np.round(endy),11))
     wholeAx.grid()
     plt.show
     
