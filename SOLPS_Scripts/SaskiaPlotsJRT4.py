@@ -34,7 +34,7 @@ if Base == 1:
     ContPlot[1].set_ylabel('')
     ContPlot[1].set_title('Low Ip')    
     
-    Fig, RadPlot = plt.subplots(nrows=6,ncols=1,sharex=True)
+    Fig, RadPlot = plt.subplots(nrows=3,ncols=1,sharex=True)
     
     #Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
     
@@ -48,16 +48,16 @@ if Base == 1:
     
     #Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
     
-    Base012.RadProf('Te',AX=RadPlot[2],Markers=False)
-    Base025.RadProf('Te',AX=RadPlot[2],Markers=False,Publish=['High Ip','Low Ip'])
-    RadPlot[2].set_xlabel('')
-    RadPlot[2].set_ylabel('')
-    RadPlot[2].get_legend().remove()
-    RadPlot[2].set_title(r'Electron Temperature $T_e\;(eV)$',position=(0,0),ha='left')
+    Base012.RadProf('Te',AX=RadPlot[1],Markers=False)
+    Base025.RadProf('Te',AX=RadPlot[1],Markers=False,Publish=['High Ip','Low Ip'])
+    RadPlot[1].set_xlabel('')
+    RadPlot[1].set_ylabel('')
+    RadPlot[1].get_legend().remove()
+    RadPlot[1].set_title(r'Electron Temperature $T_e\;(eV)$',position=(0,0),ha='left')
     #Based3d.RadProf('Te',AX=TeRadPlot,Publish=['1160718012','1160718025','175060'])
     
     #IonFlxfig, IonFlxRadPlot = plt.subplots(nrows=1, ncols=1)
-    
+    '''
     Base012.RadProf('IonFlx',AX=RadPlot[4],Markers=False)
     Base025.RadProf('IonFlx',AX=RadPlot[4],Markers=False,Publish=['High Ip','Low Ip'])
     RadPlot[4].set_xlabel('')
@@ -84,11 +84,11 @@ if Base == 1:
     RadPlot[3].set_title(r'Electron Thermal Diffusivity $\chi_e (m^2/s)$',position=(0,0),ha='left')
     
     #NeuDenfig, NeuDenRadPlot = plt.subplots(nrows=1, ncols=1)
-    
-    Base012.RadProf('NeuDen',AX=RadPlot[5],LOG10=2,Markers=False)
-    Base025.RadProf('NeuDen',AX=RadPlot[5],LOG10=2,Markers=False,Publish=['High Ip','Low Ip'])
-    RadPlot[5].set_ylabel('')
-    RadPlot[5].set_title(r'Neutral Atom (D) Density $(m^{-3})$',position=(0,0),ha='left')
+    '''
+    Base012.RadProf('NeuDen',AX=RadPlot[2],LOG10=2,Markers=False)
+    Base025.RadProf('NeuDen',AX=RadPlot[2],LOG10=2,Markers=False,Publish=['High Ip','Low Ip'])
+    RadPlot[2].set_ylabel('')
+    RadPlot[2].set_title(r'Neutral Atom (D) Density $(m^{-3})$',position=(0,0),ha='left')
     
     #Based3d.RadProf('NeuDen',AX=NeuDenRadPlot,LOG10=2,Publish=['1160718012','1160718025','175060'])
     

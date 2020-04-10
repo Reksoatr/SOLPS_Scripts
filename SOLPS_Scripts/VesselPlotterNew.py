@@ -426,11 +426,12 @@ class SOLPSPLOT(object):
                                 print('Parameter {} not found for Attempt {}. Creating NAN Array'.format(p, str(Attempt)))
                                 self.PARAM[p].values[:,:,n] = np.nan
                                 RawData=[]
-                                
-                        if RawData.size == 3724:
-                            self.PARAM[p].values[:,:,n] = RawData.reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
-                        elif RawData.size == 7448:
-                            self.PARAM[p].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
+                        
+                        if len(RawData) > 0:        
+                            if RawData.size == 3724:
+                                self.PARAM[p].values[:,:,n] = RawData.reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                            elif RawData.size == 7448:
+                                self.PARAM[p].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
                             
         if RadSlc == 'all':
             RadSlc = self.PARAM.coords['Radial_Location'].values
