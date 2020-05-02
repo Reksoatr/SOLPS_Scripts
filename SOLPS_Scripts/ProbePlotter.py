@@ -18,7 +18,7 @@ BASEDRT, TOPDRT = SET_WDIR('','')
 
 if Shot012 == 1:
     
-    Base012=SOLPSPLOT('12',['101','135'])
+    Base012=SOLPSPLOT('12',['101','203'])
     
     Probe012=loadmat('{}gfileProcessing/cmod_files/1160718012_ProbeData.mat'.format(TOPDRT))
     
@@ -52,7 +52,7 @@ if Shot012 == 1:
 
 if Shot025 == 1:
 
-    Base025=SOLPSPLOT('25',[161,166])
+    Base025=SOLPSPLOT('25',[161,274,275,276])
     
     Probe025=loadmat('{}gfileProcessing/cmod_files/1160718025_ProbeData.mat'.format(TOPDRT))
     

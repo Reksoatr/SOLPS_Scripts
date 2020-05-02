@@ -14,28 +14,29 @@ from VesselPlotterNew import SOLPSPLOT
 from TOOLS import SET_WDIR
 
 DEV = 'cmod'
-Shot=12
-ExpID = [23,13,12]
-COLORS = ['k','y','r','r:']
-TimeRange=[0.9,1.0]
-PsinOffset=-0.01
+SHOT=25
+ExpID = [25,24]
+COLORS = ['k','y','r']
+TimeRange=[1.2,1.35]
+PsinOffset=-0.0125
 
 JJ=0
-JND=1
+GAS=1
+JND=0
 
 BASEDRT, TOPDRT = SET_WDIR('','')
 
 Wdir = "{}MatData".format(TOPDRT)
 
-Jexp = np.genfromtxt('{}\exp_data_1040122027.csv'.format(Wdir),dtype=float,delimiter=',',skip_header=3,names=True)
-
-Jkn1d_plasma = np.genfromtxt('{}\kn1d_out_1040122027_750to830ms_update.csv'.format(Wdir),dtype=float,delimiter=',',skip_header=10,skip_footer=778,names=True)
-
-Jkn1d_H = np.genfromtxt('{}\kn1d_out_1040122027_750to830ms_update.csv'.format(Wdir),dtype=float,delimiter=',',skip_header=69,skip_footer=56,names=True)
-
-Jkn1d_H2 = np.genfromtxt('{}\kn1d_out_1040122027_750to830ms_update.csv'.format(Wdir),dtype=float,delimiter=',',skip_header=791,names=True)
-
 if JJ == 1:
+    Jexp = np.genfromtxt('{}\exp_data_1040122027.csv'.format(Wdir),dtype=float,delimiter=',',skip_header=3,names=True)
+
+    Jkn1d_plasma = np.genfromtxt('{}\kn1d_out_1040122027_750to830ms_update.csv'.format(Wdir),dtype=float,delimiter=',',skip_header=10,skip_footer=778,names=True)
+
+    Jkn1d_H = np.genfromtxt('{}\kn1d_out_1040122027_750to830ms_update.csv'.format(Wdir),dtype=float,delimiter=',',skip_header=69,skip_footer=56,names=True)
+
+    Jkn1d_H2 = np.genfromtxt('{}\kn1d_out_1040122027_750to830ms_update.csv'.format(Wdir),dtype=float,delimiter=',',skip_header=791,names=True)
+
     fig1 = plt.figure()
     plt.plot(Jexp['R__R_LCFS_m'],Jexp['N_E_m3'])
     plt.plot(Jkn1d_plasma['R__R_LCFS_m'],Jkn1d_plasma['N_E_m3'],'--')
@@ -61,6 +62,7 @@ if JJ == 1:
     plt.legend(('Exp_NeuDen','KN1D_H','KN1D_H2'))
     plt.title('Neutral Densities')
 
+if GAS == 1:
     ExpData={}
     PsinAvg={}
     RmidAvg={}
@@ -68,19 +70,7 @@ if JJ == 1:
     ErrNe={}
     TemidAvg={}
     ErrTe={}
-    
-    if os.environ['OS'] == 'Windows_NT':
-        if os.environ['USERNAME'] == 'rmreksoatmodjo':
-            BASEDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-            TOPDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
-        elif os.environ['USERNAME'] == '18313':
-            BASEDRT = r"C:/Users/18313/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-            TOPDRT = r"C:/Users/18313/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
-        elif os.environ['USERNAME'] == 'Richard':
-            BASEDRT = r"C:/Users/Richard/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
-            TOPDRT = r"C:/Users/Richard/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
-    
-    
+        
     for Shot in ExpID:
     #    BASEDRT = '{}cmod/0{}home'.format(BASEDRT, Shot)
         
@@ -129,7 +119,7 @@ if JJ == 1:
     Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
     Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
     
-    if Shot == 12:              
+    if SHOT == 12:              
         Gas012 = SOLPSPLOT('gas012',[19,18,17,8],Publish=['77.8 TorrL total D2','39.5 TorrL total D2','8.25 TorrL total D2','No D2 puff'],PsinOffset=PsinOffset,Markers=False,PlotScheme=COLORS,EXP=False)
         Gas012.RadProf('Ne',AX=NeRadPlot)
         Gas012.RadProf('Te',AX=TeRadPlot)
@@ -137,8 +127,8 @@ if JJ == 1:
         for n, Shot in enumerate(ExpID):
             NeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
             TeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
-    elif Shot == 25:
-        Gas025=SOLPSPLOT('gas025',[19,16,1],Publish=['72.2 TorrL total D2','6.77 TorrL total D2','No D2 puff'],Markers=False,PlotScheme=COLORS,EXP=False)
+    elif SHOT == 25:
+        Gas025=SOLPSPLOT('gas025',[69,68,65],Publish=['6.77 TorrL total D2','72.2 TorrL total D2','No D2 puff'],Markers=False,PlotScheme=COLORS,EXP=False)
         
         Gas025.RadProf('Ne',AX=NeRadPlot)
         Gas025.RadProf('Te',AX=TeRadPlot)

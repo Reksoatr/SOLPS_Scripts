@@ -14,11 +14,11 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider, Button, CheckButtons
 
-Shot = '25'
-Attempt = ['161','162','163','164','165']
+Shot = 'd3d'
+Attempt = ['70']
 PS=['.','.','.','.','.','x']
 
-NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],EXP=False,AVG=True,PlotScheme=PS)
+NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],EXP=False,AVG=False,PlotScheme='')
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
 CoreBound = NeuDen.KW['CoreBound']
