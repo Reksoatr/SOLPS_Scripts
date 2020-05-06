@@ -170,7 +170,9 @@ class SOLPSPLOT(object):
                      'SY': r'Radial Contact Area SY $(m^{2})$',
                      'SZ': r'Poloidal Cross-Sectional Area SZ $(m^{2})$',
                      'VOL': r'Cell Volume VOL $(m^{2})$',
-                     'RadPinch': r'Anomalous Radial Pinch Velocity $v_y\;(m/s)$'}
+                     'RadPinch': r'Anomalous Radial Pinch Velocity $v_y\;(m/s)$',
+                     'AHAL': r'Atomic $H_\alpha$ emissivity $(photons*m^{-3}s^{-1})$',
+                     'MHAL': r'Molecular $H_\alpha$ emissivity $(photons*m^{-3}s^{-1})$'}
         
         self._LoadSOLPSData()
         

@@ -29,6 +29,9 @@ VertLoc = NeuDen.RadCoords['VertLoc']
 RR = NeuDen.GetRadCoords('rrsep',[0,0])[0]
 Psin = NeuDen.GetRadCoords('psin',[0,0])[0]
 
+X_c=(RadLoc.loc[36,JXA,Attempt[-1]].values+RadLoc.loc[36,JXI,Attempt[-1]].values)/2
+Y_c=(VertLoc.loc[36,JXA,Attempt[-1]].values+VertLoc.loc[36,JXI,Attempt[-1]].values)/2
+
 f0 = JXA
 p0 = [0,3.5e20,0.005,1e18,1e21]
 e0 = [1e15,100]
@@ -56,7 +59,8 @@ gs=gridspec.GridSpec(9,2,width_ratios=[5,3],height_ratios=[1,1,1,1,1,1,1,1,1],hs
 axcontour = fig.add_subplot(gs[0:8,1])
 NeuDen.Contour('NeuDen',LOG10=1,AX=axcontour, Markers=False)
 axcontour.set_title('Neutral Density Contour')
-l, = axcontour.plot(RadLoc.loc[:,f0,Attempt[-1]],VertLoc.loc[:,f0,Attempt[-1]],color='Red',linewidth=3)
+axcontour.plot(X_c,Y_c,'X')
+l, = axcontour.plot([X_c,RadLoc.loc[36,f0,Attempt[-1]].values],[Y_c,VertLoc.loc[36,f0,Attempt[-1]].values],color='Red',linewidth=3)
 axcontour.margins(x=0)
 
 neudenprofile = fig.add_subplot(gs[0:3,0]) #plt.axes([0.25, 0.2, 0.4, 0.6], facecolor=axcolor)
@@ -94,8 +98,8 @@ def update(val):
         
     PolPos = sslide.val
     RR_SOLPS = RR.loc[:,PolPos,Attempt[-1]].values
-    l.set_xdata(RadLoc.loc[:,PolPos,Attempt[-1]])
-    l.set_ydata(VertLoc.loc[:,PolPos,Attempt[-1]])
+    l.set_xdata([X_c,RadLoc.loc[36,PolPos,Attempt[-1]].values])
+    l.set_ydata([Y_c,VertLoc.loc[36,PolPos,Attempt[-1]].values])
     neudenprofile.clear()
     neprofile.clear()
     fluxpsnprofile.clear()
