@@ -98,8 +98,8 @@ def update(val):
         
     PolPos = sslide.val
     RR_SOLPS = RR.loc[:,PolPos,Attempt[-1]].values
-    l.set_xdata([X_c,RadLoc.loc[36,PolPos,Attempt[-1]].values])
-    l.set_ydata([Y_c,VertLoc.loc[36,PolPos,Attempt[-1]].values])
+    l.set_xdata([RadLoc.loc[:,PolPos,Attempt[-1]].values]) #[X_c,RadLoc.loc[36,PolPos,Attempt[-1]].values])
+    l.set_ydata([VertLoc.loc[:,PolPos,Attempt[-1]].values]) #[Y_c,VertLoc.loc[36,PolPos,Attempt[-1]].values])
     neudenprofile.clear()
     neprofile.clear()
     fluxpsnprofile.clear()

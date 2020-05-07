@@ -153,7 +153,8 @@ class SOLPSPLOT(object):
         
         self.PARAMDICT = {'Ne': r'Electron Density $n_e\;(m^{-3})$',
                      'Te': r'Electron Temperature $T_e\;(eV)$',
-                     'Ti': r'Ion Temperature $T_i\;(eV)$',
+                     'NI' : r'Ion (D+) Density $n_i\;(m^{-3})$',
+                     'Ti': r'Ion (D+) Temperature $T_i\;(eV)$',
                      'DN': r'Particle Density Diffusivity $D\;(m^2/s)$',
                      'KYE': r'Electron Thermal Diffusivity $\chi_e (m^2/s)$',
                      'KYI': r'Ion Thermal Diffusivity $\chi_i (m^2/s)$',
@@ -172,7 +173,9 @@ class SOLPSPLOT(object):
                      'VOL': r'Cell Volume VOL $(m^{2})$',
                      'RadPinch': r'Anomalous Radial Pinch Velocity $v_y\;(m/s)$',
                      'AHAL': r'Atomic $H_\alpha$ emissivity $(photons*m^{-3}s^{-1})$',
-                     'MHAL': r'Molecular $H_\alpha$ emissivity $(photons*m^{-3}s^{-1})$'}
+                     'MHAL': r'Molecular $H_\alpha$ emissivity $(photons*m^{-3}s^{-1})$',
+                     'NTI' : r'Test Ion (D2+) Density $n_{ti}\;(m^{-3})$',
+                     'TestIonTemp' : r'Test Ion (D2+) Temperature $T_{testion}\;(eV)$'}
         
         self._LoadSOLPSData()
         

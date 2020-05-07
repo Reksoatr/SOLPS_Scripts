@@ -37,10 +37,13 @@ VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
 
 NeuDen=np.loadtxt('{}/EirAtom{}'.format(DRT,Attempt),usecols = (2))
 MolDen=np.loadtxt('{}/EirMol{}'.format(DRT,Attempt),usecols = (2))
+TestIonDen=np.loadtxt('{}/EirTestIon{}'.format(DRT,Attempt),usecols = (2))
 NeuEng=np.loadtxt('{}/AtomEnergy{}'.format(DRT,Attempt),usecols = (2))
 MolEng=np.loadtxt('{}/MolEnergy{}'.format(DRT,Attempt),usecols = (2))
+TestIonEng=np.loadtxt('{}/TestIonEnergy{}'.format(DRT,Attempt),usecols = (2))
 
-LogVal=np.ma.log10(NeuDen)
+LogVal=np.ma.log10(TestIonDen)
+LogVal=LogVal.filled(np.floor(LogVal.min()))
 
 Nodes=np.fromfile('{}/{}.tria.{}.nodes'.format(BASEDRT,Device,MeshID),sep=' ')
 NN=int(Nodes[0])
