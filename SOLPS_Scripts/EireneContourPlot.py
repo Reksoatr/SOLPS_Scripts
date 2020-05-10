@@ -16,6 +16,9 @@ Device='d3d'
 Attempt='70'
 MeshID='001'
 
+TeVAC=0.02 #Hard-wired Electron Temperature in EIRENE vacuum cells
+NeVAC=1e8 #Hard-wired Electron Density in EIRENE vacuum cells
+
 Slice=1
 P0=np.array([1.4,-0.7])  #[1.65,-0.65])
 P1=np.array([1.0,-0.95])  #[2,-1.1])
