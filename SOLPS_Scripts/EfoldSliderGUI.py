@@ -21,6 +21,7 @@ PS=['.','.','.','.','.','x']
 NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],EXP=False,AVG=False,PlotScheme='')
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
+SEP = NeuDen.KW['SEP']
 CoreBound = NeuDen.KW['CoreBound']
 Rmax = 0.01
 Rmin = -0.01
@@ -60,8 +61,10 @@ axcontour = fig.add_subplot(gs[0:8,1])
 NeuDen.Contour('NeuDen',LOG10=1,AX=axcontour, Markers=False)
 axcontour.set_title('Neutral Density Contour')
 axcontour.plot(X_c,Y_c,'X')
-l, = axcontour.plot([X_c,RadLoc.loc[36,f0,Attempt[-1]].values],[Y_c,VertLoc.loc[36,f0,Attempt[-1]].values],color='Red',linewidth=3)
+l, = axcontour.plot(RadLoc.loc[1:SEP,f0,Attempt[-1]].values,VertLoc.loc[1:SEP,f0,Attempt[-1]].values,color='Red',linewidth=3)
 axcontour.margins(x=0)
+
+# Implement Chord Slicing from EireneContourPlot here, to get linear cuts of data!
 
 neudenprofile = fig.add_subplot(gs[0:3,0]) #plt.axes([0.25, 0.2, 0.4, 0.6], facecolor=axcolor)
 NeuDen.RadProf('NeuDen',LOG10=log,AX=neudenprofile,Markers=False,RADC='rrsep',JXA=f0)  #,PlotScheme=['x'])
@@ -98,8 +101,8 @@ def update(val):
         
     PolPos = sslide.val
     RR_SOLPS = RR.loc[:,PolPos,Attempt[-1]].values
-    l.set_xdata([RadLoc.loc[:,PolPos,Attempt[-1]].values]) #[X_c,RadLoc.loc[36,PolPos,Attempt[-1]].values])
-    l.set_ydata([VertLoc.loc[:,PolPos,Attempt[-1]].values]) #[Y_c,VertLoc.loc[36,PolPos,Attempt[-1]].values])
+    l.set_xdata(RadLoc.loc[1:SEP,PolPos,Attempt[-1]].values) #[X_c,RadLoc.loc[36,PolPos,Attempt[-1]].values])
+    l.set_ydata(VertLoc.loc[1:SEP,PolPos,Attempt[-1]].values) #[Y_c,VertLoc.loc[36,PolPos,Attempt[-1]].values])
     neudenprofile.clear()
     neprofile.clear()
     fluxpsnprofile.clear()
