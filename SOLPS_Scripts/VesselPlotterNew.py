@@ -364,7 +364,7 @@ class SOLPSPLOT(object):
         #RadCor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Corner Radial Coordinate $m$')
         #VertCor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Corner Vertical Coordinate $m$')
 
-        PolLbl = ['XXLoc', 'Theta', 'DJXA', 'Flux Expansion']
+        PolLbl = ['XXLoc', 'Theta', 'dXP','dXP_norm']
         PolVec = xr.DataArray(np.zeros((YSurf,XGrid,N,4)), coords=[Y,X,Attempts,PolLbl], dims=['Radial_Location','Poloidal_Location','Attempt','Poloidal Metric'], name = 'Poloidal Coordinate Data')            
 
         for n in range(N):
@@ -394,10 +394,24 @@ class SOLPSPLOT(object):
                 YVector[:,0] = RadLoc.values[1,:,n] - RadLoc.values[0,:,n]
                 YVector[:,1] = VertLoc.values[1,:,n] - VertLoc.values[0,:,n]            
                 
-                for i in range(len(X)):
-                    PolVec.loc[:,X[i],Attempt,'Theta'] = np.degrees(np.math.atan2(np.linalg.det([YVector[JXA,:],YVector[i,:]]),np.dot(YVector[JXA,:],YVector[i,:])))
-                    if PolVec.loc[:,X[i],Attempt,'Theta'].values[0] < 0 and X[i] < JXA:
-                        PolVec.loc[:,X[i],Attempt,'Theta'] = PolVec.loc[:,X[i],Attempt,'Theta'] + 360
+            for i in range(len(X)):
+                PolVec.loc[:,X[i],Attempt,'Theta'] = np.degrees(np.math.atan2(np.linalg.det([YVector[JXA,:],YVector[i,:]]),np.dot(YVector[JXA,:],YVector[i,:])))
+                if PolVec.loc[:,X[i],Attempt,'Theta'].values[0] < 0 and X[i] < JXA:
+                    PolVec.loc[:,X[i],Attempt,'Theta'] = PolVec.loc[:,X[i],Attempt,'Theta'] + 360
+        
+            XP_range=np.array([CoreBound[0]-1,CoreBound[0],CoreBound[1],CoreBound[1]+1])
+            X_xp=np.mean(RadLoc.loc[SEP,XP_range,Attempt].values)
+            Y_xp=np.mean(VertLoc.loc[SEP,XP_range,Attempt].values)
+            
+            for index in np.arange(CoreBound[0],CoreBound[1]+1):
+                if index == CoreBound[0]:
+                    PolVec.loc[:,index,Attempt,'dXP'] = round(np.sqrt((RadLoc.loc[SEP,index,Attempt].values-X_xp)**2 + (VertLoc.loc[SEP,index,Attempt].values-Y_xp)**2),5)
+                else:
+                    NL = np.sqrt((RadLoc.loc[SEP,index,Attempt].values-RadLoc.loc[SEP,index-1,Attempt].values)**2 + (VertLoc.loc[SEP,index,Attempt].values-VertLoc.loc[SEP,index-1,Attempt].values)**2)
+                    PolVec.loc[:,index,Attempt,'dXP']= PolVec.loc[:,index-1,Attempt,'dXP']+NL
+         
+            PolVec.loc[:,:,Attempt,'dXP_norm'] = PolVec.loc[:,:,Attempt,'dXP'].values/np.max(PolVec.loc[:,:,Attempt,'dXP'].values)
+
             #try:
             #    RadCor.values[:,:,n] = np.loadtxt(DRT2 + '/Rad0Cor' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
             #    VertCor.values[:,:,n] = np.loadtxt(DRT2 + '/Vert0Cor' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
@@ -465,8 +479,11 @@ class SOLPSPLOT(object):
         self.VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
         self.Xx = Xx
         self.Yy = Yy
+        self.X_xp = X_xp
+        self.Y_yp = Y_xp
         self.N = N
         self.P = P
+        #self.XP = XP
         self.RadCoords['XMin'] = XMin
         self.RadCoords['YYLoc'] = YYLoc        
         self.RadCoords['PsinLoc'] = PsinLoc
@@ -777,9 +794,12 @@ class SOLPSPLOT(object):
             elif POLC == 'X':
                 PP = PolVec.loc[:,:,:,'XXLoc']
                 PolXLbl = r'Poloidal Cell Index $X$'
-            elif POLC == 'djxa':
-                PP = PolVec.loc[:,:,:,'DJXA']
-                PolXLbl = r'Distance from Outer Midplane $m$'
+            elif POLC == 'dXP':
+                PP = PolVec.loc[:,:,:,'dXP']
+                PolXLbl = r'Distance along Separatrix CW from X-Point $m$'
+            elif POLC == 'dXP_norm':
+                PP = PolVec.loc[:,:,:,'dXP_norm']
+                PolXLbl = r'Normalized Distance along Separatrix CW from X-Point'
 
             #print('Beginning Plot Sequence')                
 
@@ -816,9 +836,11 @@ class SOLPSPLOT(object):
                 plt.title('Poloidal ' + PARAM.name + ' along Separatrix')
 
             if Markers == True:
-                plt.axvline(PP.loc[SURF,JXI,Attempts[0]],'r--')
-                plt.axvline(PP.loc[SURF,JXA,Attempts[0]],'--')
-            
+                plt.axvline(PP.loc[SURF,JXI,Attempts[0]],color='orange')
+                plt.axvline(PP.loc[SURF,JXA,Attempts[0]],color='red')
+                plt.axvline(PP.loc[SURF,CoreBound[0],Attempts[0]],color='black')
+                plt.axvline(PP.loc[SURF,CoreBound[1],Attempts[0]],color='black')
+                  
             plt.xlabel(PolXLbl)
             plt.ylabel(PARAM.name)
             plt.grid()

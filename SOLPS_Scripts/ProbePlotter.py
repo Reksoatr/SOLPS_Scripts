@@ -11,14 +11,14 @@ from scipy.io import loadmat
 from VesselPlotterNew import SOLPSPLOT
 from TOOLS import SET_WDIR
 
-Shot012=1
-Shot025=0
+Shot012=0
+Shot025=1
 
 BASEDRT, TOPDRT = SET_WDIR('','')
 
 if Shot012 == 1:
     
-    Base012=SOLPSPLOT('12',['101','203'])
+    Base012=SOLPSPLOT('12',['203'])
     
     Probe012=loadmat('{}gfileProcessing/cmod_files/1160718012_ProbeData.mat'.format(TOPDRT))
     
@@ -52,7 +52,7 @@ if Shot012 == 1:
 
 if Shot025 == 1:
 
-    Base025=SOLPSPLOT('25',[161,274,275,276])
+    Base025=SOLPSPLOT('25',[276])
     
     Probe025=loadmat('{}gfileProcessing/cmod_files/1160718025_ProbeData.mat'.format(TOPDRT))
     
