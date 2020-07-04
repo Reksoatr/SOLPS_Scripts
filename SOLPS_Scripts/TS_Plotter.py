@@ -17,12 +17,13 @@ BASEDRT, TOPDRT=SET_WDIR('','')
 
 Device='cmod'
 
-Shots=['1120917011']# ['1160718012','1160718013','1160718023','1160718024','1160718025']#['1101014006','1101014019']#    
+Shots=['1120917011']#['1160718024','1160718025']# ['1160718012','1160718013','1160718023','1160718024','1160718025']#['1101014006','1101014019']#    
 
-Rad='psin'
+Rad='rmid'
 
 Time0=75
 AVG=0
+PsinOffset=-0.012
 TimeA=np.nan
 TimeB=np.nan
 
@@ -54,6 +55,8 @@ for i in Shots:
     Data[i]=loadmat('{}gfileProcessing/{}_files/{}.mat'.format(TOPDRT,Device,i))
     if Rad not in Data[i].keys():
         sys.exit('Error! Coordinate {} does not exist! Aborting!'.format(Rad))
+    if PsinOffset!=0:
+        Data[i]['psin']=Data[i]['psin']+PsinOffset
     
     Data[i]['time']=Data[i]['time'].flatten()
     NeLine[i] = ne_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['ne'][:,Time0],yerr=Data[i]['nerr'][:,Time0],marker='o',linestyle='--')

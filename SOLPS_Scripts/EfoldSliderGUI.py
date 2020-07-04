@@ -37,7 +37,7 @@ CoreBound = NeuDen.KW['CoreBound']
 Rmax = 0.01
 Rmin = -0.01
 Thresh=0.01
-Mag=0.25
+Mag=0.2
 RadLoc = NeuDen.RadCoords['RadLoc']
 VertLoc = NeuDen.RadCoords['VertLoc']
 RR = NeuDen.GetRadCoords('rrsep',[0,0])[0]
@@ -94,33 +94,6 @@ axcontour.set_title('Neutral Density Contour')
 axcontour.plot(X_xp,Y_xp,'X')
 axcontour.margins(x=0)
 
-# Implement Chord Slicing from EireneContourPlot here, to get linear cuts of data!
-Slice, = axcontour.plot(np.nan,np.nan,color='orange',linewidth=1)
-ChordXY, =axcontour.plot(np.nan,np.nan,'r.')
-PR=RadLoc.loc[:,:,Attempt[-1]].values.flatten()
-PZ=VertLoc.loc[:,:,Attempt[-1]].values.flatten()
-NeuDen_ALL=NeuDen.PARAM['NeuDen'].loc[:,:,Attempt[-1]].values.flatten()
-Ne_ALL=NeuDen.PARAM['Ne'].loc[:,:,Attempt[-1]].values.flatten()
-
-neudenprofile = fig.add_subplot(gs[6:9,0]) #plt.axes([0.25, 0.2, 0.4, 0.6], facecolor=axcolor)
-NeuDenProf, = neudenprofile.plot(np.nan,np.nan,'x')
-'''
-NeuDen.RadProf('NeuDen',LOG10=log,AX=neudenprofile,Markers=False,RADC='rrsep',JXA=f0)  #,PlotScheme=['x'])
-XLim = neudenprofile.get_xlim()
-YLim = neudenprofile.get_ylim()
-'''
-neudenprofile.set_title('')
-
-neprofile = fig.add_subplot(gs[3:6,0])
-NeProf, = neprofile.plot(np.nan,np.nan,'x')
-'''
-NeuDen.RadProf('Ne',AX=neprofile,Markers=False,RADC='rrsep',JXA=f0)
-neprofile.set_xlim(XLim)
-NeYLim = neprofile.get_ylim()
-'''
-neprofile.set_xlabel('')
-neprofile.set_title('')
-
 fluxpsnprofile = fig.add_subplot(gs[0:3,0])
 fluxpsnprofile.plot(RR.loc[:,f0,Attempt[-1]].values,Psin.loc[:,f0,Attempt[-1]].values,'*')
 fluxpsnprofile.axvline(0.0,color='k')
@@ -130,6 +103,34 @@ fluxpsnYLim = fluxpsnprofile.get_ylim()
 fluxpsnprofile.set_ylabel(r'$\psi_n$')
 fluxpsnprofile.set_xlabel('')
 fluxpsnprofile.set_title('Shot {}, Attempt {}'.format(Shot,*Attempt))
+
+neprofile = fig.add_subplot(gs[3:6,0],sharex=fluxpsnprofile)
+NeProf, = neprofile.plot(np.nan,np.nan,'X')
+'''
+NeuDen.RadProf('Ne',AX=neprofile,Markers=False,RADC='rrsep',JXA=f0)
+neprofile.set_xlim(XLim)
+NeYLim = neprofile.get_ylim()
+'''
+neprofile.set_xlabel('')
+neprofile.set_title('')
+
+neudenprofile = fig.add_subplot(gs[6:9,0],sharex=neprofile)
+NeuDenProf, = neudenprofile.plot(np.nan,np.nan,'X')
+'''
+NeuDen.RadProf('NeuDen',LOG10=log,AX=neudenprofile,Markers=False,RADC='rrsep',JXA=f0)  #,PlotScheme=['x'])
+XLim = neudenprofile.get_xlim()
+YLim = neudenprofile.get_ylim()
+'''
+neudenprofile.set_title('')
+
+# Implement Chord Slicing from EireneContourPlot here, to get linear cuts of data!
+
+Slice, = axcontour.plot(np.nan,np.nan,color='orange',linewidth=1)
+ChordXY, =axcontour.plot(np.nan,np.nan,'r.')
+PR=RadLoc.loc[:,:,Attempt[-1]].values.flatten()
+PZ=VertLoc.loc[:,:,Attempt[-1]].values.flatten()
+NeuDen_ALL=NeuDen.PARAM['NeuDen'].loc[:,:,Attempt[-1]].values.flatten()
+Ne_ALL=NeuDen.PARAM['Ne'].loc[:,:,Attempt[-1]].values.flatten()
 
 ### Methods and Functions ###
 
@@ -144,8 +145,6 @@ def update(val):
         
     PolPos = sslide.val
     RR_SOLPS = RR.loc[:,PolPos,Attempt[-1]].values
-    neudenprofile.clear()
-    neprofile.clear()
     fluxpsnprofile.clear()
     
     #P0 = Grab X,Y Point of Inner Most (Core) Cell at PolPos
@@ -224,7 +223,12 @@ def update(val):
     neprofile.set_title('')
     neprofile.set_xlabel('')
     neudenprofile.set_title('')
-    fig.canvas.draw_idle()
+    
+    neprofile.relim()
+    neprofile.autoscale_view(True,True,True)
+    neudenprofile.relim()
+    neudenprofile.autoscale_view(True,True,True)
+    fig.canvas.draw()
 
 ### Basic Buttons and Sliders ###
 

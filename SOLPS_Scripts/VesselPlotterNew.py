@@ -46,8 +46,8 @@ class SOLPSPLOT(object):
     GRAD = False > Calculate Gradient of Parameter Data
     ELEV = 75 > Elevation of viewing angle
     AZIM = 270 > Azimuthal viewing angle for Surface Plot
-    JXI = 37 > Poloidal position of Inner Midplane - default is 37
-    JXA = 55 > Poloidal position of Outer Midplane - default is 55
+    JXI = 38 > Poloidal position of Inner Midplane - default is 37
+    JXA = 56 > Poloidal position of Outer Midplane - default is 55
     SEP = 20 > Radial position of Separatrix - default is 18    
     XDIM = 98 > Dimension of computational grid in the x (poloidal) direction
     YDIM = 38 > Dimension of computational grid in the y (radial) direction
@@ -115,7 +115,7 @@ class SOLPSPLOT(object):
                      'GRAD' : False,
                      'ELEV' : 75,
                      'AZIM' : 270,
-                     'JXI' : 37,
+                     'JXI' : 38,
                      'JXA' : 56,
                      'SEP' : 20,
                      'XDIM' : 98,
@@ -303,22 +303,31 @@ class SOLPSPLOT(object):
                 print('Psin coordinates not found. Attempting to approximate experimental psin from gfile')
                 PsinAvg = GF.psiN(RmidAvg,np.zeros(RmidAvg.shape))
             
+            #Robust Statistics -> Use MEDIAN, not MEAN, of TS Data
+            
             Nemid = ExpData['ne'][:,ti:tf]
+            NemidAvg=np.median(Nemid, axis=1)
+            ErrNe=np.median(ExpData['nerr'][:,ti:tf], axis=1)
+            '''
             Nemid[Nemid == 0] = np.nan
             NemidAvg = np.nanmean(Nemid, axis=1)
             ErrNe = np.nanmean(ExpData['nerr'][:,ti:tf], axis=1)
+            '''
             NeThresh = (ErrNe*2)/NemidAvg
-            
+
             for NT in range(len(NeThresh)):
                 if np.abs(NeThresh[NT]) > 2.0:
                     NemidAvg[NT] = np.nan
                     ErrNe[NT] = np.nan
             
-            
             Temid = ExpData['te'][:,ti:tf]
+            TemidAvg=np.median(Temid, axis=1)
+            ErrTe=np.median(ExpData['terr'][:,ti:tf], axis=1)
+            '''
             Temid[Temid == 0] = np.nan
             TemidAvg = np.nanmean(Temid, axis=1)
             ErrTe = np.nanmean(ExpData['terr'][:,ti:tf], axis=1)
+            '''
             TeThresh = (ErrTe*2)/TemidAvg
             
             for TT in range(len(TeThresh)):

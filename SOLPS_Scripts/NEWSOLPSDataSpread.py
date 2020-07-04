@@ -25,18 +25,24 @@ def SOLPSDataSpread(Shot, Attempt):
 		RADC = 'radial'
 		JXA = 59
 		JXI = 35
-		ROOTSHOT=''   
+		ROOTSHOT=''
+    elif '1120917011' in Shot:
+        PsinOffset = 0
+		RADC = 'psin'
+		JXA = 56
+		JXI = 38
+		ROOTSHOT=''    
 	elif '12' in Shot:
 		PsinOffset = -0.005
 		RADC = 'psin'
 		JXA = 56
-		JXI = 37
+		JXI = 38
 		ROOTSHOT='1160718'
 	elif '25' in Shot:
 		PsinOffset = -0.0125 
 		RADC = 'psin'
-		JXA = 55
-		JXI = 37
+		JXA = 56
+		JXI = 38
 		ROOTSHOT='1160718'		
 	else:
 		RADC = 'psin'
@@ -84,7 +90,7 @@ def SOLPSDataSpread(Shot, Attempt):
 	AxTe = Spreadfig.add_subplot(gs[3,1], title='Outer Midplane Seperatrix Electron Temperature Time Trace', xlabel=XLabel, ylabel=TeLabel)
 	AxTi = Spreadfig.add_subplot(gs[3,2], title='Outer Midplane Separatrix Ion Temperature Time Trace', xlabel=XLabel, ylabel=TiLabel)
 
-	if 'gas' in Shot:
+	if 'gas' or 'new' in Shot:
         	BDRT = 'solps-iter/runs/gaspuff/'
 	else:
         	BDRT = 'solps-iter/runs/'
@@ -95,6 +101,8 @@ def SOLPSDataSpread(Shot, Attempt):
 			dirT = '{}d3d/Attempt{}/Output/'.format(BDRT,i)
 		elif ROOTSHOT == '':
 			dirT = '{}cmod/{}home/Attempt{}/Output/'.format(BDRT,Shot,i)   
+		elif 'new' in Shot:
+			dirT = '{}cmod/0{}homeNEW/Attempt{}/Output/'.format(BDRT,Shot[-2:],i)
 		else:
 			dirT = '{}cmod/0{}home/Attempt{}/Output/'.format(BDRT,Shot[-2:],i)
 
