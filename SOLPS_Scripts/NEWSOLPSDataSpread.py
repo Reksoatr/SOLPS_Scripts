@@ -27,7 +27,7 @@ def SOLPSDataSpread(Shot, Attempt):
 		JXI = 35
 		ROOTSHOT=''
 	elif '1120917011' in Shot:
-        	PsinOffset = 0
+		PsinOffset = 0
 		RADC = 'psin'
 		JXA = 56
 		JXI = 38
@@ -90,7 +90,7 @@ def SOLPSDataSpread(Shot, Attempt):
 	AxTe = Spreadfig.add_subplot(gs[3,1], title='Outer Midplane Seperatrix Electron Temperature Time Trace', xlabel=XLabel, ylabel=TeLabel)
 	AxTi = Spreadfig.add_subplot(gs[3,2], title='Outer Midplane Separatrix Ion Temperature Time Trace', xlabel=XLabel, ylabel=TiLabel)
 
-	if 'gas' or 'new' in Shot:
+	if 'gas' in Shot:
         	BDRT = 'solps-iter/runs/gaspuff/'
 	else:
         	BDRT = 'solps-iter/runs/'
@@ -101,8 +101,6 @@ def SOLPSDataSpread(Shot, Attempt):
 			dirT = '{}d3d/Attempt{}/Output/'.format(BDRT,i)
 		elif ROOTSHOT == '':
 			dirT = '{}cmod/{}home/Attempt{}/Output/'.format(BDRT,Shot,i)   
-		elif 'new' in Shot:
-			dirT = '{}cmod/0{}homeNEW/Attempt{}/Output/'.format(BDRT,Shot[-2:],i)
 		else:
 			dirT = '{}cmod/0{}home/Attempt{}/Output/'.format(BDRT,Shot[-2:],i)
 
