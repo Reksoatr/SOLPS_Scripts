@@ -11,6 +11,7 @@ from TOOLS import EXPFIT
 import numpy as np
 import xarray as xr
 from scipy.optimize import curve_fit
+from scipy.stats import binned_statistic
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.path import Path
@@ -19,8 +20,8 @@ import json
 
 ### Input Fields ###
 
-Shot = 'gas025'
-Attempt = ['69']
+Shot = '25'
+Attempt = ['15N']
 GasLvl = 6.77
 Balloon = 0
 
@@ -59,6 +60,7 @@ x0 = {}
 xi = {}
 fluxpsn = {}
 fluxpsnparam={}
+bins=np.linspace(1,36,36)
 log = 2
 
 props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
@@ -178,9 +180,13 @@ def update(val):
     NeuDen_SOLPS = np.ma.array(NeuDen_ALL,mask=~Mask).compressed() 
     Ne_SOLPS = np.ma.array(Ne_ALL,mask=~Mask).compressed()    
     
+    RR_SEP_avg=binned_statistic(RR_SEP, RR_SEP,statistic='mean',bins=36)
+    NeuDen_SOLPS_med=binned_statistic(RR_SEP,NeuDen_SOLPS,statistic='median',bins=36)
+    Ne_SOLPS_med=binned_statistic(RR_SEP,Ne_SOLPS,statistic='median',bins=36)
+    
     Slice.set_data(np.array([P0,P2]).transpose())
-    NeuDenProf.set_data(RR_SEP,NeuDen_SOLPS)
-    NeProf.set_data(RR_SEP,Ne_SOLPS)
+    NeuDenProf.set_data(RR_SEP_avg[0],NeuDen_SOLPS_med[0])
+    NeProf.set_data(RR_SEP_avg[0],Ne_SOLPS_med[0])
     
     #NeuDen.RadProf('NeuDen',LOG10=log,AX=neudenprofile,Markers=False,RADC='rrsep',JXA=PolPos) #,PlotScheme=['x'])
     #NeuDen.RadProf('Ne',AX=neprofile,Markers=False,RADC='rrsep',JXA=PolPos)
