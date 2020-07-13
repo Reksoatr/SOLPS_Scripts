@@ -52,7 +52,7 @@ if Shot012 == 1:
 
 if Shot025 == 1:
 
-    Base025=SOLPSPLOT('25',[276])
+    Base025=SOLPSPLOT('25',['15N'])
     
     Probe025=loadmat('{}gfileProcessing/cmod_files/1160718025_ProbeData.mat'.format(TOPDRT))
     

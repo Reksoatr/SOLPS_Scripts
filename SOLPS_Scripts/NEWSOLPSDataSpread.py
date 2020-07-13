@@ -39,7 +39,7 @@ def SOLPSDataSpread(Shot, Attempt):
 		JXI = 37
 		ROOTSHOT='1160718'
 	elif '25' in Shot:
-		PsinOffset = -0.0125 
+		PsinOffset = -0.01 
 		RADC = 'psin'
 		JXA = 55
 		JXI = 37

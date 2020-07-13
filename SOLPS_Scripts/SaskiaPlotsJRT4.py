@@ -19,8 +19,8 @@ GasTime=0
 
 if Base == 1:
 
-    Base012=SOLPSPLOT('12',[203],PlotScheme=['b-'],PsinOffset=-0.005)
-    Base025=SOLPSPLOT('25',[279],PlotScheme=['r-'],PsinOffset=-0.0125,SEP=21)
+    Base012=SOLPSPLOT('12',['44Nb'],PlotScheme=['b-'],PsinOffset=-0.005)
+    Base025=SOLPSPLOT('25',['17Nb'],PlotScheme=['r-'],PsinOffset=-0.01,SEP=21)
     #Based3d=SOLPSPLOT('d3d',[86])
     '''
     ContFig, ContPlot = plt.subplots(nrows=1,ncols=2,sharey=True)

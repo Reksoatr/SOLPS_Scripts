@@ -14,11 +14,13 @@ from VesselPlotterNew import SOLPSPLOT
 from TOOLS import SET_WDIR
 
 DEV = 'cmod'
-SHOT=25
-ExpID = [25,24]
-COLORS = ['k','y','r']
-TimeRange=[1.2,1.35]
-PsinOffset=-0.0125
+SHOT=12
+ExpID = [23,13,12]#[25,24]#
+COLORS = ['g','c','b','k']#['r','y','k']#
+ATTEMPTS=['43N','41N','39N','37N']#['16N','14N','12N']#
+PUBLISH=['77.8 TorrL total D2','39.5 TorrL total D2','8.25 TorrL total D2','Ballooned no D2 puff']#['6.77 TorrL total D2','72.2 TorrL total D2','Ballooned no D2 puff']#
+TimeRange=[1.1,1.3]
+PsinOffset=-0.01
 
 JJ=0
 GAS=1
@@ -96,9 +98,9 @@ if GAS == 1:
         RmidAvg[Shot] = np.mean(Rmid, axis=1)
         
         Nemid = ExpData[Shot]['ne'][:,ti:tf]
-        Nemid[Nemid == 0] = np.nan
-        NemidAvg[Shot] = np.nanmean(Nemid, axis=1)
-        ErrNe[Shot] = np.nanmean(ExpData[Shot]['nerr'][:,ti:tf])
+        #Nemid[Nemid == 0] = np.nan
+        NemidAvg[Shot] = np.median(Nemid, axis=1)
+        ErrNe[Shot] = np.median(ExpData[Shot]['nerr'][:,ti:tf])
         NeThresh = (ErrNe[Shot]*2)/NemidAvg[Shot]
         '''for NT in range(len(NeThresh)):
             if np.abs(NeThresh[NT]) > 0.5:
@@ -106,9 +108,9 @@ if GAS == 1:
                 ErrNe[Shot][NT] = np.nan
         '''
         Temid = ExpData[Shot]['te'][:,ti:tf]
-        Temid[Temid == 0] = np.nan
-        TemidAvg[Shot] = np.nanmean(Temid, axis=1)
-        ErrTe[Shot] = np.nanmean(ExpData[Shot]['terr'][:,ti:tf])
+        #Temid[Temid == 0] = np.nan
+        TemidAvg[Shot] = np.median(Temid, axis=1)
+        ErrTe[Shot] = np.median(ExpData[Shot]['terr'][:,ti:tf])
         TeThresh = (ErrTe[Shot]*2)/TemidAvg[Shot]
         '''for TT in range(len(TeThresh)):
             if np.abs(TeThresh[TT]) > 0.5:
@@ -120,7 +122,7 @@ if GAS == 1:
     Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
     
     if SHOT == 12:              
-        Gas012 = SOLPSPLOT('gas012',[19,18,17,8],Publish=['77.8 TorrL total D2','39.5 TorrL total D2','8.25 TorrL total D2','No D2 puff'],PsinOffset=PsinOffset,Markers=False,PlotScheme=COLORS,EXP=False)
+        Gas012 = SOLPSPLOT('12',ATTEMPTS,Publish=PUBLISH,PsinOffset=PsinOffset,Markers=False,PlotScheme=COLORS,EXP=False)
         Gas012.RadProf('Ne',AX=NeRadPlot)
         Gas012.RadProf('Te',AX=TeRadPlot)
         
@@ -128,7 +130,7 @@ if GAS == 1:
             NeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
             TeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
     elif SHOT == 25:
-        Gas025=SOLPSPLOT('gas025',[69,68,65],Publish=['6.77 TorrL total D2','72.2 TorrL total D2','No D2 puff'],Markers=False,PlotScheme=COLORS,EXP=False)
+        Gas025=SOLPSPLOT('25',ATTEMPTS,Publish=PUBLISH,Markers=False,PlotScheme=COLORS,EXP=False)
         
         Gas025.RadProf('Ne',AX=NeRadPlot)
         Gas025.RadProf('Te',AX=TeRadPlot)
@@ -137,11 +139,11 @@ if GAS == 1:
             NeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n][0],markersize=7,linewidth=3,capsize=7)
             TeRadPlot.errorbar(PsinAvg[Shot]+PsinOffset,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n][0],markersize=7,linewidth=3,capsize=7)
     
-    NeRadPlot.set_title(r'Outer Midplane Electron Density $n_e\;(m^{-3})$')
-    NeRadPlot.set_ylabel('')
+    NeRadPlot.set_ylabel(r'Outer Midplane Electron Density $n_e\;(m^{-3})$')
+    #NeRadPlot.set_ylabel('')
     
-    TeRadPlot.set_title(r'Outer Midplane Electron Temperature $T_e\;(eV)$')
-    TeRadPlot.set_ylabel('')
+    TeRadPlot.set_ylabel(r'Outer Midplane Electron Temperature $T_e\;(eV)$')
+    #TeRadPlot.set_ylabel('')
 
 if JND == 1:
     NeuDenfig, NeuDRadPlot = plt.subplots(nrows=1, ncols=1)

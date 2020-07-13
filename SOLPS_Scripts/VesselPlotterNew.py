@@ -58,7 +58,7 @@ class SOLPSPLOT(object):
     PsinOffset = 0 > Psi_n offset of Experimental Data Points
     RadOffset = 0 > Radial (in meters) offset of Experimental Data Points
     RADC = 'psin' > Set radial coordinate convention - Either 'psin', 'radial', 'rrsep' or 'Y'    
-    POLC = 'theta' > Set poloidal coordinate convention - Either 'theta', 'djxa' or 'X'
+    POLC = 'theta' > Set poloidal coordinate convention - Either 'theta', 'dXP', 'dXP_norm' or 'X'
     RadSlc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
     PolSlc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
     SURF = 20 > Same purpose as PolSlc
@@ -74,7 +74,7 @@ class SOLPSPLOT(object):
     AX = None > Pass the name of a matplotlib axis for the SOLPSPLOT object to plot on; by default SOLPSPLOT plots on a new axis
     BASEDRT = 'SOLPS_2D_prof/' > Local base directory for all stored SOLPS simulation run data
     TOPDRT = '' > Local home directory, parent of BASEDRT and 'gfileProcessing' directories
-    ROOTSHOT = '1160718' > Optional numerical prefix that designate the experimental campaign that a series of shots may share in common 
+    ROOTSHOT = '1160718' > Optional numerical prefix to designate the experimental campaign that a series of shots may share in common 
         
     PLOT TYPES:
         
@@ -127,7 +127,7 @@ class SOLPSPLOT(object):
                      'PsinOffset' : 0,
                      'RadOffset' : 0,
                      'RADC' : 'psin',
-                     'POLC' : 'theta',
+                     'POLC' : 'dXP',
                      'RadSlc' : None,
                      'PolSlc' : None,
                      'SURF' : 20,
