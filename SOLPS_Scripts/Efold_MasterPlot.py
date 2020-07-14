@@ -11,13 +11,12 @@ import matplotlib.patches as mpatches
 import json
 from TOOLS import SET_WDIR
 import numpy as np
-#import numpy as np
 #from VesselPlotterNew import SOLPSPLOT
 
 BASEDRT, TOPDRT = SET_WDIR('','')
 
-Shot025=[['11N','12N','15N','16N','13N','14N'],[0,0,0,0,0,0]]
-Shot012=[['36N','37N','38N','39N','40N','41N','42N','43N'],[0,0,0,0,0,0,0,0]]
+Shot025=[['17N','18N','21N','22N','19N','20N'],[0,0,0,0,0,0]]
+Shot012=[['44N','45N','46N','47N','48N','49N','50N','51N'],[0,0,0,0,0,0,0,0]]
 
 fig1, ax1 = plt.subplots()
 fig2, ax2 = plt.subplots()
@@ -28,6 +27,12 @@ NB_012={'x':[],'y':[],'NeuDen':[]}
 SB_012={'x':[],'y':[],'NeuDen':[]}
 NB_025={'x':[],'y':[],'NeuDen':[]}
 SB_025={'x':[],'y':[],'NeuDen':[]}
+
+file='{}cmod/JerryV1.txt'.format(BASEDRT)
+Jerry_LD=np.loadtxt(file,usecols=(1,2),skiprows=1)
+
+file='{}cmod/JerryV2.txt'.format(BASEDRT)
+Jerry_PedWid=np.loadtxt(file,usecols=(1,2),skiprows=1)
 
 for N, Attempt in enumerate(Shot025[0]):
     if Shot025[1][N]==1:
@@ -120,6 +125,8 @@ ax3.plot(SB_012['x'],SB_012['y'],'b-')
 ax3.plot(NB_025['x'],NB_025['y'],'r--')
 ax3.plot(SB_025['x'],SB_025['y'],'r-')
 
+ax3.plot(Jerry_LD[:,0],Jerry_LD[:,1]*1000,'*')
+
 ax3.set_xlabel(r'Pedestal electron density $n_{e,PED}\;(m^{-3})$')
 ax3.set_ylabel('Adjusted neutral e-folding length (mm)')
 
@@ -133,8 +140,8 @@ ax4.set_ylabel(r'Neutral density at separatrix ($m^{-3}$)')
 
 ### Create Legend Objects ###
 
-Red = mpatches.Patch(color='red',label='Low Ip')
-Blue = mpatches.Patch(color='blue', label='High Ip')
+Red = mpatches.Patch(color='red',label='Low Ip (1.0 MA)')
+Blue = mpatches.Patch(color='blue', label='High Ip (1.3 MA)')
 In_HFS = mlines.Line2D([],[], color='black',marker='<',fillstyle='full',linestyle='none',markersize=15,label='HFS')
 Out_LFS = mlines.Line2D([],[], color='black',marker='>',fillstyle='full',linestyle='none',markersize=15,label='LFS')
 NB = mlines.Line2D([],[], color='black',marker='>',fillstyle='none',linestyle='none',markersize=15,label='Ballooning Off')

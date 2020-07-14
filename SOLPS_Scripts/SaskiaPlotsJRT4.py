@@ -19,8 +19,8 @@ GasTime=0
 
 if Base == 1:
 
-    Base012=SOLPSPLOT('12',['44Nb'],PlotScheme=['b-'],PsinOffset=-0.005)
-    Base025=SOLPSPLOT('25',['17Nb'],PlotScheme=['r-'],PsinOffset=-0.01,SEP=21)
+    Base012=SOLPSPLOT('12',['46N'],PlotScheme=['b-'],PsinOffset=-0.005)
+    Base025=SOLPSPLOT('25',['21N'],PlotScheme=['r-'],PsinOffset=-0.01,SEP=21)
     #Based3d=SOLPSPLOT('d3d',[86])
     '''
     ContFig, ContPlot = plt.subplots(nrows=1,ncols=2,sharey=True)
@@ -39,11 +39,12 @@ if Base == 1:
     #Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
     
     Base012.RadProf('Ne',AX=RadPlot[0],Markers=False)
-    Base025.RadProf('Ne',AX=RadPlot[0],Markers=True,Publish=['High Ip','Low Ip'])
+    Base025.RadProf('Ne',AX=RadPlot[0],Markers=True,Publish=['High Ip (1.3 MA)','Low Ip (1.0 MA)'])
     RadPlot[0].set_xlabel('')
     RadPlot[0].set_ylabel('')
+    RadPlot[1].set_xlim(left=0.8,right=1.055)
     #RadPlot[0].get_legend().remove()
-    RadPlot[0].set_title(r'(a) Electron Density $n_e\;(m^{-3})$',position=(0,0),ha='left')
+    RadPlot[0].set_title(r'(a) Electron Density $n_e\;(m^{-3})$',position=(0,0),ha='left',fontsize=25)
     #Based3d.RadProf('Ne',AX=NeRadPlot,Publish=['1160718012','1160718025','175060'])
     
     #Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
@@ -53,7 +54,7 @@ if Base == 1:
     RadPlot[1].set_xlabel('')
     RadPlot[1].set_ylabel('')
     RadPlot[1].get_legend().remove()
-    RadPlot[1].set_title(r'(b) Electron Temperature $T_e\;(eV)$',position=(0,0),ha='left')
+    RadPlot[1].set_title(r'(b) Electron Temperature $T_e\;(eV)$',position=(0,0),ha='left',fontsize=25)
     #Based3d.RadProf('Te',AX=TeRadPlot,Publish=['1160718012','1160718025','175060'])
     
     #IonFlxfig, IonFlxRadPlot = plt.subplots(nrows=1, ncols=1)
@@ -73,7 +74,7 @@ if Base == 1:
     RadPlot[2].set_xlabel('')
     RadPlot[2].set_ylabel('')
     RadPlot[2].get_legend().remove()
-    RadPlot[2].set_title(r'(c) Particle Density Diffusivity $D\;(m^2/s)$',position=(0,0),ha='left')
+    RadPlot[2].set_title(r'(c) Particle Density Diffusivity $D\;(m^2/s)$',position=(0,0),ha='left',fontsize=25)
     #Based3d.RadProf('DN',AX=DNRadPlot,Publish=['1160718012','1160718025','175060'])
     
     Base012.RadProf('KYE',AX=RadPlot[3],Markers=False)
@@ -81,7 +82,7 @@ if Base == 1:
     RadPlot[3].set_xlabel('')
     RadPlot[3].set_ylabel('')
     RadPlot[3].get_legend().remove()
-    RadPlot[3].set_title(r'(d) Electron Thermal Diffusivity $\chi_e (m^2/s)$',position=(0,0),ha='left')
+    RadPlot[3].set_title(r'(d) Electron Thermal Diffusivity $\chi_e (m^2/s)$',position=(0,0),ha='left',fontsize=25)
     
     #NeuDenfig, NeuDenRadPlot = plt.subplots(nrows=1, ncols=1)
     
@@ -89,7 +90,9 @@ if Base == 1:
     Base025.RadProf('NeuDen',AX=RadPlot[4],LOG10=2,Markers=True,Publish=['High Ip','Low Ip'])
     RadPlot[4].set_ylabel('')
     RadPlot[4].get_legend().remove()
-    RadPlot[4].set_title(r'(e) Neutral Atom (D) Density $(m^{-3})$',position=(0,0.85),ha='left')
+    RadPlot[4].set_title(r'(e) Neutral Atom (D) Density $(m^{-3})$',position=(0,0.85),ha='left',fontsize=25)
+    
+    RadPlot[0].legend(['High Ip (1.3 MA)','Low Ip (1.0 MA)'],fontsize=20,loc=1)
     
     plt.subplots_adjust(wspace=0, hspace=0)
     

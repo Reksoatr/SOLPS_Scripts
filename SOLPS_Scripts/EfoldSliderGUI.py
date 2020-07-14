@@ -21,7 +21,7 @@ import json
 ### Input Fields ###
 
 Shot = '12'
-Attempt = ['43N']
+Attempt = ['51N']
 GasLvl = 77.8
 Balloon = 1
 
@@ -222,14 +222,7 @@ def update(val):
     FluxPsnProf.set_data(RR_SEP_avg[PolPos],Psin_avg[PolPos])
     NeuDenProf.set_data(RR_SEP_avg[PolPos],NeuDen_SOLPS_med[PolPos])
     NeProf.set_data(RR_SEP_avg[PolPos],Ne_SOLPS_med[PolPos])
-    '''
-    NeuDen.RadProf('NeuDen',LOG10=log,AX=neudenprofile,Markers=False,RADC='rrsep',JXA=PolPos) #,PlotScheme=['x'])
-    NeuDen.RadProf('Ne',AX=neprofile,Markers=False,RADC='rrsep',JXA=PolPos)
-    fluxpsnprofile.plot(RR.loc[:,PolPos,Attempt[-1]].values,Psin.loc[:,PolPos,Attempt[-1]].values,'*')
-    fluxpsnprofile.axvline(0.0,color='k')
-    fluxpsnprofile.axhline(1.0,color='k')
-    fluxpsnprofile.set_ylabel(r'$\psi_n$')
-    '''
+
     if PolPos in x0.keys(): 
         FluxPsnV1.set_xdata(x0[PolPos])
         FluxPsnV2.set_xdata(xi[PolPos])
@@ -279,11 +272,6 @@ def update(val):
         fluxpsnprofile.set_xlim(XLim)
         fluxpsnprofile.set_ylim(fluxpsnYLim)
         '''
-    #fluxpsnprofile.set_title('Shot {}, Attempt {}'.format(Shot,*Attempt))
-    #fluxpsnprofile.set_xlabel('')
-    #neprofile.set_title('')
-    #neprofile.set_xlabel('')
-    #neudenprofile.set_title('')
     
     neprofile.relim()
     neprofile.autoscale_view(True,True,True)
@@ -311,25 +299,33 @@ def arrowclick(event):
 cid = fig.canvas.mpl_connect('key_press_event', arrowclick)
 
 resetax = plt.axes([0.125, 0.025, 0.05, 0.05])
-Reset = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
+Reset = Button(resetax, 'Reset (JXA)', color=axcolor, hovercolor='0.975')
 
 def reset(event):
     sslide.reset()
     
 Reset.on_clicked(reset)
 
-logonax = plt.axes([0.185, 0.025, 0.075, 0.05], facecolor=axcolor)
+jxiax = plt.axes([0.185, 0.025, 0.05, 0.05])
+JXI_Button = Button(jxiax, 'JXI', color=axcolor, hovercolor='0.975')
+
+def jxi_set(event):
+    sslide.set_val(JXI)
+    
+JXI_Button.on_clicked(jxi_set)
+
+logonax = plt.axes([0.245, 0.025, 0.075, 0.05], facecolor=axcolor)
 LogOn = CheckButtons(logonax, [r'Log$_{10}(n_D)$'],[True])
 LogOn.on_clicked(update)
 
-fixedax = plt.axes([0.270, 0.025, 0.075, 0.05], facecolor=axcolor)
-Fixed = CheckButtons(fixedax, ['Fix Axes'],[True])
+fixedax = plt.axes([0.330, 0.025, 0.05, 0.05], facecolor=axcolor)
+Fixed = CheckButtons(fixedax, ['Fix\nAxes'],[True])
 Fixed.on_clicked(update)
 
 ### Modified TANH Fitting Function ###
 
-tanhfitax = plt.axes([0.355, 0.025, 0.1, 0.05])
-TanhFit = Button(tanhfitax, 'Create Tanh Fit', color=axcolor, hovercolor='0.975')
+tanhfitax = plt.axes([0.390, 0.025, 0.075, 0.05])
+TanhFit = Button(tanhfitax, 'Create\nTanh Fit', color=axcolor, hovercolor='0.975')
 
 def tanhfit(event):
     PolPos=sslide.val
@@ -343,7 +339,7 @@ def tanhfit(event):
         x0[PolPos] = yparam[PolPos][0]+yparam[PolPos][2]
         xi[PolPos] = yparam[PolPos][0]-yparam[PolPos][2]
 
-    print('Poloidal Slice {:0.0f}: r0={:.3f}m, h={:.3e}m^-3, d={:.3f}m, b={:.3e}m^-3, m={:.3e}m^-4'.format(PolPos,*yparam[PolPos]))
+    print('Poloidal Slice {:0.0f}: r0={:.3e}m, h={:.3e}m^-3, d={:.3e}m, b={:.3e}m^-3, m={:.3e}m^-4'.format(PolPos,*yparam[PolPos]))
     TXT_TANH.set_text(r'$n_{{e,PED}}$={:.3e}$m^{{-3}}$, $\Delta n_e$={:.3f}mm'.format(yparam[PolPos][1]+yparam[PolPos][3],2000*yparam[PolPos][2]))
     
     Tanh_Fit.set_data(RR_SEP_avg[PolPos],TANH(RR_SEP_avg[PolPos],*yparam[PolPos]))
@@ -361,8 +357,8 @@ TanhFit.on_clicked(tanhfit)
 
 ### Exponential Fitting Function ###
 
-expfitax = plt.axes([0.465, 0.025, 0.1, 0.05])
-ExpFit = Button(expfitax, 'Create Exp. Fit', color=axcolor, hovercolor='0.975')
+expfitax = plt.axes([0.475, 0.025, 0.075, 0.05])
+ExpFit = Button(expfitax, 'Create\nExp. Fit', color=axcolor, hovercolor='0.975')
 
 def expfit(event):
     PolPos=sslide.val
@@ -387,7 +383,7 @@ def expfit(event):
         fluxpsn[PolPos] = fluxpsnparam[PolPos][0]/fluxpsnparam[JXA][0]
         efold_adj[PolPos] = fluxpsn[PolPos]*efold[PolPos]
                 
-    print('Exponential fit from r-r_sep={:.3f}m to r-r_sep={:.3f}m'.format(RR_exp[0],RR_exp[-1]))
+    print('Exponential fit from r-r_sep={:.3e}m to r-r_sep={:.3e}m'.format(RR_exp[0],RR_exp[-1]))
     print('A0={:.3e}, lambda={:.3f}'.format(*eparam[PolPos]))
     print('Poloidal Slice {:0.0f}: e-folding length={:.3f}mm'.format(PolPos,efold[PolPos]))
     print('Slope={:.3f}, Flux Expansion={:.3f}, Adjusted e-folding length={:.3f}'.format(fluxpsnparam[PolPos][0],fluxpsn[PolPos],efold_adj[PolPos]))
@@ -450,6 +446,19 @@ ExportButton = Button(exportax, 'Export\nData', color=axcolor, hovercolor='0.975
 
 def export(event):    
     # Save LFS and HFS Adjusted e-Folding lengths in an external .json file
+    if JXA or JXI not in yparam.keys():
+        
+        print('Processing Inner and Outer Midplane Neutral Data')
+        
+        reset(event)
+        tanhfit(event)
+        expfit(event)
+        
+        jxi_set(event)
+        tanhfit(event)
+        expfit(event)
+    
+    print('Formatting data...')
     
     efold_plot={}
     efold_plot['gaslvl']=GasLvl
@@ -460,6 +469,8 @@ def export(event):
     efold_plot['HFS_NeuDen'] = float(NeuDen.PARAM['NeuDen'].loc[SEP,JXI,Attempt[-1]].values)
     efold_plot['LFS_NePED'] = yparam[JXA][1]+yparam[JXA][3]
     efold_plot['HFS_NePED'] = yparam[JXI][1]+yparam[JXI][3]
+    efold_plot['LFS_PedWidth'] = 2000*yparam[JXA][2]
+    efold_plot['HFS_PedWidth'] = 2000*yparam[JXI][2]
     
     dXP_dict=dXP.to_dict()
     
@@ -468,7 +479,7 @@ def export(event):
     with open('{}efold_data_{}.json'.format(DRT,Attempt[0]),'w') as fp:
         json.dump(export_data,fp,indent=2)
         
-    print('Data exported succesfully')
+    print('Data exported succesfully!')
     
 WholeFit.on_clicked(wholefit)
 ExportButton.on_clicked(export)

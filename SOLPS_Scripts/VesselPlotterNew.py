@@ -805,10 +805,10 @@ class SOLPSPLOT(object):
                 PolXLbl = r'Poloidal Cell Index $X$'
             elif POLC == 'dXP':
                 PP = PolVec.loc[:,:,:,'dXP']
-                PolXLbl = r'Distance along Separatrix CW from X-Point $m$'
+                PolXLbl = r'Poloidal distance along separatrix, clockwise from X-point ($m$)'
             elif POLC == 'dXP_norm':
                 PP = PolVec.loc[:,:,:,'dXP_norm']
-                PolXLbl = r'Normalized Distance along Separatrix CW from X-Point'
+                PolXLbl = r'Normalized poloidal distance along separatrix, clockwise from X-point'
 
             #print('Beginning Plot Sequence')                
 
@@ -852,7 +852,9 @@ class SOLPSPLOT(object):
                   
             plt.xlabel(PolXLbl)
             plt.ylabel(PARAM.name)
-            plt.grid()
+            
+            if PolKW['GRID'] is True:
+                plt.grid()
             
             self.PolKW = PolKW
     
