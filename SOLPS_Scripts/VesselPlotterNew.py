@@ -46,8 +46,8 @@ class SOLPSPLOT(object):
     GRAD = False > Calculate Gradient of Parameter Data
     ELEV = 75 > Elevation of viewing angle
     AZIM = 270 > Azimuthal viewing angle for Surface Plot
-    JXI = 38 > Poloidal position of Inner Midplane - default is 37
-    JXA = 56 > Poloidal position of Outer Midplane - default is 55
+    JXI = 37 > Poloidal position of Inner Midplane - default is 37
+    JXA = 55 > Poloidal position of Outer Midplane - default is 55
     SEP = 20 > Radial position of Separatrix - default is 18    
     XDIM = 98 > Dimension of computational grid in the x (poloidal) direction
     YDIM = 38 > Dimension of computational grid in the y (radial) direction

@@ -15,24 +15,27 @@ from scipy.stats import binned_statistic
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.path import Path
-from matplotlib.widgets import Slider, Button, CheckButtons
+from matplotlib.widgets import Slider, Button, CheckButtons, TextBox
 import json
 
 ### Input Fields ###
 
 Shot = '12'
-Attempt = ['51N']
+Attempt = ['50N']
 GasLvl = 77.8
-Balloon = 1
+Balloon = 0
 
 PS=['.','.','.','.','.','x']
+
+plt.rc('lines',linewidth=5,markersize=15,markeredgewidth=2,linestyle='solid')
 
 ### Setting up Base Variables ###
 NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],EXP=True,AVG=False,PlotScheme='')
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
 SEP = 18
-CoreBound = [26,70]
+CoreBound = [24,71]
+PolLim=CoreBound
 Rmax = 0.01
 Rmin = -0.01
 Thresh=0.01
@@ -41,6 +44,7 @@ RadLoc = NeuDen.RadCoords['RadLoc']
 VertLoc = NeuDen.RadCoords['VertLoc']
 RR = NeuDen.GetRadCoords('rrsep',[0,0])[0]
 Psin = NeuDen.GetRadCoords('psin',[0,0])[0]
+plt.rc('font',size=15) 
 DRT='{}/Attempt{}/'.format(NeuDen.KW['BASEDRT'],Attempt[0])
 
 XP_range=np.array([CoreBound[0]-1,CoreBound[0],CoreBound[1],CoreBound[1]+1])
@@ -62,12 +66,18 @@ NeuDen_SOLPS_med = {}
 
 efold={}
 efold_adj={}
+efold_adj_err={}
 yparam={}
 eparam={}
+e_err={}
+efold_err={}
+ldparam1={}
+ldparam2={}
 x0 = {}
 xi = {}
 fluxpsn = {}
 fluxpsnparam={}
+fluxpsn_err={}
 
 if 'AVG' in NeuDen.Attempts:
     Attempt.append('AVG')
@@ -91,58 +101,48 @@ dXP.loc[:,PolCoords[1]]=dXP.loc[:,PolCoords[0]].values/np.max(dXP.loc[:,PolCoord
 fig, ax = plt.subplots()
 ax.set_frame_on(False)
 ax.set_axis_off()
-gs=gridspec.GridSpec(9,2,width_ratios=[5,3],height_ratios=[1,1,1,1,1,1,1,1,1],hspace=0.3)
+gs=gridspec.GridSpec(9,2,width_ratios=[5,3],height_ratios=[1,1,1,1,1,1,1,1,1],hspace=0.0)
 
 axcontour = fig.add_subplot(gs[0:8,1])
 NeuDen.Contour('NeuDen',LOG10=1,AX=axcontour, Markers=False)
-axcontour.set_title('Neutral Density Contour')
+axcontour.set_title('Shot {}, Attempt {}\nNeutral Density Contour'.format(Shot,*Attempt))
 axcontour.plot(X_xp,Y_xp,'X')
 axcontour.margins(x=0)
 
-fluxpsnprofile = fig.add_subplot(gs[0:3,0])
-FluxPsnProf, = fluxpsnprofile.plot(np.nan,np.nan,'rX')
-Lin_Fit, = fluxpsnprofile.plot(np.nan,np.nan)
-FluxPsnV1 = fluxpsnprofile.axvline(np.nan)
-FluxPsnV2 = fluxpsnprofile.axvline(np.nan)
-fluxpsnprofile.axvline(0.0,color='k')
-fluxpsnprofile.axhline(1.0,color='k')
-TXT_FLXPSN=fluxpsnprofile.text(0.02,0.95,'',transform=fluxpsnprofile.transAxes,verticalalignment='top', bbox=props)
-fluxpsnprofile.set_ylabel(r'$\psi_n$')
-fluxpsnprofile.set_title('Shot {}, Attempt {}'.format(Shot,*Attempt))
-'''
-fluxpsnprofile.plot(RR.loc[:,f0,Attempt[-1]].values,Psin.loc[:,f0,Attempt[-1]].values,'*')
-fluxpsnprofile.set_xlim(XLim)
-fluxpsnYLim = fluxpsnprofile.get_ylim()
-'''
+neudenprofile = fig.add_subplot(gs[6:9,0])
+NeuDenProf, = neudenprofile.semilogy(np.nan,np.nan,'gX',markersize=16)
+Exp_Fit, = neudenprofile.semilogy(np.nan,np.nan,color='lime',linewidth=5)
+NDV1 = neudenprofile.axvline(np.nan,linewidth=3)
+NDV2 = neudenprofile.axvline(np.nan,linewidth=3)
+neudenprofile.axvline(0.0,color='k',linewidth=3)
+TXT_EFOLD=neudenprofile.text(0.02,0.9,'',transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
+TXT_EADJ=neudenprofile.text(0.02,0.81,'',transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
+neudenprofile.set_xlabel(r'$R-R_{SEP}$ (m)',fontsize=20)
+neudenprofile.set_ylabel(r'Neutral D Density ($m^{-3}$)',fontsize=20)
+neudenprofile.tick_params(width=2,length=5)
 
-neprofile = fig.add_subplot(gs[3:6,0],sharex=fluxpsnprofile)
-NeProf, = neprofile.plot(np.nan,np.nan,'bX')
-Tanh_Fit, = neprofile.plot(np.nan,np.nan)
-NeV1 = neprofile.axvline(np.nan)
-NeV2 = neprofile.axvline(np.nan)
+neprofile = fig.add_subplot(gs[3:6,0],sharex=neudenprofile)
+NeProf, = neprofile.plot(np.nan,np.nan,'bX',markersize=16)
+Tanh_Fit, = neprofile.plot(np.nan,np.nan,color='cyan',linewidth=5)
+NeV1 = neprofile.axvline(np.nan,linewidth=3)
+NeV2 = neprofile.axvline(np.nan,linewidth=3)
+neprofile.axvline(0.0,color='k',linewidth=3)
 TXT_TANH=neprofile.text(0.02,0.2,'',transform=neprofile.transAxes,verticalalignment='top', bbox=props)
-neprofile.set_ylabel(r'Electron Density ($m^{-3}$)')
-XLim = neprofile.get_xlim()
-'''
-NeuDen.RadProf('Ne',AX=neprofile,Markers=False,RADC='rrsep',JXA=f0)
-neprofile.set_xlim(XLim)
-NeYLim = neprofile.get_ylim()
-'''
+neprofile.set_ylabel(r'Electron Density ($10^{20}\;m^{-3}$)',fontsize=20)
+neprofile.tick_params(width=2,length=5)
+plt.setp(neprofile.get_xticklabels(),visible=False)
 
-neudenprofile = fig.add_subplot(gs[6:9,0],sharex=neprofile)
-NeuDenProf, = neudenprofile.semilogy(np.nan,np.nan,'gX')
-Exp_Fit, = neudenprofile.semilogy(np.nan,np.nan)
-NDV1 = neudenprofile.axvline(np.nan)
-NDV2 = neudenprofile.axvline(np.nan)
-TXT_EFOLD=neudenprofile.text(0.02,0.75,'',transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
-TXT_EADJ=neudenprofile.text(0.02,0.6,'',transform=neudenprofile.transAxes,verticalalignment='top', bbox=props)
-neudenprofile.set_xlabel(r'$R-R_{SEP}$ (m)')
-neudenprofile.set_ylabel(r'Neutral D Density ($m^{-3}$)')
-'''
-NeuDen.RadProf('NeuDen',LOG10=log,AX=neudenprofile,Markers=False,RADC='rrsep',JXA=f0)  #,PlotScheme=['x'])
-XLim = neudenprofile.get_xlim()
-YLim = neudenprofile.get_ylim()
-'''
+fluxpsnprofile = fig.add_subplot(gs[0:3,0],sharex=neprofile)
+FluxPsnProf, = fluxpsnprofile.plot(np.nan,np.nan,'rX',markersize=16)
+Lin_Fit, = fluxpsnprofile.plot(np.nan,np.nan,color='yellow',linewidth=5)
+FluxPsnV1 = fluxpsnprofile.axvline(np.nan,linewidth=3)
+FluxPsnV2 = fluxpsnprofile.axvline(np.nan,linewidth=3)
+fluxpsnprofile.axvline(0.0,color='k',linewidth=3)
+fluxpsnprofile.axhline(1.0,color='k',linewidth=3)
+TXT_FLXPSN=fluxpsnprofile.text(0.02,0.95,'',transform=fluxpsnprofile.transAxes,verticalalignment='top', bbox=props)
+fluxpsnprofile.set_ylabel(r'$\psi_n$',fontsize=20)
+fluxpsnprofile.tick_params(width=2,length=5)
+plt.setp(fluxpsnprofile.get_xticklabels(),visible=False)
 
 # Initiate Chord Slicing Variables and Data Vectors
 
@@ -254,7 +254,7 @@ def update(val):
         TXT_EFOLD.set_text('e-folding length={:.3f}mm'.format(efold[PolPos]))
         TXT_EADJ.set_text('Adjusted e-folding length={:.3f}mm'.format(efold_adj[PolPos]))
         
-        Lin_Fit.set_data(RR_SEP_avg[PolPos],(fluxpsnparam[PolPos][0]*RR_SEP_avg[PolPos]+fluxpsnparam[PolPos][1]))
+        Lin_Fit.set_data(RR_SEP_avg[PolPos],(fluxpsnparam[PolPos][0][0]*RR_SEP_avg[PolPos]+fluxpsnparam[PolPos][0][1]))
         TXT_FLXPSN.set_text('Flux Expansion={:.3f}mm'.format(fluxpsn[PolPos]))
     else:
         Exp_Fit.set_data(np.nan,np.nan)
@@ -283,7 +283,7 @@ def update(val):
 
 ### Basic Buttons and Sliders ###
 
-axslide = fig.add_subplot(gs[8,1], facecolor=axcolor) #plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
+axslide = plt.axes([0.63, 0.1, 0.3, 0.04], facecolor=axcolor)#fig.add_subplot(gs[8,1], facecolor=axcolor)#
 sslide = Slider(axslide, 'Poloidal\nSurface', CoreBound[0], CoreBound[1], valinit=f0, valfmt='%0.0f', valstep=1.0)
 
 sslide.on_changed(update)
@@ -367,66 +367,136 @@ def expfit(event):
     #RR_SOLPS = RR.loc[:,PolPos,Attempt[-1]].values
     RR_i = np.where((RR_SEP_avg[PolPos]>(xi[PolPos])) & (RR_SEP_avg[PolPos]<(x0[PolPos])))[0]
     RR_i = np.arange((RR_i[0]-1),(RR_i[-1]+2),1)
-    RR_exp=RR_SEP_avg[PolPos][RR_i]
-    if len(RR_exp) < 3:
-        RR_i = np.arange((RR_i[0]-1),(RR_i[-1]+2),1)
-        RR_exp= RR.loc[RR_i,PolPos,Attempt[-1]].values
+    while np.count_nonzero(NeuDen_SOLPS_med[PolPos][RR_i]) < 3:
+        RR_i = np.arange((RR_i[0]),(RR_i[-1]+2),1)
+        print(RR_i)
+    
+    print(RR_i)
+    print(NeuDen_SOLPS_med[PolPos][RR_i])
+    
+    RR_exp= RR_SEP_avg[PolPos][RR_i]     
         
     if PolPos not in eparam.keys():
         
-        exfit=curve_fit(EXPFIT,RR_exp,NeuDen_SOLPS_med[PolPos][RR_i],e0)
+        zmask=np.where(NeuDen_SOLPS_med[PolPos][RR_i] != 0)
+        print(zmask)
+        exfit=curve_fit(EXPFIT,RR_exp[zmask],NeuDen_SOLPS_med[PolPos][RR_i][zmask],e0)
         eparam[PolPos] = exfit[0]
+        e_err[PolPos] = np.sqrt(np.diag(exfit[1]))
         efold[PolPos] = 1000/eparam[PolPos][1]
+        efold_err[PolPos] = efold[PolPos]*(e_err[PolPos][1]/eparam[PolPos][1])
+        
+        while efold[PolPos] < 0:
+            RR_i = np.arange((RR_i[0]-1),(RR_i[-1]+2),1)
+            print(RR_i)
+            RR_exp= RR_SEP_avg[PolPos][RR_i]
+            zmask=np.where(NeuDen_SOLPS_med[PolPos][RR_i] != 0)
+            print(zmask)
+            exfit=curve_fit(EXPFIT,RR_exp[zmask],NeuDen_SOLPS_med[PolPos][RR_i][zmask],e0)
+            eparam[PolPos] = exfit[0]
+            e_err[PolPos] = np.sqrt(np.diag(exfit[1]))
+            efold[PolPos] = 1000/eparam[PolPos][1]
+            efold_err[PolPos] = efold[PolPos]*(e_err[PolPos][1]/eparam[PolPos][1])
         
         #Psin_SOLPS = Psin.loc[RR_i,PolPos,Attempt[-1]].values
-        fluxpsnparam[PolPos] = np.polyfit(RR_exp,Psin_avg[PolPos][RR_i],1)
-        fluxpsn[PolPos] = fluxpsnparam[PolPos][0]/fluxpsnparam[JXA][0]
+        fluxpsnparam[PolPos] = np.polyfit(RR_exp,Psin_avg[PolPos][RR_i],1,cov=True)
+        fluxpsn[PolPos] = fluxpsnparam[PolPos][0][0]/fluxpsnparam[JXA][0][0]
+        fluxpsn_err[PolPos] = np.sqrt(np.diag(fluxpsnparam[PolPos][1]))[0]
         efold_adj[PolPos] = fluxpsn[PolPos]*efold[PolPos]
+        efold_adj_err[PolPos] = efold_adj[PolPos]*np.sqrt((efold_err[PolPos]/efold[PolPos])**2 + (fluxpsn_err[PolPos]/fluxpsn[PolPos])**2)
                 
     print('Exponential fit from r-r_sep={:.3e}m to r-r_sep={:.3e}m'.format(RR_exp[0],RR_exp[-1]))
     print('A0={:.3e}, lambda={:.3f}'.format(*eparam[PolPos]))
-    print('Poloidal Slice {:0.0f}: e-folding length={:.3f}mm'.format(PolPos,efold[PolPos]))
-    print('Slope={:.3f}, Flux Expansion={:.3f}, Adjusted e-folding length={:.3f}'.format(fluxpsnparam[PolPos][0],fluxpsn[PolPos],efold_adj[PolPos]))
+    print('Poloidal Slice {:0.0f}: Raw e-folding length={:.3f}mm, std error={:.3f}'.format(PolPos,efold[PolPos],efold_err[PolPos]))
+    print('Slope={:.3f}, Flux Expansion={:.3f}, Adjusted e-folding length={:.3f}, std error={:.3f}'.format(fluxpsnparam[PolPos][0][0],fluxpsn[PolPos],efold_adj[PolPos],efold_adj_err[PolPos]))
 
     Exp_Fit.set_data(RR_exp, EXPFIT(RR_exp,*eparam[PolPos]))
     TXT_EFOLD.set_text('e-folding length={:.3f}mm'.format(efold[PolPos]))
     TXT_EADJ.set_text('Adjusted e-folding length={:.3f}mm'.format(efold_adj[PolPos]))
-    Lin_Fit.set_data(RR_exp,(fluxpsnparam[PolPos][0]*RR_exp+fluxpsnparam[PolPos][1]))
+    Lin_Fit.set_data(RR_exp,(fluxpsnparam[PolPos][0][0]*RR_exp+fluxpsnparam[PolPos][0][1]))
     TXT_FLXPSN.set_text('Flux Expansion={:.3f}mm'.format(fluxpsn[PolPos]))
 
 ExpFit.on_clicked(expfit)
 
+def gradLD(event):
+    PolPos=sslide.val
+    RR_i = np.where((RR_SEP_avg[PolPos]>(xi[PolPos])) & (RR_SEP_avg[PolPos]<(x0[PolPos])))[0]
+    RR_i = np.arange((RR_i[0]-1),(RR_i[-1]+2),1)
+    RR_exp=RR_SEP_avg[PolPos][RR_i]
+    NeuDen=NeuDen_SOLPS_med[PolPos][RR_i]
+    if len(RR_exp) < 3:
+        RR_i = np.arange((RR_i[0]-1),(RR_i[-1]+2),1)
+        RR_exp= RR.loc[RR_i,PolPos,Attempt[-1]].values
+        
+    if PolPos not in ldparam1.keys():
+        lgrad = np.gradient(NeuDen,RR_exp)
+        lgrad_avg = np.mean(lgrad)
+        NeuDen_avg = np.mean(NeuDen)
+        ldparam1[PolPos]=1000*NeuDen_avg/lgrad_avg
+        ldparam2[PolPos]=1000*np.mean(NeuDen/lgrad)
+        
+    print('Poloidal Slice {}: Gradient Scale Length V1:{:.3f}mm, Gradient Scale Length V2:{:.3f}mm'.format(PolPos,ldparam1[PolPos],ldparam2[PolPos]))
+
 ### Poloidal Neutral e-Folding Length Plotting Function ###
 
-wholeax = plt.axes([0.575, 0.025, 0.135, 0.05])
-WholeFit = Button(wholeax, 'WHOLE POLOIDAL PLOT', color=axcolor, hovercolor='0.975')
+wholeax = plt.axes([0.580, 0.025, 0.080, 0.05])
+WholeFit = Button(wholeax, 'POLOIDAL\nPLOT', color=axcolor, hovercolor='0.975')
 
-bothax = plt.axes([0.720, 0.025, 0.125, 0.05], facecolor=axcolor)
-BothPlot = CheckButtons(bothax, ['Plot Raw e-Fold'],[False])
+poliminax = plt.axes([0.685, 0.025, 0.025, 0.05])
+PolLim_Min = TextBox(poliminax, 'Pol\nPlot\nMin', hovercolor='0.9')
+
+polimaxax = plt.axes([0.735, 0.025, 0.025, 0.05])
+PolLim_Max = TextBox(polimaxax, 'Pol\nPlot\nMax', hovercolor='0.9')
+
+bothax = plt.axes([0.770, 0.025, 0.075, 0.05], facecolor=axcolor)
+BothPlot = CheckButtons(bothax, ['Plot Raw\ne-Fold'],[False])
+
+exportax = plt.axes([0.855, 0.025, 0.1, 0.05])
+ExportButton = Button(exportax, 'Export\nData', color=axcolor, hovercolor='0.975')
+
+def submitPolLim_Min(text):
+    if int(text) > CoreBound[0] and int(text) < PolLim[1]:
+        PolLim[0]=int(text)
+    else:
+        PolLim[0]=CoreBound[0]    
+    print('Minimum Poloidal Surface={}'.format(PolLim[0]))
+
+PolLim_Min.on_submit(submitPolLim_Min)
+
+def submitPolLim_Max(text):
+    if int(text) < CoreBound[1] and int(text) > PolLim[0]:
+        PolLim[1]=int(text)
+    else:
+        PolLim[1]=CoreBound[1]  
+    print('Maximum Poloidal Surface={}'.format(PolLim[1]))
+
+PolLim_Max.on_submit(submitPolLim_Max)
 
 def wholefit(event):
     wholeFig, wholeAx = plt.subplots()
     reset(event)
     tanhfit(event)
     expfit(event)
-    for n in range(CoreBound[0],CoreBound[1]+1):
+    for n in range(PolLim[0],PolLim[1]+1):
         sslide.set_val(n)
         print('Calculating e-fold length for Poloidal Position {}'.format(n))
         tanhfit(event)
         expfit(event)
   
-    x_adj,y_adj = zip(*sorted(efold_adj.items()))
-    wholeAx.plot(dXP.loc[:,PolCoords[0]].values,y_adj,'b^')
+    y_adj = np.array(sorted(efold_adj.items()))[:,1]
+    y_adj_err = np.array(sorted(efold_adj_err.items()))[:,1]
+    wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y_adj,'bv:')
+    wholeAx.fill_between(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y_adj-y_adj_err,y_adj+y_adj_err,alpha=0.2,edgecolor='k',facecolor='c')
     wholeAx.set_title('Shot {} Attempt {} neutral e-folding lengths'.format(Shot,Attempt[-1]))
     wholeAx.set_xlabel(PolCoords[0])
     wholeAx.set_ylabel('e_folding length (mm)')
-    wholeAx.axvline(dXP.loc[JXA,PolCoords[0]].values,color='black')
+    wholeAx.axvline(dXP.loc[JXA,PolCoords[0]].values,color='red')
     wholeAx.axvline(dXP.loc[JXI,PolCoords[0]].values,color='orange')
-    wholeAx.axvline(dXP.loc[CoreBound[0],PolCoords[0]].values,color='red')
+    wholeAx.axvline(dXP.loc[CoreBound[0],PolCoords[0]].values,color='black')
     
     if BothPlot.get_status()[0] == True:
         x,y = zip(*sorted(efold.items()))  
-        wholeAx.plot(dXP.loc[:,PolCoords[0]].values,y,'r^-')
+        wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y,'r^:')
         wholeAx.legend(['Adjusted e-folding length','Outer Midplane', 'Inner Midplane','X-Point','Raw e-folding length'])
     else:
         wholeAx.legend(['Adjusted e-folding length','Outer Midplane', 'Inner Midplane','X-Point'])
@@ -434,15 +504,12 @@ def wholefit(event):
     #wholeAx.xaxis.set_ticks(np.arange(20,75,5))
     starty, endy = wholeAx.get_ylim()
     wholeAx.yaxis.set_ticks(np.linspace(0,np.round(endy),11))
-    wholeAx.axvline(dXP.loc[CoreBound[1],PolCoords[0]].values,color='red')
+    wholeAx.axvline(dXP.loc[CoreBound[1],PolCoords[0]].values,color='black')
     wholeAx.grid()
     
     secax=wholeAx.secondary_xaxis('top',functions=(lambda x: x / np.max(dXP[:,0].values), lambda x: x * np.max(dXP[:,0].values)))
     secax.set_xlabel(PolCoords[1])
     plt.show
-
-exportax = plt.axes([0.855, 0.025, 0.1, 0.05])
-ExportButton = Button(exportax, 'Export\nData', color=axcolor, hovercolor='0.975')
 
 def export(event):    
     # Save LFS and HFS Adjusted e-Folding lengths in an external .json file
@@ -450,31 +517,63 @@ def export(event):
         
         print('Processing Inner and Outer Midplane Neutral Data')
         
+        yparam_JXA_AVG=yparam[JXA] #0
+        efold_adj_JXA_AVG=efold_adj[JXA] #0
+    
+        yparam_JXI_AVG=yparam[JXI] #0
+        efold_adj_JXI_AVG=efold_adj[JXI] #0    
+    
         reset(event)
         tanhfit(event)
         expfit(event)
+        gradLD(event)
         
         jxi_set(event)
         tanhfit(event)
         expfit(event)
-    
+        
+        '''
+        for n in range(JXA-2,JXA+3):
+            sslide.set_val(n)
+            tanhfit(event)
+            expfit(event)
+            yparam_JXA_AVG = (yparam_JXA_AVG+yparam[n])
+            efold_adj_JXA_AVG = (efold_adj_JXA_AVG+efold_adj[n])
+        
+        for n in range(JXI-2,JXI+3):
+            sslide.set_val(n)
+            tanhfit(event)
+            expfit(event)
+            yparam_JXI_AVG = (yparam_JXI_AVG+yparam[n])
+            efold_adj_JXI_AVG = (efold_adj_JXI_AVG+efold_adj[n])
+            
+        yparam_JXA_AVG = yparam_JXA_AVG/5
+        efold_adj_JXA_AVG = efold_adj_JXA_AVG/5
+        
+        yparam_JXI_AVG = yparam_JXI_AVG/5
+        efold_adj_JXI_AVG = efold_adj_JXI_AVG/5
+        '''
     print('Formatting data...')
     
     efold_plot={}
     efold_plot['gaslvl']=GasLvl
     efold_plot['balloon']=Balloon
-    efold_plot['LFS'] = efold_adj[JXA]
-    efold_plot['HFS'] = efold_adj[JXI]
-    efold_plot['LFS_NeuDen'] = float(NeuDen.PARAM['NeuDen'].loc[SEP,JXA,Attempt[-1]].values)
-    efold_plot['HFS_NeuDen'] = float(NeuDen.PARAM['NeuDen'].loc[SEP,JXI,Attempt[-1]].values)
-    efold_plot['LFS_NePED'] = yparam[JXA][1]+yparam[JXA][3]
-    efold_plot['HFS_NePED'] = yparam[JXI][1]+yparam[JXI][3]
-    efold_plot['LFS_PedWidth'] = 2000*yparam[JXA][2]
-    efold_plot['HFS_PedWidth'] = 2000*yparam[JXI][2]
+    efold_plot['LFS'] = efold_adj_JXA_AVG
+    efold_plot['HFS'] = efold_adj_JXI_AVG
+    efold_plot['LFS_NeuDen'] = np.mean(NeuDen.PARAM['NeuDen'].loc[SEP,JXA-2:JXA+2,Attempt[-1]].values)
+    efold_plot['HFS_NeuDen'] = np.mean(NeuDen.PARAM['NeuDen'].loc[SEP,JXI-2:JXI+2,Attempt[-1]].values)
+    efold_plot['LFS_NePED'] = yparam_JXA_AVG[1]+yparam_JXA_AVG[3]
+    efold_plot['HFS_NePED'] = yparam_JXI_AVG[1]+yparam_JXI_AVG[3]
+    efold_plot['LFS_PedWidth'] = 2000*yparam_JXA_AVG[2]
+    efold_plot['HFS_PedWidth'] = 2000*yparam_JXI_AVG[2]
+    efold_plot['LFS Gradient_Scale_Length'] = ldparam1[JXA]
+    efold_plot['LFS_Gradient_Scale_Length_V2'] = ldparam2[JXA]
     
     dXP_dict=dXP.to_dict()
     
-    export_data=[efold_plot,efold,efold_adj,dXP_dict]
+    NeuDen_dict=NeuDen.PARAM['NeuDen'].loc[SEP,:,Attempt[-1]].to_dict()
+    
+    export_data=[efold_plot,efold,efold_adj,dXP_dict,NeuDen_dict,efold_adj_err]
     
     with open('{}efold_data_{}.json'.format(DRT,Attempt[0]),'w') as fp:
         json.dump(export_data,fp,indent=2)
@@ -485,5 +584,7 @@ WholeFit.on_clicked(wholefit)
 ExportButton.on_clicked(export)
 
 update(JXA)
+tanhfit(JXA)
+expfit(JXA)
 
 plt.show()

@@ -12,18 +12,20 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.widgets import Slider
+from TOOLS import SET_WDIR
 
-plt.rc('font',size=25)
-plt.rc('lines',linewidth=5,markersize=10)
+plt.rc('font',size=9)
+plt.rc('lines',linewidth=2,markersize=10)
 
 # Will eventually implement as a function. Input:
 
-Shot = 'd3d'           #Shot Number (12, 25, or d3d)
-Attempt = 72
+Shot = '25'           #Shot Number (12, 25, or d3d)
+Attempt = '21N'
 Geo = 1
 Contour = 0
+Device='cmod'
 
-CmodReScale = [1.0, 0.90, 0.835, 0.77] 
+CmodReScale = [1.0,0.92,0.835,0.77]#[1.0,0.9,0.835,0.77]# 
 D3DReScale = [10, 9, 8.35, 7.7]
 
 jxi = 37    # Poloidal position of Inner Midplane
@@ -31,15 +33,17 @@ jxa = 55    # Poloidal position of Outer Midplane
 sep = 20    # Radial position of Separatrix
 
 BalRescale = CmodReScale
-ballooning = [0.0,1.0,1.5,2.0]
+ballooning = [0.0,1.0,1.5,2.0]#
 #Function would begin here
 
-dir = 'SOLPS_2D_prof/Shot0' + str(Shot)    #Generate path
+BASEDRT,TOPDRT=SET_WDIR('','')
+
+dir = '{}{}/0{}home'.format(BASEDRT,Device,Shot)    #Generate path
 
 X = np.linspace(24,71,48)
 Y = np.linspace(0,35,36)
 
-BB = xr.DataArray(np.loadtxt(dir + '/bb0' + str(Shot),usecols = (3)).reshape((38,98))[1:37,25:73], coords=[Y,X], dims=['Radial_Location','Poloidal_Location'])     #Load Neutral Density data 
+BB = xr.DataArray(np.loadtxt('{}/bb0{}'.format(dir,Shot),usecols = (3)).reshape((38,98))[1:37,25:73], coords=[Y,X], dims=['Radial_Location','Poloidal_Location'])     #Load Neutral Density data 
 
 bb_ref = np.mean(BB.values)
 
@@ -147,73 +151,71 @@ if Contour == 1:
         a.set_aspect(1.0)
         plt.grid()
 
-legendtext = ['Outer Midplane', 'Inner Midplane','Control','Ballooning1', 'Ballooning2', 'Ballooning3']
+legendtext = ['Outer Midplane', 'Inner Midplane','Control({},{})'.format(ballooning[0],BalRescale[0]),'Ballooning1({},{})'.format(ballooning[1],BalRescale[1]), 'Ballooning2({},{})'.format(ballooning[2],BalRescale[2]), 'Ballooning3({},{})'.format(ballooning[3],BalRescale[3])]
 #for u in range(len(ballooning)):
 #    legendtext.append('b=' + str(ballooning[u]) + ', b_r=' + str(BalRescale[u]))
 
 BB_scan2 = np.ones((48,len(ballooning)))
 
-fig3a = plt.figure(figsize=(14,7))
-plt.plot([jxa,jxa],[np.amin(ResFactor[sep,:,:]),np.amax(ResFactor[sep,:,:])],color='orange',linewidth=2)
-plt.plot([jxi,jxi],[np.amin(ResFactor[sep,:,:]),np.amax(ResFactor[sep,:,:])],color='red',linewidth=2)
-plt.plot(Xx[sep,:],ResFactor[sep,:,:],linewidth=5)
-plt.legend(legendtext)
-plt.title('Transport Coefficient Rescale Factor at Separatrix')
-plt.xlabel('Poloidal Coordinate')
-plt.ylabel(r'$F_{TC}$')
-plt.grid()
+FigBalloon, AxBalloon = plt.subplots(nrows=3,ncols=2)
 
-fig3b = plt.figure(figsize=(14,10))
-plt.plot([jxa,jxa],[np.amin(ResArea[sep,:,:]),np.amax(ResArea[sep,:,:])],color='orange',linewidth=2)
-plt.plot([jxi,jxi],[np.amin(ResArea[sep,:,:]),np.amax(ResArea[sep,:,:])],color='red',linewidth=2)
-plt.plot(Xx[sep,:],ResArea[sep,:,:],linewidth=5)
-plt.legend(legendtext)
-plt.title('Area-Corrected Rescale Factor at Separatrix')
-plt.xlabel('Poloidal Coordinate')
-plt.ylabel(r'$F_{TC}/A\;(m^{-2})$')
-a = plt.gca()
-a.ticklabel_format(axis='y',style='scientific',scilimits=(0,0))
-plt.grid()
+#fig3a = plt.figure(figsize=(14,7))
+AxBalloon[0,0].plot([jxa,jxa],[np.amin(ResFactor[sep,:,:]),np.amax(ResFactor[sep,:,:])],color='orange',linewidth=2)
+AxBalloon[0,0].plot([jxi,jxi],[np.amin(ResFactor[sep,:,:]),np.amax(ResFactor[sep,:,:])],color='red',linewidth=2)
+AxBalloon[0,0].plot(Xx[sep,:],ResFactor[sep,:,:],linewidth=2)
+AxBalloon[0,0].legend(legendtext)
+AxBalloon[0,0].set_title('Transport Coefficient Rescale Factor at Separatrix')
+AxBalloon[0,0].set_xlabel('Poloidal Coordinate')
+AxBalloon[0,0].set_ylabel(r'$F_{TC}$')
+AxBalloon[0,0].set_xlim(Xx[sep,0],Xx[sep,-1])
+AxBalloon[0,0].grid()
 
-fig4 = plt.figure(figsize=(14,10))
-plt.plot(Y,np.sum(ResDN,axis=1),linewidth=5)
-plt.legend(legendtext[2:6])
-plt.title('Poloidal Sum of Particle Diffusion Coefficient vs Radial Surface')
-plt.xlabel('Radial Coordinate')
-plt.ylabel(r'Poloidal Sum of Diffusion Coefficient $m^2s^{-1}$')
-plt.grid()
+#fig3b = plt.figure(figsize=(14,10))
+AxBalloon[1,0].plot([jxa,jxa],[np.amin(ResArea[sep,:,:]),np.amax(ResArea[sep,:,:])],color='orange',linewidth=2)
+AxBalloon[1,0].plot([jxi,jxi],[np.amin(ResArea[sep,:,:]),np.amax(ResArea[sep,:,:])],color='red',linewidth=2)
+AxBalloon[1,0].plot(Xx[sep,:],ResArea[sep,:,:],linewidth=2)
+AxBalloon[1,0].legend(legendtext)
+AxBalloon[1,0].set_title('Area-Corrected Rescale Factor at Separatrix')
+AxBalloon[1,0].set_xlabel('Poloidal Coordinate')
+AxBalloon[1,0].set_ylabel(r'$F_{TC}/A\;(m^{-2})$')
+#a = AxBalloon[1,0].gca()
+AxBalloon[1,0].ticklabel_format(axis='y',style='scientific',scilimits=(0,0))
+AxBalloon[1,0].grid()
 
-fig5 = plt.figure(figsize=(14,10))
-plt.plot(Y,np.sum(ResKYE,axis=1),linewidth=5)
-plt.legend(legendtext[2:6])
-plt.title('Poloidal Sum of Thermal Diffusion Coefficient vs Radial Surface')
-plt.xlabel('Radial Coordinate')
-plt.ylabel(r'Poloidal Sum of Thermal Coefficient $m^2s^{-1}$')
-plt.grid()
+#fig4 = plt.figure(figsize=(14,10))
+AxBalloon[0,1].plot(Y,np.sum(ResDN,axis=1),linewidth=2)
+AxBalloon[0,1].legend(legendtext[2:6])
+AxBalloon[0,1].set_title('Poloidal Sum of Particle Diffusion Coefficient vs Radial Surface')
+AxBalloon[0,1].set_xlabel('Radial Coordinate')
+AxBalloon[0,1].set_ylabel(r'Poloidal Sum of Diffusion Coefficient $m^2s^{-1}$')
+AxBalloon[0,1].set_xlim(Y[0],Y[-1])
+AxBalloon[0,1].grid()
 
-fig6 = plt.figure(figsize=(14,10))
-plt.plot(Y,np.sum(ResArea,axis=1),linewidth=5)
-plt.legend(legendtext[2:6],loc=2)
-plt.plot(sep,np.sum(ResArea[sep,:,0],axis=0),'kX',markersize=25)
-plt.title(r'Poloidal Sum of $F_{TC}/A$ vs Radial Surface')
-plt.xlabel('Radial Coordinate')
-plt.ylabel(r'$\sum_x F_{TC}/A\;(m^{-2})$')
-a = plt.gca()
-a.ticklabel_format(axis='y',style='scientific',scilimits=(0,0))
-plt.grid()
+#fig5 = plt.figure(figsize=(14,10))
+AxBalloon[1,1].plot(Y,np.sum(ResKYE,axis=1),linewidth=2)
+AxBalloon[1,1].legend(legendtext[2:6])
+AxBalloon[1,1].set_title('Poloidal Sum of Thermal Diffusion Coefficient vs Radial Surface')
+AxBalloon[1,1].set_xlabel('Radial Coordinate')
+AxBalloon[1,1].set_ylabel(r'Poloidal Sum of Thermal Coefficient $m^2s^{-1}$')
+AxBalloon[1,1].grid()
 
-'''
-sbal = Slider(axfreq, 'Freq', 0.1, 30.0, valinit=f0, valstep=delta_f)
-sbs = Slider(axamp, 'Amp', 0.1, 10.0, valinit=a0)
+#fig6 = plt.figure(figsize=(14,10))
+AxBalloon[2,1].plot(Y,np.sum(ResArea,axis=1),linewidth=2)
+AxBalloon[2,1].legend(legendtext[2:6])
+AxBalloon[2,1].plot(sep,np.sum(ResArea[sep,:,0],axis=0),'kX',markersize=15)
+AxBalloon[2,1].set_title(r'Poloidal Sum of $F_{TC}/A$ vs Radial Surface')
+AxBalloon[2,1].set_xlabel('Radial Coordinate')
+AxBalloon[2,1].set_ylabel(r'$\sum_x F_{TC}/A\;(m^{-2})$')
+#a = plt.gca()
+AxBalloon[2,1].ticklabel_format(axis='y',style='scientific',scilimits=(0,0))
+AxBalloon[2,1].grid()
 
-def update(val):
-    amp = samp.val
-    freq = sfreq.val
-    l.set_ydata(amp*np.sin(2*np.pi*freq*t))
-    fig.canvas.draw_idle()
-sfreq.on_changed(update)
-samp.on_changed(update)
-'''
+AxBalloon[0,0].relim()
+AxBalloon[0,0].autoscale_view(True,True,True)
+
+AxBalloon[0,1].relim()
+AxBalloon[0,1].autoscale_view(True,True,True)
+
 plt.show()
 
 #print(np.sum(ResDN.values,axis=1)[0] - 32.289)

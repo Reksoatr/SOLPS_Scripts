@@ -17,13 +17,13 @@ BASEDRT, TOPDRT=SET_WDIR('','')
 
 Device='cmod'
 
-Shots=['1160718024','1160718025']#['1160718012','1160718013','1160718023']#['1120917011']#['1101014006','1101014019']#    
+Shots=['1160718012','1160718013','1160718023']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#['1120917011']#['1101014006','1101014019']#    
 
 Rad='psin'
 
 Time0=75
 AVG=0
-PsinOffset=-0.01
+PsinOffset=-0.005
 TimeA=np.nan
 TimeB=np.nan
 
@@ -59,8 +59,8 @@ for i in Shots:
         Data[i]['psin']=Data[i]['psin']+PsinOffset
     
     Data[i]['time']=Data[i]['time'].flatten()
-    NeLine[i] = ne_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['ne'][:,Time0],yerr=Data[i]['nerr'][:,Time0],marker='o',linestyle='--')
-    TeLine[i] = te_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['te'][:,Time0],yerr=Data[i]['terr'][:,Time0],marker='o',linestyle='--')
+    NeLine[i] = ne_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['ne'][:,Time0],yerr=Data[i]['nerr'][:,Time0],marker='o',linestyle=':')
+    TeLine[i] = te_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['te'][:,Time0],yerr=Data[i]['terr'][:,Time0],marker='o',linestyle=':')
     
 ne_profile.set_title('Thompson Scattering Profiles at {:0.3f} sec'.format(Data[i]['time'][Time0]))
 ne_profile.set_ylabel(r'Electron Density $n_e\;(m^{-3})$')
