@@ -35,7 +35,7 @@ PolLegend=[]
 JXA=55
 JXI=37
 
-plt.rc('axes',titlesize=30)
+plt.rc('axes',titlesize=30,labelsize=30)
 plt.rc('lines',linewidth=5,markersize=20,markeredgewidth=2,linestyle='solid')
 plt.rc('legend',fontsize=25,title_fontsize=25)
 plt.rc('xtick',labelsize=25)
@@ -226,28 +226,32 @@ ax2[1].set_xlabel(r'Poloidal distance from x-point along separatrix, clockwise (
 ax2[1].set_ylabel(r'Neutral e-folding length (mm)')
 ax2[1].legend(handles=[XPT,IMP,OMP],loc=(0.53,0.01))
 
-ax4.set_xlabel(r'Pedestal electron density $n_{e,PED}\;(m^{-3})$')
-ax4.set_ylabel(r'Length (mm)')
+ax4.set_xlabel(r'Pedestal electron density $n_{e,PED}\;(m^{-3})$',fontsize=30)
+ax4.set_ylabel(r'Length (mm)',fontsize=30)
+xmax=ax4.get_xlim()[1]
+ymax=ax4.get_ylim()[1]
+ax4.set_xlim([0,xmax])
+ax4.set_ylim([0,ymax])
 ### Create Legend Objects ###
 
-PedWidth_46=mlines.Line2D([],[], marker='s',markerfacecolor='w',markeredgecolor='k',label='0.46 MA')
-PedWidth_76=mlines.Line2D([],[], marker='D',markerfacecolor='w',markeredgecolor='k',label='0.76 MA')
-PedWidth_98=mlines.Line2D([],[], marker='o',markerfacecolor='w',markeredgecolor='k',label='0.98 MA')
-PedWidth_012=mlines.Line2D([],[], marker='^',markerfacecolor='lightblue',markeredgecolor='k',label='1.0 MA')
-PedWidth_025=mlines.Line2D([],[], marker='v',markerfacecolor='salmon',markeredgecolor='k',label='1.3 MA')
+PedWidth_46=mlines.Line2D([],[], marker='s',markerfacecolor='w',markeredgecolor='k',label='0.46 MA',linestyle='none')
+PedWidth_76=mlines.Line2D([],[], marker='D',markerfacecolor='w',markeredgecolor='k',label='0.76 MA',linestyle='none')
+PedWidth_98=mlines.Line2D([],[], marker='o',markerfacecolor='w',markeredgecolor='k',label='0.98 MA',linestyle='none')
+PedWidth_012=mlines.Line2D([],[], marker='^',markerfacecolor='lightblue',markeredgecolor='k',label='1.3 MA',linestyle='none')
+PedWidth_025=mlines.Line2D([],[], marker='v',markerfacecolor='salmon',markeredgecolor='k',label='1.0 MA',linestyle='none')
 
-L_D_46=mlines.Line2D([],[], marker='s',markerfacecolor='grey',markeredgecolor='k',label='0.48 MA')
-L_D_76=mlines.Line2D([],[], marker='D',markerfacecolor='grey',markeredgecolor='k',label='0.76 MA')
-L_D_98=mlines.Line2D([],[], marker='o',markerfacecolor='grey',markeredgecolor='k',label='0.98 MA')
-L_D_012=mlines.Line2D([],[], marker='^',markerfacecolor='b',markeredgecolor='k',label='1.0 MA')
-L_D_025=mlines.Line2D([],[], marker='v',markerfacecolor='r',markeredgecolor='k',label='1.3 MA')
+L_D_46=mlines.Line2D([],[], marker='s',markerfacecolor='grey',markeredgecolor='k',label='0.48 MA',linestyle='none')
+L_D_76=mlines.Line2D([],[], marker='D',markerfacecolor='grey',markeredgecolor='k',label='0.76 MA',linestyle='none')
+L_D_98=mlines.Line2D([],[], marker='o',markerfacecolor='grey',markeredgecolor='k',label='0.98 MA',linestyle='none')
+L_D_012=mlines.Line2D([],[], marker='^',markerfacecolor='b',markeredgecolor='k',label='1.3 MA',linestyle='none')
+L_D_025=mlines.Line2D([],[], marker='v',markerfacecolor='r',markeredgecolor='k',label='1.0 MA',linestyle='none')
 
-EFold_Space=mlines.Line2D([],[], marker='o',markerfacecolor='w',markeredgecolor='w')
-EFold_012=mlines.Line2D([],[], marker='^',markerfacecolor='navy',markeredgecolor='k',label='1.0 MA')
-EFold_025=mlines.Line2D([],[], marker='v',markerfacecolor='maroon',markeredgecolor='k',label='1.3 MA')
+EFold_Space=mlines.Line2D([],[], marker='o',markerfacecolor='w',markeredgecolor='w',linestyle='none')
+EFold_012=mlines.Line2D([],[], marker='^',markerfacecolor='navy',markeredgecolor='k',label='1.3 MA',linestyle='none')
+EFold_025=mlines.Line2D([],[], marker='v',markerfacecolor='maroon',markeredgecolor='k',label='1.0 MA',linestyle='none')
 
-legend_cols= [(PedWidth_46,PedWidth_76,PedWidth_98,PedWidth_012,PedWidth_025),(L_D_46,L_D_76,L_D_98,L_D_012,L_D_025), (EFold_Space,EFold_Space,EFold_Space,EFold_012,EFold_025)]
-legend_title='              0.46 MA      0.76 MA     0.98 MA         1.0 MA         1.3 MA'
+legend_cols= [(PedWidth_46,PedWidth_76,PedWidth_98,PedWidth_025,PedWidth_012),(L_D_46,L_D_76,L_D_98,L_D_025,L_D_012), (EFold_Space,EFold_Space,EFold_Space,EFold_025,EFold_012)]
+legend_title='         0.46 MA   0.76 MA   0.98 MA   1.0 MA   1.3 MA'
 legend_keys=[r'$\Delta n$',r'$<L_D>$',r'$\lambda$']
 ax4.legend(legend_cols,legend_keys,title=legend_title,ncol=1,numpoints=1,markerfirst=False,shadow=True,handlelength=24,labelspacing=1,handler_map={tuple: HandlerTuple(ndivide=None)})
 

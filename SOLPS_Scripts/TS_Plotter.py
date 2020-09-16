@@ -11,13 +11,14 @@ import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider,TextBox,Button
 from TOOLS import SET_WDIR
 import numpy as np
+import pickle as pkl
 import sys
 
 BASEDRT, TOPDRT=SET_WDIR('','')
 
 Device='cmod'
 
-Shots=['1160718012','1160718013','1160718023']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#['1120917011']#['1101014006','1101014019']#    
+Shots=['1120917011']#['1160718012','1160718013','1160718023']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#['1120917011']#['1101014006','1101014019']#    
 
 Rad='psin'
 
@@ -26,11 +27,12 @@ AVG=0
 PsinOffset=-0.005
 TimeA=np.nan
 TimeB=np.nan
+CoreTS=True
 
 fig, ax = plt.subplots()
 ax.set_frame_on(False)
 ax.set_axis_off()
-gs=gridspec.GridSpec(3,1,height_ratios=[3,3,1],hspace=0.3)
+gs=gridspec.GridSpec(3,1,height_ratios=[3,3,1],hspace=0.2)
 
 ne_profile = fig.add_subplot(gs[0,0])
 te_profile = fig.add_subplot(gs[1,0],sharex=ne_profile)
@@ -59,8 +61,15 @@ for i in Shots:
         Data[i]['psin']=Data[i]['psin']+PsinOffset
     
     Data[i]['time']=Data[i]['time'].flatten()
-    NeLine[i] = ne_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['ne'][:,Time0],yerr=Data[i]['nerr'][:,Time0],marker='o',linestyle=':')
-    TeLine[i] = te_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['te'][:,Time0],yerr=Data[i]['terr'][:,Time0],marker='o',linestyle=':')
+    NeLine[i] = ne_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['ne'][:,Time0],yerr=Data[i]['nerr'][:,Time0],marker='.',linestyle=':')
+    TeLine[i] = te_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['te'][:,Time0],yerr=Data[i]['terr'][:,Time0],marker='.',linestyle=':')
+ 
+if CoreTS is True:
+    with open('{}gfileProcessing/cmod_files/{}_CORE.pkl'.format(TOPDRT,Shots[0]),'rb') as f:
+        CTS=pkl.load(f)
+        
+    CoreNe = ne_profile.errorbar(CTS[0],CTS[1]*1e20,yerr=CTS[2]*1e20,linestyle='',capsize=5,marker='.')
+    CoreTe = te_profile.errorbar(CTS[3],CTS[4]*1000,yerr=CTS[5]*1000,linestyle='',capsize=5,marker='.')
     
 ne_profile.set_title('Thompson Scattering Profiles at {:0.3f} sec'.format(Data[i]['time'][Time0]))
 ne_profile.set_ylabel(r'Electron Density $n_e\;(m^{-3})$')
