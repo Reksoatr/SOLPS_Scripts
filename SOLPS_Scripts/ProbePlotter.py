@@ -12,11 +12,11 @@ from VesselPlotterNew import SOLPSPLOT
 from TOOLS import SET_WDIR
 
 Shot012=1
-Shot025=1
+Shot025=0
 
-Attempt012='50N'
-Attempt025='19N'
-GasPuffTxt='High'
+Attempt012='46N'
+Attempt025='21N'
+GasPuffTxt='Low'
 
 #Good X-Limits for this data seem to be [-0.01,0.023]
 
@@ -60,12 +60,14 @@ if Shot012 == 1:
     Rad012Plot[0,0].semilogy(Probe012['rho_IN']/1000,Probe012['Ne_I'],'.',markersize=3,color=COLOR)
     Rad012Plot[0,0].set_title('High Density, {} Gas Puff Inner Divertor'.format(GasPuffTxt))
     Rad012Plot[0,0].set_xlabel('')
+    Rad012Plot[0,0].set_ylabel('$n_e\;(m^{-3})$')
     #Rad012Plot[0,0].get_legend().remove()
     
     Base012.RadProf('Te',JXA=1,RADC='rrsep',AX=Rad012Plot[1,0],PlotScheme=['b'],Markers=False)
     Rad012Plot[1,0].plot(Probe012['rho_IT']/1000,Probe012['Te_I'],'.',markersize=3,color=COLOR)
     Rad012Plot[1,0].set_title('')
     Rad012Plot[1,0].set_xlabel('R-Rsep (m)')
+    Rad012Plot[1,0].set_ylabel('$T_e\;(eV)$')
     Rad012Plot[1,0].get_legend().remove()
     
     plt.subplots_adjust(wspace=0, hspace=0)
