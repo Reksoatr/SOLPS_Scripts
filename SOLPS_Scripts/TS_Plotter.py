@@ -18,25 +18,28 @@ BASEDRT, TOPDRT=SET_WDIR('','')
 
 Device='cmod'
 
-Shots=['1120917011']#['1160718012','1160718013','1160718023']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#['1120917011']#['1101014006','1101014019']#    
+Shots=['1120917011']#['1080416025']#['1120917011']#['1160718012','1160718013','1160718023']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#['1120917011']#['1101014006','1101014019']#    
 
-Rad='psin'
+Rad='psin' #'rmid'
 
-Time0=75
+Time0=70
 AVG=0
-PsinOffset=-0.005
+PsinOffset=0 #-0.005
 TimeA=np.nan
 TimeB=np.nan
 CoreTS=True
+XLIM = [0.45,1.06]
+NeLIM=[0,7.5e19]
+TeLIM=[0,1500]
 
 fig, ax = plt.subplots()
 ax.set_frame_on(False)
 ax.set_axis_off()
-gs=gridspec.GridSpec(3,1,height_ratios=[3,3,1],hspace=0.2)
+gs=gridspec.GridSpec(2,1,height_ratios=[1,1],hspace=0.0)
 
 ne_profile = fig.add_subplot(gs[0,0])
 te_profile = fig.add_subplot(gs[1,0],sharex=ne_profile)
-time_slide = fig.add_subplot(gs[2,0])
+#time_slide = fig.add_subplot(gs[2,0])
 
 textTimeAax = plt.axes([0.15, 0.05, 0.03, 0.05])
 TimeA_Text = TextBox(textTimeAax, 'Initial\nTime', hovercolor='0.9')
@@ -46,6 +49,8 @@ TimeB_Text = TextBox(textTimeBax, 'End\nTime', hovercolor='0.9')
 
 buttonTimeAVGax = plt.axes([0.25, 0.05, 0.11, 0.05])
 TimeAVGButton = Button(buttonTimeAVGax, 'Plot Time Averaged Profiles')
+
+slideTimeax = plt.axes([0.45, 0.05, 0.45, 0.05])
 
 N = len(Shots)
 Data={}
@@ -65,11 +70,12 @@ for i in Shots:
     TeLine[i] = te_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['te'][:,Time0],yerr=Data[i]['terr'][:,Time0],marker='.',linestyle=':')
  
 if CoreTS is True:
-    with open('{}gfileProcessing/cmod_files/{}_CORE.pkl'.format(TOPDRT,Shots[0]),'rb') as f:
-        CTS=pkl.load(f)
-        
-    CoreNe = ne_profile.errorbar(CTS[0],CTS[1]*1e20,yerr=CTS[2]*1e20,linestyle='',capsize=5,marker='.')
-    CoreTe = te_profile.errorbar(CTS[3],CTS[4]*1000,yerr=CTS[5]*1000,linestyle='',capsize=5,marker='.')
+    for i in Shots:
+        with open('{}gfileProcessing/cmod_files/{}_CORE.pkl'.format(TOPDRT,i),'rb') as f:
+            CTS=pkl.load(f)
+            
+        CoreNe = ne_profile.errorbar(CTS[0],CTS[1]*1e20,yerr=CTS[2]*1e20,linestyle='',capsize=5,marker='.')
+        CoreTe = te_profile.errorbar(CTS[3],CTS[4]*1000,yerr=CTS[5]*1000,linestyle='',capsize=5,marker='.')
     
 ne_profile.set_title('Thompson Scattering Profiles at {:0.3f} sec'.format(Data[i]['time'][Time0]))
 ne_profile.set_ylabel(r'Electron Density $n_e\;(m^{-3})$')
@@ -148,7 +154,7 @@ def update(event):
    
    fig.canvas.draw_idle()
 
-TimeSlider = Slider(time_slide, 'Time', 0, len(Data[i]['time']), valinit=Time0, valfmt="%i", valstep=1)
+TimeSlider = Slider(slideTimeax, 'Time', 0, len(Data[i]['time']), valinit=Time0, valfmt="%i", valstep=1)
 TimeSlider.valtext.set_text('{:0.3f}\nseconds'.format(Data[i]['time'][Time0]))
 TimeSlider.on_changed(update)
 
@@ -193,6 +199,14 @@ def arrowclick(event):
         TimeSlider.set_val(TimeSlider.val-1)
     else:
         pass        
+
+if XLIM != []:
+    ne_profile.set_xlim(*XLIM)
+if NeLIM != []:
+    ne_profile.set_ylim(*NeLIM)
+if TeLIM != []:
+    te_profile.set_ylim(*TeLIM)    
+
 
 cid = fig.canvas.mpl_connect('key_press_event', arrowclick)
 

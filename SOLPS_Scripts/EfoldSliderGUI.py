@@ -20,9 +20,9 @@ import json
 
 ### Input Fields ###
 
-Shot = '12'
-Attempt = ['50N']
-GasLvl = 77.8
+Shot = '1120917011'
+Attempt = ['68']
+GasLvl = 0
 Balloon = 0
 
 PS=['.','.','.','.','.','x']
@@ -30,7 +30,7 @@ PS=['.','.','.','.','.','x']
 plt.rc('lines',linewidth=5,markersize=15,markeredgewidth=2,linestyle='solid')
 
 ### Setting up Base Variables ###
-NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],EXP=True,AVG=False,PlotScheme='')
+NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],EXP=True,AVG=False,PlotScheme='',ROOTSHOT='')
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
 SEP = 18
