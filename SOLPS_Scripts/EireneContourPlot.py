@@ -55,12 +55,12 @@ TestIonEng=np.loadtxt('{}/TestIonEnergy{}'.format(DRT,Attempt),usecols = (2))
 LogVal=np.ma.log10(NeuDen)
 LogVal=LogVal.filled(np.floor(LogVal.min()))
 
-Nodes=np.fromfile('{}/{}.tria.{}.nodes'.format(BASEDRT,Device,MeshID),sep=' ')
+Nodes=np.fromfile('{}/{}.tria.{}.nodes'.format(BASEDRT,Device,MeshID),sep=' ') #Alternatively use fort.33
 NN=int(Nodes[0])
 XNodes=Nodes[1:NN+1]/100
 YNodes=Nodes[NN+1:]/100
 
-Triangles=np.loadtxt('{}/{}.tria.{}.cells'.format(BASEDRT,Device,MeshID),skiprows=1, usecols=(1,2,3))
+Triangles=np.loadtxt('{}/{}.tria.{}.cells'.format(BASEDRT,Device,MeshID),skiprows=1, usecols=(1,2,3)) #Alternatively use fort.34
 
 TP=tri.Triangulation(XNodes,YNodes,triangles=(Triangles-1))
 

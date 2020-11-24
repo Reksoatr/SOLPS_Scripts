@@ -15,12 +15,17 @@ from TOOLS import SET_WDIR
 
 DEV = 'cmod'
 SHOT=25
-ExpID = [24,25]#[23,13,12]#[25,24]#
-COLORS = ['maroon','red']#['navy','xkcd:teal blue','blue']#['maroon','red']#
+ExpID = [24,25]#[23,13,12]#
+COLORS = ['maroon','red']#['navy','xkcd:teal blue','blue']#
 ATTEMPTS=['19N','21N']#['50N','48N','46N']#
-PUBLISH=['72.2 TorrL','6.77 TorrL']#['77.8 TorrL','39.5 TorrL','8.25 TorrL']#['6.77 TorrL','72.2 TorrL']#
+PUBLISH=['72.2 TorrL','6.77 TorrL']#['77.8 TorrL','39.5 TorrL','8.25 TorrL']#
 TimeRange=[1.1,1.3]
 #PsinOffset=-0.01
+
+plt.rc('xtick',labelsize=25)
+plt.rc('ytick',labelsize=25)
+plt.rc('axes',titlesize=35)
+plt.rc('legend',title_fontsize=25)
 
 JJ=0
 GAS=1
@@ -117,33 +122,53 @@ if GAS == 1:
                 TemidAvg[Shot][TT] = np.nan
                 ErrTe[Shot][TT] = np.nan
         '''        
-        
-    Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
-    Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
+     
+    Trifig, TriRadPlot = plt.subplots(nrows=3,ncols=1,sharex=True)   
+    #Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
+    #Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
     
-    if SHOT == 12:              
+    if SHOT == 12:
+        MTitle='High Density Discharges'              
         Gas012 = SOLPSPLOT('12',ATTEMPTS,Publish=PUBLISH,PsinOffset=-0.005,Markers=False,PlotScheme=COLORS,EXP=False)
-        Gas012.RadProf('Ne',AX=NeRadPlot)
-        Gas012.RadProf('Te',AX=TeRadPlot)
+        Gas012.RadProf('Ne',AX=TriRadPlot[0])
+        Gas012.RadProf('Te',AX=TriRadPlot[1])
+        Gas012.RadProf('NeuDen',LOG10=2,AX=TriRadPlot[2])
         
         for n, Shot in enumerate(ExpID):
-            NeRadPlot.errorbar(PsinAvg[Shot]-0.005,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
-            TeRadPlot.errorbar(PsinAvg[Shot]-0.005,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
+            TriRadPlot[0].errorbar(PsinAvg[Shot]-0.005,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
+            TriRadPlot[1].errorbar(PsinAvg[Shot]-0.005,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
+    
     elif SHOT == 25:
+        MTitle='Low Density Discharges'
         Gas025=SOLPSPLOT('25',ATTEMPTS,Publish=PUBLISH,PsinOffset=-0.01,Markers=False,PlotScheme=COLORS,EXP=False)
         
-        Gas025.RadProf('Ne',AX=NeRadPlot)
-        Gas025.RadProf('Te',AX=TeRadPlot)
+        Gas025.RadProf('Ne',AX=TriRadPlot[0])
+        Gas025.RadProf('Te',AX=TriRadPlot[1])
+        Gas025.RadProf('NeuDen',LOG10=2,AX=TriRadPlot[2])
         
         for n, Shot in enumerate(ExpID):
-            NeRadPlot.errorbar(PsinAvg[Shot]-0.01,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
-            TeRadPlot.errorbar(PsinAvg[Shot]-0.01,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
+            TriRadPlot[0].errorbar(PsinAvg[Shot]-0.01,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
+            TriRadPlot[1].errorbar(PsinAvg[Shot]-0.01,TemidAvg[Shot],yerr=ErrTe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
     
-    NeRadPlot.set_ylabel(r'Outer Midplane Electron Density $n_e\;(m^{-3})$')
-    #NeRadPlot.set_ylabel('')
+    TriRadPlot[0].set_title(MTitle)
+    TriRadPlot[1].set_title('')
+    TriRadPlot[2].set_title('')
     
-    TeRadPlot.set_ylabel(r'Outer Midplane Electron Temperature $T_e\;(eV)$')
-    #TeRadPlot.set_ylabel('')
+    TriRadPlot[0].set_title(r'$n_e\;(m^{-3})$',loc='left',y=0.0)
+    TriRadPlot[1].set_title(r'$T_e\;(eV)$',loc='left',y=0.0)
+    TriRadPlot[2].set_title(r'$n_D\;(m^{-3})$',loc='left',y=0.9)
+
+    TriRadPlot[0].set_ylabel('')
+    TriRadPlot[0].set_xlabel('')
+    TriRadPlot[1].set_ylabel('')
+    TriRadPlot[1].set_xlabel('')
+    TriRadPlot[2].set_ylabel('')
+    
+    TriRadPlot[0].get_legend().remove()
+    TriRadPlot[1].get_legend().remove()
+    TriRadPlot[2].legend(PUBLISH,loc=4)
+    
+    plt.subplots_adjust(wspace=0, hspace=0)
 
 if JND == 1:
     NeuDenfig, NeuDRadPlot = plt.subplots(nrows=1, ncols=1)

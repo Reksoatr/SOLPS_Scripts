@@ -266,7 +266,7 @@ class SOLPSPLOT(object):
                 
                 BASEDRT = '{}cmod/{}home'.format(BASEDRT,Shot)
                 GFILE = glob.glob('{}gfileProcessing/cmod_files/g{}*'.format(TOPDRT,Shot))
-                #print(GFILE)
+                print(GFILE)
                 GF = eq.equilibrium(gfile=GFILE[0])
                 
                 ExpFile = Shot
@@ -278,7 +278,7 @@ class SOLPSPLOT(object):
                 
                 #GFILE = '{}gfileProcessing/cmod_files/g11607180{}.01209_974'.format(TOPDRT, Shot[-2:])
                 GFILE = glob.glob('{}gfileProcessing/cmod_files/g{}*{}*'.format(TOPDRT,ROOTSHOT,Shot[-2:]))
-                #print(GFILE)
+                print(GFILE)
                 GF = eq.equilibrium(gfile=GFILE[0])
                 
                 #ExpFile = '11607180{}'.format(Shot[-2:])
@@ -301,7 +301,7 @@ class SOLPSPLOT(object):
                 PsinAvg = np.mean(Psin, axis=1)
             except:
                 print('Psin coordinates not found. Attempting to approximate experimental psin from gfile')
-                PsinAvg = GF.psiN(RmidAvg,np.zeros(RmidAvg.shape))
+                PsinAvg = GF.psiN(RmidAvg,np.zeros(RmidAvg.shape))[0]
             
             #Robust Statistics -> Use MEDIAN, not MEAN, of TS Data
             
@@ -456,9 +456,9 @@ class SOLPSPLOT(object):
                                 RawData=[]
                         
                         if len(RawData) > 0:        
-                            if RawData.size == 3724:
+                            if RawData.size == XDIM*YDIM:
                                 self.PARAM[p].values[:,:,n] = RawData.reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
-                            elif RawData.size == 7448:
+                            elif RawData.size == XDIM*YDIM*2:
                                 self.PARAM[p].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
                             
         if RadSlc == 'all':
