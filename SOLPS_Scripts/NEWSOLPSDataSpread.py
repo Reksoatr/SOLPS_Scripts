@@ -25,30 +25,80 @@ def SOLPSDataSpread(Shot, Attempt):
 		RADC = 'radial'
 		JXA = 59
 		JXI = 35
+		SEP = 20
+                XDIM = 98
+                YDIM = 38
+                CoreBound = [24,71]
 		ROOTSHOT=''
+	elif '1080416025' in Shot:
+		PsinOffset = 0
+		RADC = 'psin'
+		JXA = 27
+		JXI = 38
+		SEP = 13
+		XDIM = 66
+		YDIM = 26
+		CoreBound = [16,47]
+		ROOTSHOT=''
+	elif '1100305023' in Shot:
+                PsinOffset = 0
+                RADC = 'psin'
+                JXA = 55
+                JXI = 37
+                SEP = 20
+                XDIM = 98
+                YDIM = 38
+                CoreBound = [24,71]
+                ROOTSHOT=''
+	elif '1100308004' in Shot:
+                PsinOffset = 0
+                RADC = 'psin'
+                JXA = 40
+                JXI = 59
+                SEP = 20
+                XDIM = 98
+                YDIM = 38
+                CoreBound = [24,71]
+                ROOTSHOT=''
 	elif '1120917011' in Shot:
 		PsinOffset = 0
 		RADC = 'psin'
 		JXA = 56
 		JXI = 38
+		SEP = 20
+                XDIM = 98
+                YDIM = 38
+                CoreBound = [24,71]
 		ROOTSHOT=''
-		TimeRange=[0.8,1.2]    
+		TimeRange=[0.8,1.2]
 	elif '12' in Shot:
 		PsinOffset = -0.005
 		RADC = 'psin'
 		JXA = 55
 		JXI = 37
+		SEP = 20
+                XDIM = 98
+                YDIM = 38
+                CoreBound = [24,71]
 		ROOTSHOT='1160718'
 	elif '25' in Shot:
 		PsinOffset = -0.01 
 		RADC = 'psin'
 		JXA = 55
 		JXI = 37
+		SEP = 20
+                XDIM = 98
+                YDIM = 38
+                CoreBound = [24,71]
 		ROOTSHOT='1160718'		
 	else:
 		RADC = 'psin'
 		JXA = 56
 		JXI = 40
+		SEP = 20
+                XDIM = 98
+                YDIM = 38
+                CoreBound = [24,71]
 		ROOTSHOT='175060'
 		PsinOffset = 0
 
