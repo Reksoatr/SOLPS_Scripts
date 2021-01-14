@@ -14,14 +14,19 @@ import matplotlib.tri as tri
 from matplotlib.path import Path
 import matplotlib.gridspec as gridspec
 from matplotlib.widgets import TextBox, Button, Slider
+from PARAMDICT import EireneDict
 
-Shot='d3d'
-Device='d3d'
-Attempt='70'
-MeshID='001'
+Shot='25'
+Device='cmod'
+Attempt='19N'
+MeshID='026'
+LOG=False
+Pressure=True
+Param='EDENA'
 
 TeVAC=0.02 #Hard-wired Electron Temperature in EIRENE vacuum cells
 NeVAC=1e8 #Hard-wired Electron Density in EIRENE vacuum cells
+ED2P=(2/3)*1.20173129e-18 #Conversion from Energy Density to Pressure (eV*m^-3 to mTorr)
 
 P0=np.empty((2))
 P0.fill(np.nan)  #[1.65,-0.65])
@@ -45,15 +50,23 @@ tr=np.loadtxt('{}/TriangRadLoc{}'.format(DRT,Attempt),usecols = (2))
 
 VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
 
-NeuDen=np.loadtxt('{}/EirAtom{}'.format(DRT,Attempt),usecols = (2))
-MolDen=np.loadtxt('{}/EirMol{}'.format(DRT,Attempt),usecols = (2))
-TestIonDen=np.loadtxt('{}/EirTestIon{}'.format(DRT,Attempt),usecols = (2))
-NeuEng=np.loadtxt('{}/AtomEnergy{}'.format(DRT,Attempt),usecols = (2))
-MolEng=np.loadtxt('{}/MolEnergy{}'.format(DRT,Attempt),usecols = (2))
-TestIonEng=np.loadtxt('{}/TestIonEnergy{}'.format(DRT,Attempt),usecols = (2))
+Parameter=EireneDict[Param]
+Data=np.loadtxt('{}/{}{}'.format(DRT,Parameter['FileName'],Attempt),usecols = (2))
 
-LogVal=np.ma.log10(NeuDen)
-LogVal=LogVal.filled(np.floor(LogVal.min()))
+#NeuDen=np.loadtxt('{}/EirAtom{}'.format(DRT,Attempt),usecols = (2))
+#MolDen=np.loadtxt('{}/EirMol{}'.format(DRT,Attempt),usecols = (2))
+#TestIonDen=np.loadtxt('{}/EirTestIon{}'.format(DRT,Attempt),usecols = (2))
+#NeuEng=np.loadtxt('{}/AtomEnergy{}'.format(DRT,Attempt),usecols = (2))
+#MolEng=np.loadtxt('{}/MolEnergy{}'.format(DRT,Attempt),usecols = (2))
+#TestIonEng=np.loadtxt('{}/TestIonEnergy{}'.format(DRT,Attempt),usecols = (2))
+
+if 'EDEN' in Param and Pressure:
+    Data=ED2P*Data
+    Parameter['Label']=r'Pressure $(mTorr)$'
+    
+if LOG:
+    Data=np.ma.log10(Data)
+    Data=Data.filled(np.floor(Data.min()))
 
 Nodes=np.fromfile('{}/{}.tria.{}.nodes'.format(BASEDRT,Device,MeshID),sep=' ') #Alternatively use fort.33
 NN=int(Nodes[0])
@@ -81,7 +94,7 @@ for n in range(0,NT):
 Contour = EirFig.add_subplot(gs[0:2,1])
 Profile = EirFig.add_subplot(gs[0,0])
 Profile.set_xlabel('Distance along Chord from Core Boundary (m)')
-Profile.set_ylabel(r'Neutral Density D $(m^{-3})$')
+Profile.set_ylabel(Parameter['Label'])
 
 P0_point, =Contour.plot(np.nan,np.nan,'rx')
 P1_point, =Contour.plot(np.nan,np.nan,'gx')
@@ -125,11 +138,12 @@ axslide = plt.axes([0.15, 0.1, 0.4, 0.03])
 sslide = Slider(axslide, 'Threshhold', 0.005, 0.1, valinit=0.05, valfmt='%0.3f', valstep=0.005)
 
 Contour.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000,'k-')
-IM=Contour.tripcolor(TP,LogVal)
+IM=Contour.tripcolor(TP,Data)
 Contour.set_aspect('equal')
 Contour.grid()
 Contour.set_xlabel('Radial Position R (m)')
 Contour.set_ylabel('Vertical Position Z (m)')
+Contour.set_title('{}, Shot{} Attempt{}'.format(Parameter['Label'],Shot,Attempt))
 plt.colorbar(IM,ax=Contour)
 
 def ClearP0(event): 
@@ -254,12 +268,17 @@ def chordplot(event):
     
     Chord=np.sqrt((ChordX-P0[0])**2 + (ChordY-P0[1])**2)
     Chord=Chord-Chord.min()
-    Band=np.ma.array(LogVal,mask=~Mask).compressed()
+    Band=np.ma.array(Data,mask=~Mask).compressed()
+
+    print('Distance along Chord:{}'.format(Chord))
+    print('{}:{}'.format(Parameter['Label'],Band))
+    print('Average {}: {}'.format(Parameter['Label'],np.mean(Band)))
     
     Prof1.set_data(Chord,Band)
     
     Profile.relim()
     Profile.autoscale_view(True,True,True)
+    Profile.set_title(r'Average {}: {}'.format(Parameter['Label'],np.mean(Band)))
     
     EirFig.canvas.draw()
     

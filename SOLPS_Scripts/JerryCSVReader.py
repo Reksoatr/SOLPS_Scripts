@@ -17,8 +17,8 @@ DEV = 'cmod'
 SHOT=25
 ExpID = [24,25]#[23,13,12]#
 COLORS = ['maroon','red']#['navy','xkcd:teal blue','blue']#
-ATTEMPTS=['19N','21N']#['50N','48N','46N']#
-PUBLISH=['72.2 TorrL','6.77 TorrL']#['77.8 TorrL','39.5 TorrL','8.25 TorrL']#
+ATTEMPTS = ['19N','21N']#['50N','48N','46N']#
+PUBLISH = ['72.2 TorrL','6.77 TorrL']#['77.8 TorrL','39.5 TorrL','8.25 TorrL']#
 TimeRange=[1.1,1.3]
 #PsinOffset=-0.01
 
@@ -105,25 +105,25 @@ if GAS == 1:
         Nemid = ExpData[Shot]['ne'][:,ti:tf]
         #Nemid[Nemid == 0] = np.nan
         NemidAvg[Shot] = np.median(Nemid, axis=1)
-        ErrNe[Shot] = np.median(ExpData[Shot]['nerr'][:,ti:tf])
+        ErrNe[Shot] = np.median(ExpData[Shot]['nerr'][:,ti:tf],axis=1)
         NeThresh = (ErrNe[Shot]*2)/NemidAvg[Shot]
-        '''for NT in range(len(NeThresh)):
-            if np.abs(NeThresh[NT]) > 0.5:
+        for NT in range(len(NeThresh)):
+            if np.abs(NeThresh[NT]) > 2.0:
                 NemidAvg[Shot][NT] = np.nan
                 ErrNe[Shot][NT] = np.nan
-        '''
+        
         Temid = ExpData[Shot]['te'][:,ti:tf]
         #Temid[Temid == 0] = np.nan
         TemidAvg[Shot] = np.median(Temid, axis=1)
-        ErrTe[Shot] = np.median(ExpData[Shot]['terr'][:,ti:tf])
+        ErrTe[Shot] = np.median(ExpData[Shot]['terr'][:,ti:tf],axis=1)
         TeThresh = (ErrTe[Shot]*2)/TemidAvg[Shot]
-        '''for TT in range(len(TeThresh)):
-            if np.abs(TeThresh[TT]) > 0.5:
+        for TT in range(len(TeThresh)):
+            if np.abs(TeThresh[TT]) > 2.0:
                 TemidAvg[Shot][TT] = np.nan
                 ErrTe[Shot][TT] = np.nan
-        '''        
+                
      
-    Trifig, TriRadPlot = plt.subplots(nrows=3,ncols=1,sharex=True)   
+    Trifig, TriRadPlot = plt.subplots(nrows=4,ncols=1,sharex=True)   
     #Nefig, NeRadPlot = plt.subplots(nrows=1, ncols=1)
     #Tefig, TeRadPlot = plt.subplots(nrows=1, ncols=1)
     
@@ -133,6 +133,8 @@ if GAS == 1:
         Gas012.RadProf('Ne',AX=TriRadPlot[0])
         Gas012.RadProf('Te',AX=TriRadPlot[1])
         Gas012.RadProf('NeuDen',LOG10=2,AX=TriRadPlot[2])
+        Gas012.RadProf('KYE',AX=TriRadPlot[3],PlotScheme=['b:','b:','b:'])
+        Gas012.RadProf('DN',AX=TriRadPlot[3],PlotScheme=['b--','b--','b--'])
         
         for n, Shot in enumerate(ExpID):
             TriRadPlot[0].errorbar(PsinAvg[Shot]-0.005,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
@@ -145,6 +147,8 @@ if GAS == 1:
         Gas025.RadProf('Ne',AX=TriRadPlot[0])
         Gas025.RadProf('Te',AX=TriRadPlot[1])
         Gas025.RadProf('NeuDen',LOG10=2,AX=TriRadPlot[2])
+        Gas025.RadProf('KYE',AX=TriRadPlot[3],PlotScheme=['r:','r:'])
+        Gas025.RadProf('DN',AX=TriRadPlot[3],PlotScheme=['r--','r--'])
         
         for n, Shot in enumerate(ExpID):
             TriRadPlot[0].errorbar(PsinAvg[Shot]-0.01,NemidAvg[Shot],yerr=ErrNe[Shot],fmt='o',color=COLORS[n],markersize=7,linewidth=3,capsize=7)
@@ -153,20 +157,25 @@ if GAS == 1:
     TriRadPlot[0].set_title(MTitle)
     TriRadPlot[1].set_title('')
     TriRadPlot[2].set_title('')
+    TriRadPlot[3].set_title('')
     
-    TriRadPlot[0].set_title(r'$n_e\;(m^{-3})$',loc='left',y=0.0)
-    TriRadPlot[1].set_title(r'$T_e\;(eV)$',loc='left',y=0.0)
-    TriRadPlot[2].set_title(r'$n_D\;(m^{-3})$',loc='left',y=0.9)
+    TriRadPlot[0].set_title(r'a) $n_e\;(m^{-3})$',loc='left',y=0.0)
+    TriRadPlot[1].set_title(r'b) $T_e\;(eV)$',loc='left',y=0.0)
+    TriRadPlot[2].set_title(r'c) $n_D\;(m^{-3})$',loc='left',y=0.85)
+    TriRadPlot[3].set_title(r'd) Transport Coeff. $(m^2/s)$',loc='left',y=0.0)
 
     TriRadPlot[0].set_ylabel('')
     TriRadPlot[0].set_xlabel('')
     TriRadPlot[1].set_ylabel('')
     TriRadPlot[1].set_xlabel('')
     TriRadPlot[2].set_ylabel('')
+    TriRadPlot[2].set_xlabel('')
+    TriRadPlot[3].set_ylabel('')
     
-    TriRadPlot[0].get_legend().remove()
+    TriRadPlot[0].legend(PUBLISH,loc=1)
     TriRadPlot[1].get_legend().remove()
-    TriRadPlot[2].legend(PUBLISH,loc=4)
+    TriRadPlot[2].get_legend().remove()
+    TriRadPlot[3].get_legend().remove()
     
     plt.subplots_adjust(wspace=0, hspace=0)
 

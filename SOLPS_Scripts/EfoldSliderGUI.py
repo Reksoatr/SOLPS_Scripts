@@ -20,8 +20,8 @@ import json
 
 ### Input Fields ###
 
-Shot = '1120917011'
-Attempt = ['68']
+Shot = '25'
+Attempt = ['21N']
 GasLvl = 0
 Balloon = 0
 
@@ -30,7 +30,7 @@ PS=['.','.','.','.','.','x']
 plt.rc('lines',linewidth=5,markersize=15,markeredgewidth=2,linestyle='solid')
 
 ### Setting up Base Variables ###
-NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],EXP=True,AVG=False,PlotScheme='',ROOTSHOT='')
+NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],EXP=True,AVG=False,PlotScheme='')#,ROOTSHOT='')
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
 SEP = 18
@@ -244,18 +244,18 @@ def update(val):
         
     if PolPos in yparam.keys():
         Tanh_Fit.set_data(RR_SEP_avg[PolPos],TANH(RR_SEP_avg[PolPos],*yparam[PolPos]))
-        TXT_TANH.set_text(r'$n_{{e,PED}}$={:.3e}$m^{{-3}}$, $\Delta n_e$={:.3f}mm'.format(yparam[PolPos][1]+yparam[PolPos][3],2000*yparam[PolPos][2]))
+        TXT_TANH.set_text(r'$n_{{e,PED}}$={:.1e}$m^{{-3}}$, $\Delta n_e$={:.1f}mm'.format(yparam[PolPos][1]+yparam[PolPos][3],2000*yparam[PolPos][2]))
     else:
         Tanh_Fit.set_data(np.nan,np.nan)
         TXT_TANH.set_text('')
 
     if PolPos in eparam.keys():
         Exp_Fit.set_data(RR_SEP_avg[PolPos], EXPFIT(RR_SEP_avg[PolPos],*eparam[PolPos]))
-        TXT_EFOLD.set_text('e-folding length={:.3f}mm'.format(efold[PolPos]))
-        TXT_EADJ.set_text('Adjusted e-folding length={:.3f}mm'.format(efold_adj[PolPos]))
+        TXT_EFOLD.set_text('e-folding length={:.1f}mm'.format(efold[PolPos]))
+        TXT_EADJ.set_text('Adjusted e-folding length={:.1f}mm'.format(efold_adj[PolPos]))
         
         Lin_Fit.set_data(RR_SEP_avg[PolPos],(fluxpsnparam[PolPos][0][0]*RR_SEP_avg[PolPos]+fluxpsnparam[PolPos][0][1]))
-        TXT_FLXPSN.set_text('Flux Expansion={:.3f}mm'.format(fluxpsn[PolPos]))
+        TXT_FLXPSN.set_text('Flux Expansion={:.1f}mm'.format(fluxpsn[PolPos]))
     else:
         Exp_Fit.set_data(np.nan,np.nan)
         TXT_EFOLD.set_text('')
@@ -405,16 +405,16 @@ def expfit(event):
         efold_adj[PolPos] = fluxpsn[PolPos]*efold[PolPos]
         efold_adj_err[PolPos] = efold_adj[PolPos]*np.sqrt((efold_err[PolPos]/efold[PolPos])**2 + (fluxpsn_err[PolPos]/fluxpsn[PolPos])**2)
                 
-    print('Exponential fit from r-r_sep={:.3e}m to r-r_sep={:.3e}m'.format(RR_exp[0],RR_exp[-1]))
-    print('A0={:.3e}, lambda={:.3f}'.format(*eparam[PolPos]))
-    print('Poloidal Slice {:0.0f}: Raw e-folding length={:.3f}mm, std error={:.3f}'.format(PolPos,efold[PolPos],efold_err[PolPos]))
-    print('Slope={:.3f}, Flux Expansion={:.3f}, Adjusted e-folding length={:.3f}, std error={:.3f}'.format(fluxpsnparam[PolPos][0][0],fluxpsn[PolPos],efold_adj[PolPos],efold_adj_err[PolPos]))
+    print('Exponential fit from r-r_sep={:.1e}m to r-r_sep={:.1e}m'.format(RR_exp[0],RR_exp[-1]))
+    print('A0={:.3e}, lambda={:.1f}'.format(*eparam[PolPos]))
+    print('Poloidal Slice {:0.0f}: Raw e-folding length={:.1f}mm, std error={:.1f}'.format(PolPos,efold[PolPos],efold_err[PolPos]))
+    print('Slope={:.3f}, Flux Expansion={:.1f}, Adjusted e-folding length={:.1f}, std error={:.1f}'.format(fluxpsnparam[PolPos][0][0],fluxpsn[PolPos],efold_adj[PolPos],efold_adj_err[PolPos]))
 
     Exp_Fit.set_data(RR_exp, EXPFIT(RR_exp,*eparam[PolPos]))
-    TXT_EFOLD.set_text('e-folding length={:.3f}mm'.format(efold[PolPos]))
-    TXT_EADJ.set_text('Adjusted e-folding length={:.3f}mm'.format(efold_adj[PolPos]))
+    TXT_EFOLD.set_text('e-folding length={:.1f}mm'.format(efold[PolPos]))
+    TXT_EADJ.set_text('Adjusted e-folding length={:.1f}mm'.format(efold_adj[PolPos]))
     Lin_Fit.set_data(RR_exp,(fluxpsnparam[PolPos][0][0]*RR_exp+fluxpsnparam[PolPos][0][1]))
-    TXT_FLXPSN.set_text('Flux Expansion={:.3f}mm'.format(fluxpsn[PolPos]))
+    TXT_FLXPSN.set_text('Flux Expansion={:.1f}mm'.format(fluxpsn[PolPos]))
 
 ExpFit.on_clicked(expfit)
 

@@ -12,7 +12,7 @@ from VesselPlotterNew import SOLPSPLOT
 from TOOLS import SET_WDIR
 
 Shot012=1
-Shot025=0
+Shot025=1
 
 Attempt012='46N'
 Attempt025='21N'

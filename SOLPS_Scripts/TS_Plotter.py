@@ -18,19 +18,22 @@ BASEDRT, TOPDRT=SET_WDIR('','')
 
 Device='cmod'
 
-Shots=['1120917011']#['1160718024','1160718025']#['1080416025']#['1120917011']#['1160718012','1160718013','1160718023']#['1101014006','1101014019']#    
+Shots=['1100308004','1101014006']#['1101014029','1080416025']#['1101014019','1100305023']#['1101014029','1080416025']#['1100308004']#['1100305023']#['1080416025']#['1120917011']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#   
 
-Rad='psin' #'rmid'
+Rad='rmid'#'psin'#
 
 Time0=70
 AVG=0
 PsinOffset=0 #-0.005
 TimeA=np.nan
 TimeB=np.nan
+
 CoreTS=True
-XLIM = [0.45,1.06]
-NeLIM=[0,7.5e19]
-TeLIM=[0,1500]
+CoreTime=1.0
+
+XLIM = [0.64,1.05]#[0.45,1.06]
+NeLIM=[]#[0,7.5e19]
+TeLIM=[]#[0,1500]
 
 fig, ax = plt.subplots()
 ax.set_frame_on(False)
@@ -58,25 +61,31 @@ NeLine={}
 TeLine={}
 Coords={'rmid':'(m)','psin':''}
 
-for i in Shots:
-    Data[i]=loadmat('{}gfileProcessing/{}_files/{}.mat'.format(TOPDRT,Device,i))
-    if Rad not in Data[i].keys():
-        sys.exit('Error! Coordinate {} does not exist! Aborting!'.format(Rad))
-    if PsinOffset!=0:
-        Data[i]['psin']=Data[i]['psin']+PsinOffset
-    
-    Data[i]['time']=Data[i]['time'].flatten()
-    NeLine[i] = ne_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['ne'][:,Time0],yerr=Data[i]['nerr'][:,Time0],marker='.',linestyle=':')
-    TeLine[i] = te_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['te'][:,Time0],yerr=Data[i]['terr'][:,Time0],marker='.',linestyle=':')
- 
-if CoreTS is True:
+if CoreTS:
     for i in Shots:
         with open('{}gfileProcessing/cmod_files/{}_CORE.pkl'.format(TOPDRT,i),'rb') as f:
-            CTS=pkl.load(f)
-            
+            u = pkl._Unpickler(f)
+            u.encoding = 'latin1'
+            CTS = u.load()
+            #CTS=pkl.load(f)
+        
+        Time0=0
+        Data[i]={'time':[CoreTime]}
         CoreNe = ne_profile.errorbar(CTS[0],CTS[1]*1e20,yerr=CTS[2]*1e20,linestyle='',capsize=5,marker='.')
         CoreTe = te_profile.errorbar(CTS[3],CTS[4]*1000,yerr=CTS[5]*1000,linestyle='',capsize=5,marker='.')
-    
+        
+else:
+    for i in Shots:
+        Data[i]=loadmat('{}gfileProcessing/{}_files/{}.mat'.format(TOPDRT,Device,i))
+        if Rad not in Data[i].keys():
+            sys.exit('Error! Coordinate {} does not exist! Aborting!'.format(Rad))
+        if PsinOffset!=0:
+            Data[i]['psin']=Data[i]['psin']+PsinOffset
+        
+        Data[i]['time']=Data[i]['time'].flatten()
+        NeLine[i] = ne_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['ne'][:,Time0],yerr=Data[i]['nerr'][:,Time0],marker='.',linestyle=':')
+        TeLine[i] = te_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['te'][:,Time0],yerr=Data[i]['terr'][:,Time0],marker='.',linestyle=':')
+       
 ne_profile.set_title('Thompson Scattering Profiles at {:0.3f} sec'.format(Data[i]['time'][Time0]))
 ne_profile.set_ylabel(r'Electron Density $n_e\;(m^{-3})$')
 ne_profile.legend(Shots)
@@ -94,7 +103,10 @@ def update(event):
    global AVG
 
    for i in Shots:
-       if AVG==1:
+       if CoreTS:
+           TitleText='{:0.3f}'.format(Data[i]['time'][0])
+           continue
+       elif AVG==1:
            print('Taking Median Average between {} and {} seconds'.format(TimeA,TimeB))
            ti = 0
            while float(TimeA) > Data[i]['time'].flatten()[ti]:
