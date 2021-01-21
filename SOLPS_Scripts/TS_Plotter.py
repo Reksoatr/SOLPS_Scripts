@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider,TextBox,Button
 from TOOLS import SET_WDIR
+from VesselPlotterNew import SOLPSPLOT
 import numpy as np
 import pickle as pkl
 import sys
@@ -18,20 +19,34 @@ BASEDRT, TOPDRT=SET_WDIR('','')
 
 Device='cmod'
 
-Shots=['1100308004','1101014006']#['1101014029','1080416025']#['1101014019','1100305023']#['1101014029','1080416025']#['1100308004']#['1100305023']#['1080416025']#['1120917011']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#   
+Shots=['1100308004','1101014006']#['1080416025','1101014029']#['1100305023','1101014019']#['1101014029','1080416025']#['1100308004']#['1100305023']#['1080416025']#['1120917011']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#   
 
-Rad='rmid'#'psin'#
+Rad='psin'#'rmid'#
 
+SOLPS=True
+Attempts=[9]
+KW={}
+'''
+KW={'JXA' : 27,
+    'JXI' : 38,
+    'SEP' : 13,
+    'XDIM' : 66,
+    'YDIM' : 26,
+    'CoreBound' : [16,47]}
+'''
+        
 Time0=70
 AVG=0
-PsinOffset=0 #-0.005
+PsinOffset=[0.03,-0.013]#[-0.015,-0.02]
+RmidOffset=[-0.01,-0.015]
 TimeA=np.nan
 TimeB=np.nan
 
 CoreTS=True
 CoreTime=1.0
+LCFS_Te=[90,90]
 
-XLIM = [0.64,1.05]#[0.45,1.06]
+XLIM=[0.60,1.05]#[0.45,1.06]
 NeLIM=[]#[0,7.5e19]
 TeLIM=[]#[0,1500]
 
@@ -43,6 +58,11 @@ gs=gridspec.GridSpec(2,1,height_ratios=[1,1],hspace=0.0)
 ne_profile = fig.add_subplot(gs[0,0])
 te_profile = fig.add_subplot(gs[1,0],sharex=ne_profile)
 #time_slide = fig.add_subplot(gs[2,0])
+
+if SOLPS:
+    Sim=SOLPSPLOT(Shots[0],Attempts,ROOTSHOT='',EXP=False,Markers=False,**KW)
+    Sim.RadProf('Ne',AX=ne_profile)
+    Sim.RadProf('Te',AX=te_profile)
 
 textTimeAax = plt.axes([0.15, 0.05, 0.03, 0.05])
 TimeA_Text = TextBox(textTimeAax, 'Initial\nTime', hovercolor='0.9')
@@ -62,25 +82,32 @@ TeLine={}
 Coords={'rmid':'(m)','psin':''}
 
 if CoreTS:
-    for i in Shots:
+    for n, i in enumerate(Shots):
         with open('{}gfileProcessing/cmod_files/{}_CORE.pkl'.format(TOPDRT,i),'rb') as f:
             u = pkl._Unpickler(f)
             u.encoding = 'latin1'
             CTS = u.load()
             #CTS=pkl.load(f)
         
+        if LCFS_Te!=0:
+            index=(np.abs(CTS[4]*1000-LCFS_Te[n])).argmin()
+            PsinOffset[n]=1-CTS[3][index]
+            print('Psin offset for shot {} is {}'.format(i,PsinOffset[n]))
+        
         Time0=0
         Data[i]={'time':[CoreTime]}
-        CoreNe = ne_profile.errorbar(CTS[0],CTS[1]*1e20,yerr=CTS[2]*1e20,linestyle='',capsize=5,marker='.')
-        CoreTe = te_profile.errorbar(CTS[3],CTS[4]*1000,yerr=CTS[5]*1000,linestyle='',capsize=5,marker='.')
+        CoreNe = ne_profile.errorbar(CTS[0]+PsinOffset[n],CTS[1]*1e20,yerr=CTS[2]*1e20,linestyle='',capsize=5,marker='.')
+        CoreTe = te_profile.errorbar(CTS[3]+PsinOffset[n],CTS[4]*1000,yerr=CTS[5]*1000,linestyle='',capsize=5,marker='.')
         
 else:
-    for i in Shots:
+    for n,i in enumerate(Shots):
         Data[i]=loadmat('{}gfileProcessing/{}_files/{}.mat'.format(TOPDRT,Device,i))
         if Rad not in Data[i].keys():
             sys.exit('Error! Coordinate {} does not exist! Aborting!'.format(Rad))
-        if PsinOffset!=0:
-            Data[i]['psin']=Data[i]['psin']+PsinOffset
+        if PsinOffset!=0 and Rad=='psin':
+            Data[i]['psin']=Data[i]['psin']+PsinOffset[n]
+        if RmidOffset!=0 and Rad=='rmid':
+            Data[i]['rmid']=Data[i]['rmid']+RmidOffset[n]
         
         Data[i]['time']=Data[i]['time'].flatten()
         NeLine[i] = ne_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['ne'][:,Time0],yerr=Data[i]['nerr'][:,Time0],marker='.',linestyle=':')
@@ -88,12 +115,13 @@ else:
        
 ne_profile.set_title('Thompson Scattering Profiles at {:0.3f} sec'.format(Data[i]['time'][Time0]))
 ne_profile.set_ylabel(r'Electron Density $n_e\;(m^{-3})$')
-ne_profile.legend(Shots)
+ne_profile.legend([*Attempts,*Shots])
 ne_profile.axhline(0.0,color='k')
 ne_profile.grid()
 
 te_profile.set_ylabel(r'Electron Temperature $T_e\;(eV)$')
 te_profile.set_xlabel('{} {}'.format(Rad,Coords[Rad]))
+te_profile.legend([*Attempts,*Shots])
 te_profile.axhline(0.0,color='k')
 te_profile.grid()
 

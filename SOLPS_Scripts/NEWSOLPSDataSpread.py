@@ -31,7 +31,7 @@ def SOLPSDataSpread(Shot, Attempt):
 		CoreBound = [24,71]
 		ROOTSHOT=''
 	elif '1080416025' in Shot:
-		PsinOffset = 0.01
+		PsinOffset = 0.03
 		RADC = 'psin'
 		JXA = 27
 		JXI = 38
@@ -41,7 +41,7 @@ def SOLPSDataSpread(Shot, Attempt):
 		CoreBound = [16,47]
 		ROOTSHOT=''
 	elif '1100305023' in Shot:
-		PsinOffset = -0.01
+		PsinOffset = -0.014
 		RADC = 'psin'
 		JXA = 55
 		JXI = 37
@@ -51,7 +51,7 @@ def SOLPSDataSpread(Shot, Attempt):
 		CoreBound = [24,71]
 		ROOTSHOT=''
 	elif '1100308004' in Shot:
-		PsinOffset = -0.005
+		PsinOffset = 0.02
 		RADC = 'psin'
 		JXA = 40
 		JXI = 59
