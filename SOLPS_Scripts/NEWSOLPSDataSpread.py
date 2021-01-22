@@ -40,15 +40,15 @@ def SOLPSDataSpread(Shot, Attempt):
 		YDIM = 38
 		CoreBound = [24,71]
 		ROOTSHOT=''
-        '''
+		'''
 		JXA = 27
 		JXI = 38
 		SEP = 13
 		XDIM = 66
 		YDIM = 26
 		CoreBound = [16,47]
-        ROOTSHOT=''
-        '''
+		ROOTSHOT=''
+		'''
 	elif '1100305023' in Shot:
 		PsinOffset = -0.014
 		RADC = 'psin'
