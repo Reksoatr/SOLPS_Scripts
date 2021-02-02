@@ -4,12 +4,12 @@ Created on Thu Oct  3 14:59:41 2019
 
 @author: rmreksoatmodjo
 
-Function to set correct Working Directory Path depending on which machine is in use
+Collection of general Tools to perform oft-repeated SOLPS data analyis and post-processing tasks
 """
 import os
 import numpy as np
 
-def SET_WDIR(BASEDRT,TOPDRT):
+def SET_WDIR(BASEDRT,TOPDRT): #Function to set correct Working Directory Path depending on which machine is in use
     if os.environ['OS'] == 'Windows_NT':
         if os.environ['USERNAME'] == 'rmreksoatmodjo':
             BASEDRT = r"C:/Users/rmreksoatmodjo/Desktop/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
@@ -31,3 +31,28 @@ def TANH(r,r0,h,d,b,m):
 
 def EXPFIT(x,A,l):  #Removed vertical displacement variable B; seemed to cause 'overfitting'
     return A*np.exp(l*x)
+'''
+class FORT44(object): #Class of methods used to parse and organize SOLPS fort.44 data
+    
+    def __init__(self,Shot,Attempt,Parameter,**kwargs):
+        
+        self._reset_object()
+        
+        self.Shot=Shot
+        
+        self.Attempt=Attempt
+        
+        self.Parameter=Parameter
+        
+    def _reset_object(self):
+        self.Shot=None
+        self.Attempts=None
+        self.Parameter=None
+        
+    def _OpenFort44(self):
+        
+    def _FindParameter(self):
+        
+    def PlotWalls(self):
+'''        
+        

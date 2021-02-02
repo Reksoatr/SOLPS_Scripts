@@ -41,8 +41,8 @@ def SOLPSDataSpread(Shot, Attempt):
 		CoreBound = [24,71]
 		ROOTSHOT=''
 		'''
-		JXA = 27
-		JXI = 38
+		JXA = 28
+		JXI = 39
 		SEP = 13
 		XDIM = 66
 		YDIM = 26

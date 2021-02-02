@@ -514,7 +514,7 @@ class SOLPSPLOT(object):
         if RADC == 'Y':
             RR = self.RadCoords['YYLoc']
             Rexp = None
-            Rstr = 'N'        
+            Rstr = 'Radial Cell Index Y'        
         elif RADC == 'psin':
             RR = self.RadCoords['PsinLoc']
             Rexp = self.RadCoords['PsinAvg']
