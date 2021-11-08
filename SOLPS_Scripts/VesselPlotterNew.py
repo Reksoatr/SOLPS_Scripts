@@ -48,7 +48,7 @@ class SOLPSPLOT(object):
     AZIM = 270 > Azimuthal viewing angle for Surface Plot
     JXI = 37 > Poloidal position of Inner Midplane - default is 37
     JXA = 55 > Poloidal position of Outer Midplane - default is 55
-    SEP = 20 > Radial position of Separatrix - default is 18    
+    SEP = 20 > Radial position of Separatrix - default is 20    
     XDIM = 98 > Dimension of computational grid in the x (poloidal) direction
     YDIM = 38 > Dimension of computational grid in the y (radial) direction
     CoreBound = [24,71] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
@@ -402,15 +402,16 @@ class SOLPSPLOT(object):
                 YVector=np.zeros((len(X),2))
                 YVector[:,0] = RadLoc.values[1,:,n] - RadLoc.values[0,:,n]
                 YVector[:,1] = VertLoc.values[1,:,n] - VertLoc.values[0,:,n]            
-                
-            for i in range(len(X)):
-                PolVec.loc[:,X[i],Attempt,'Theta'] = np.degrees(np.math.atan2(np.linalg.det([YVector[JXA,:],YVector[i,:]]),np.dot(YVector[JXA,:],YVector[i,:])))
-                if PolVec.loc[:,X[i],Attempt,'Theta'].values[0] < 0 and X[i] < JXA:
-                    PolVec.loc[:,X[i],Attempt,'Theta'] = PolVec.loc[:,X[i],Attempt,'Theta'] + 360
-        
+            
             XP_range=np.array([CoreBound[0]-1,CoreBound[0],CoreBound[1],CoreBound[1]+1])
             X_xp=np.mean(RadLoc.loc[SEP,XP_range,Attempt].values)
             Y_xp=np.mean(VertLoc.loc[SEP,XP_range,Attempt].values)
+            Xpoint=np.array([X_xp,Y_xp])
+            
+            for i in range(len(X)):
+                PolVec.loc[:,X[i],Attempt,'Theta'] = np.degrees(np.math.atan2(np.linalg.det([YVector[JXA-1,:],YVector[i,:]]),np.dot(YVector[JXA-1,:],YVector[i,:])))
+                if PolVec.loc[:,X[i],Attempt,'Theta'].values[0] < 0 and X[i] < JXA:
+                    PolVec.loc[:,X[i],Attempt,'Theta'] = PolVec.loc[:,X[i],Attempt,'Theta'] + 360          
             
             for index in np.arange(CoreBound[0],CoreBound[1]+1):
                 if index == CoreBound[0]:
@@ -486,10 +487,10 @@ class SOLPSPLOT(object):
         self.KW['SEP'] = SEP
         self.Attempts = Attempts
         self.VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
+        self.GF = GF
         self.Xx = Xx
         self.Yy = Yy
-        self.X_xp = X_xp
-        self.Y_yp = Y_xp
+        self.Xpoint = Xpoint
         self.N = N
         self.P = P
         #self.XP = XP
@@ -697,7 +698,7 @@ class SOLPSPLOT(object):
                         ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
                         ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=3)
                     
-                    ax.plot(RadLoc.values[SEP,:,n],VertLoc.values[SEP,:,n],color='Black',linewidth=3)
+                    ax.plot(RadLoc.values[SEP-1,:,n],VertLoc.values[SEP-1,:,n],color='Black',linewidth=3)
                     ax.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000)
                     ax.set_xlabel('Radial Location (m)')
                     ax.set_ylabel('Vertical Location (m)')
@@ -789,7 +790,7 @@ class SOLPSPLOT(object):
                         print('Plot Parameter Does Not Exist Or Could Not Be Loaded! Skipping Plot...')
                         pass
 
-                if PolKW['AVG'] is True:
+                if PolKW['AVG']:
                     if 'AVG' not in Attempts:
                         print('Taking Average over Attempts')
                         Attempts.append('AVG')
@@ -817,7 +818,7 @@ class SOLPSPLOT(object):
             else:
                 ax = PolKW['AX']
             
-            if PolKW['GRAD'] is True:
+            if PolKW['GRAD']:
                 PARAM.values = np.gradient(PARAM.values,axis=0)
                 
             if PolKW['LOG10'] == 1:
@@ -828,32 +829,32 @@ class SOLPSPLOT(object):
             if len(PlotScheme) == self.N:
                 for n in range(self.N):
                     if PolKW['LOG10'] == 2:
-                        ax.semilogy(PP.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PlotScheme[n])
+                        ax.semilogy(PP.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PlotScheme[n], label=Publish)
                     else:
-                        ax.plot(PP.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PlotScheme[n], linewidth=3)
+                        ax.plot(PP.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],Attempts[n]], PlotScheme[n], linewidth=3, label=Publish)
             else:            
                 if PolKW['LOG10'] == 2:
-                    ax.semilogy(PP.loc[SURF,CoreBound[0]:CoreBound[1],:], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],:])
+                    ax.semilogy(PP.loc[SURF,CoreBound[0]:CoreBound[1],:], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],:], label=Publish)
                 else:
-                    ax.plot(PP.loc[SURF,CoreBound[0]:CoreBound[1],:], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],:],linewidth=3)
+                    ax.plot(PP.loc[SURF,CoreBound[0]:CoreBound[1],:], PARAM.loc[SURF,CoreBound[0]:CoreBound[1],:],linewidth=3, label=Publish)
 
-            if Publish==[]:
-                plt.legend(Attempts)
-                plt.title('Discharge 0' + str(Shot) + ' Attempt(s) ' + str(Attempts) + ' Poloidal ' + PARAM.name)
-            else:
+            if Publish:
                 plt.legend(Publish)
                 plt.title('Poloidal ' + PARAM.name + ' along Separatrix')
+            else:
+                plt.legend(Attempts)
+                plt.title('Discharge 0' + str(Shot) + ' Attempt(s) ' + str(Attempts) + ' Poloidal ' + PARAM.name)
 
-            if Markers == True:
-                plt.axvline(PP.loc[SURF,JXI,Attempts[0]],color='orange')
-                plt.axvline(PP.loc[SURF,JXA,Attempts[0]],color='red')
-                plt.axvline(PP.loc[SURF,CoreBound[0],Attempts[0]],color='black')
-                plt.axvline(PP.loc[SURF,CoreBound[1],Attempts[0]],color='black')
+            if Markers:
+                plt.axvline(PP.loc[SURF,JXI,Attempts[0]],color='red',linestyle='dashed')
+                plt.axvline(PP.loc[SURF,JXA,Attempts[0]],color='orange',linestyle='dashed')
+                plt.axvline(PP.loc[SURF,CoreBound[0],Attempts[0]],color='black',linestyle='dashed')
+                plt.axvline(PP.loc[SURF,CoreBound[1],Attempts[0]],color='black',linestyle='dashed')
                   
             plt.xlabel(PolXLbl)
             plt.ylabel(PARAM.name)
             
-            if PolKW['GRID'] is True:
+            if PolKW['GRID']:
                 plt.grid()
             
             self.PolKW = PolKW
@@ -930,64 +931,64 @@ class SOLPSPLOT(object):
                             print('Gradient can not be calculated unless radial coordinate is in meters (RADC=rrsep)')
                     
                     if RadProfKW['LOG10'] == 2:
-                        ax.semilogy(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n])
+                        ax.semilogy(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n], label=Publish)
                     else:
-                        ax.plot(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n],linewidth=3)
+                        ax.plot(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n],linewidth=3, label=Publish)
                         
                     if RadProfKW['EXP'] is True and RadProfKW['RADC'] != 'rrsep' and RadProfKW['RADC'] != 'Y':
                         if 'd3d' not in Shot:
                             if pn == 'Ne':
                                 NemidAvg = self.ExpDict['NemidAvg']
                                 ErrNe = self.ExpDict['ErrNe']
-                                ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[n][0])
+                                ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[n][0], label=Publish)
                             elif pn == 'Te':
                                 TemidAvg = self.ExpDict['TemidAvg']
                                 ErrTe = self.ExpDict['ErrTe']
-                                ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[n][0])
+                                ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[n][0], label=Publish)
                         
                         if 'd3d' in Shot:
                             if pn == 'Ne':
                                 PsinNe = Rexp[0]
                                 Ned3d = self.ExpDict['Ned3d']
-                                ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0])
+                                ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0], label=Publish)
                             elif pn == 'Te':
                                 PsinTe = Rexp[1]
                                 Ted3d = self.ExpDict['Ted3d']
-                                ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0])
+                                ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0], label=Publish)
                             elif pn == 'Ti':
                                 PsinTi = Rexp[2]
                                 Tid3d = self.ExpDict['Tid3d']
-                                ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0])
+                                ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0], label=Publish)
             else:
                 if RadProfKW['LOG10'] == 2:
-                    ax.semilogy(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:])
+                    ax.semilogy(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:], label=Publish)
                 else:
-                    ax.plot(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:],linewidth=3)
+                    ax.plot(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:],linewidth=3, label=Publish)
 
                 if RadProfKW['EXP'] is True and RadProfKW['RADC'] != 'rrsep' and RadProfKW['RADC'] != 'Y':
                     if 'd3d' not in Shot:
                         if pn == 'Ne':
                             NemidAvg = self.ExpDict['NemidAvg']
                             ErrNe = self.ExpDict['ErrNe']
-                            ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7)
+                            ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7, label=Publish)
                         elif pn == 'Te':
                             TemidAvg = self.ExpDict['TemidAvg']
                             ErrTe = self.ExpDict['ErrTe']
-                            ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7)
+                            ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7, label=Publish)
                     
                     if 'd3d' in Shot:
                         if pn == 'Ne':
                             PsinNe = Rexp[0]
                             Ned3d = self.ExpDict['Ned3d']
-                            ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3)
+                            ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3, label=Publish)
                         elif pn == 'Te':
                             PsinTe = Rexp[1]
                             Ted3d = self.ExpDict['Ted3d']
-                            ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3)
+                            ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3, label=Publish)
                         elif pn == 'Ti':
                             PsinTi = Rexp[2]
                             Tid3d = self.ExpDict['Tid3d']
-                            ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3)
+                            ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3, label=Publish)
             
             ax.set_xlabel(Rstr)
             
@@ -999,10 +1000,10 @@ class SOLPSPLOT(object):
                 ax.legend(Attempts)
                 ax.set_title('Discharge 0{} Attempt(s) {} Midplane Radial {}'.format(str(Shot), str(Attempts), PARAM.name))
             else:
-                ax.legend(Publish)
+                ax.legend()
                 ax.set_title('Radial Midplane {}'.format(PARAM.name))
             if Markers == True:
-                ax.axvline(RR.loc[SEP,JXA,Attempts[0]],color='Black',linewidth=3)
+                ax.axvline(RR.loc[SEP,JXA,Attempts[0]],color='orange',linewidth=3,linestyle='dashed')
             
             if RadProfKW['GRID'] is True:
                 ax.grid(b=1)

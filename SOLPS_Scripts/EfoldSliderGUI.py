@@ -21,7 +21,7 @@ import json
 ### Input Fields ###
 
 Shot = '25'
-Attempt = ['21N']
+Attempt = ['48N']
 GasLvl = 0
 Balloon = 0
 

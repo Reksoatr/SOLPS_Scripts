@@ -11,9 +11,12 @@ Edited 7/31/18 17:20:00
 Edited 8/23/18 15:06:00
 - Extract function rewritten to use regex, outputs CoeffID to Combobox
 - Version 1.1 STABLE
-Last Edited 9/18/18 12:25:00
+Edited 9/18/18 12:25:00
 - Modified grid spacing of textbox and graph plot to be more compact
 - Version 1.2 STABLE
+Last Edited 11/8/2021 17:00:00
+- Added in profile multiplication feature
+- Version 1.3 STABLE
 
 @author: Richard Reksoatmodjo
 """
@@ -154,6 +157,21 @@ class B2PtGen(tk.Tk):
         
         Textbox = scrolledtext.ScrolledText(app, width=50,height=20)
         Textbox.grid(row=1,column=4,rowspan=6,sticky=N)
+        
+        def Multiply():
+           M=float(MultiplierT.get())
+           r = sorted(self._points.items())
+           self._newpoints = dict(zip([x[0] for x in r],[M*y[1] for y in r]))
+           self._update_plot()
+           print('Values multiplied!') 
+        
+        button4 = Button(app, command=Multiply)
+        button4.grid(column=4,row=7)
+        button4['text'] = "Multiply Values:"
+        
+        MultiplierT = Entry(app, width=10)
+        MultiplierT.insert(0,'1')
+        MultiplierT.grid(column=4,row=8)
           
         root.mainloop() 
         
@@ -162,7 +180,7 @@ class B2PtGen(tk.Tk):
             self._figure = plt.figure(num=1,frameon=True)
             canvas = FigureCanvasTkAgg(self._figure, app)
             canvas.draw()
-            canvas.get_tk_widget().grid(row=7,columnspan=5)
+            canvas.get_tk_widget().grid(column=0,row=7,columnspan=4,rowspan=4)
             
         if not self._axes:
             self._axes = plt.axes()

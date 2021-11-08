@@ -30,7 +30,7 @@ D3DReScale = [10, 9, 8.35, 7.7]
 
 jxi = 37    # Poloidal position of Inner Midplane
 jxa = 55    # Poloidal position of Outer Midplane
-sep = 20    # Radial position of Separatrix
+sep = 18    # Radial position of Separatrix
 
 BalRescale = CmodReScale
 ballooning = [0.0,1.0,1.5,2.0]#
@@ -64,12 +64,14 @@ VertLoc = xr.DataArray(np.zeros((Y.size,X.size)), coords=[Y,X], dims=['Radial_Lo
 DN = xr.DataArray(np.zeros((Y.size,X.size)), coords=[Y,X], dims=['Radial_Location','Poloidal_Location'], name = r'Particle Diffusion Coefficient $m^{-2}s^{-1}$')
 KYE = xr.DataArray(np.zeros((Y.size,X.size)), coords=[Y,X], dims=['Radial_Location','Poloidal_Location'], name = r'Thermal Diffusion Coefficient $m^{-2}s^{-1}$')
 SZ = xr.DataArray(np.zeros((Y.size,X.size)), coords=[Y,X], dims=['Radial_Location','Poloidal_Location'], name = r'Poloidal Cross-Sectional Cell Area $m^2$')
+FNAY = xr.DataArray(np.zeros((Y.size,X.size)), coords=[Y,X], dims=['Radial_Location','Poloidal_Location'], name = r'Radial Ion Flux $s^{-1}$')
 
 RadLoc.values[:,:] = np.loadtxt(dir + '/Attempt' + str(Attempt) + '/Output/RadLoc' + str(Attempt),usecols = (3)).reshape((38,98))[1:37,25:73]
 VertLoc.values[:,:] = np.loadtxt(dir + '/Attempt' + str(Attempt) + '/Output/VertLoc' + str(Attempt),usecols = (3)).reshape((38,98))[1:37,25:73]
 DN.values[:,:] = np.loadtxt(dir + '/Attempt' + str(Attempt) + '/Output/DN' + str(Attempt),usecols = (3)).reshape((76,98))[39:75,25:73]
 KYE.values[:,:] = np.loadtxt(dir + '/Attempt' + str(Attempt) + '/Output/KYE' + str(Attempt),usecols = (3)).reshape((38,98))[1:37,25:73]
 SZ.values[:,:] = np.loadtxt(dir + '/Attempt' + str(Attempt) + '/Output2/SZ' + str(Attempt),usecols = (3)).reshape((38,98))[1:37,25:73]
+FNAY.values[:,:] = np.loadtxt(dir + '/Attempt' + str(Attempt) + '/Output/IonFlx' + str(Attempt),usecols = (3)).reshape((76,98))[39:75,25:73]
 
 for g in range(len(ballooning)):
     ResArea[:,:,g] = ResFactor[:,:,g]/SZ.values
@@ -159,9 +161,11 @@ BB_scan2 = np.ones((48,len(ballooning)))
 
 FigBalloon, AxBalloon = plt.subplots(nrows=3,ncols=2)
 
+FigFNAY, AxFNAY = plt.subplots()
+
 #fig3a = plt.figure(figsize=(14,7))
-AxBalloon[0,0].plot([jxa,jxa],[np.amin(ResFactor[sep,:,:]),np.amax(ResFactor[sep,:,:])],color='orange',linewidth=2)
-AxBalloon[0,0].plot([jxi,jxi],[np.amin(ResFactor[sep,:,:]),np.amax(ResFactor[sep,:,:])],color='red',linewidth=2)
+AxBalloon[0,0].axvline(jxa,color='orange',linewidth=2)
+AxBalloon[0,0].axvline(jxi,color='red',linewidth=2)
 AxBalloon[0,0].plot(Xx[sep,:],ResFactor[sep,:,:],linewidth=2)
 AxBalloon[0,0].legend(legendtext)
 AxBalloon[0,0].set_title('Transport Coefficient Rescale Factor at Separatrix')
@@ -171,8 +175,8 @@ AxBalloon[0,0].set_xlim(Xx[sep,0],Xx[sep,-1])
 AxBalloon[0,0].grid()
 
 #fig3b = plt.figure(figsize=(14,10))
-AxBalloon[1,0].plot([jxa,jxa],[np.amin(ResArea[sep,:,:]),np.amax(ResArea[sep,:,:])],color='orange',linewidth=2)
-AxBalloon[1,0].plot([jxi,jxi],[np.amin(ResArea[sep,:,:]),np.amax(ResArea[sep,:,:])],color='red',linewidth=2)
+AxBalloon[1,0].axvline(jxa,color='orange',linewidth=2)
+AxBalloon[1,0].axvline(jxi,color='red',linewidth=2)
 AxBalloon[1,0].plot(Xx[sep,:],ResArea[sep,:,:],linewidth=2)
 AxBalloon[1,0].legend(legendtext)
 AxBalloon[1,0].set_title('Area-Corrected Rescale Factor at Separatrix')
@@ -215,6 +219,17 @@ AxBalloon[0,0].autoscale_view(True,True,True)
 
 AxBalloon[0,1].relim()
 AxBalloon[0,1].autoscale_view(True,True,True)
+
+FNAY_sum=np.sum(FNAY,axis=1)
+
+AxFNAY.plot(Y,FNAY_sum,linewidth=2)
+AxFNAY.axvline(sep,color='black',linewidth=2)
+AxFNAY.legend(['Attempt{}'.format(Attempt),'LCFS'])
+AxFNAY.set_title('Shot{} Attempt{} Poloidal Sum of Radial Ion Flux vs Radial Surface'.format(Shot,Attempt))
+AxFNAY.set_xlabel('Radial Coordinate')
+AxFNAY.set_ylabel(r'Poloidal Sum of Radial Ion Flux $s^{-1}$')
+AxFNAY.text(0.01,0.05,'Total Ion Flux at LCFS\n={:.3e} particles/sec'.format(FNAY_sum[sep].values),transform=AxFNAY.transAxes,fontsize=13,verticalalignment='bottom')
+AxFNAY.grid()
 
 plt.show()
 

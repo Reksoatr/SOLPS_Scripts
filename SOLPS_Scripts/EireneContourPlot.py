@@ -14,15 +14,21 @@ import matplotlib.tri as tri
 from matplotlib.path import Path
 import matplotlib.gridspec as gridspec
 from matplotlib.widgets import TextBox, Button, Slider
+from scipy.interpolate import griddata
+#from VesselPlotterNew import SOLPSPLOT
 from PARAMDICT import EireneDict
 
-Shot='25'
+Shot='1100305023'
 Device='cmod'
-Attempt='19N'
-MeshID='026'
-LOG=False
+Attempt='24' # 15 for 1100308004, 18N for 1080416025, 24 for 1100305023 
+
+MeshID='024'  # 026 used for Shot025, 020 used for Shot012, 001 for d3d, 
+              # 025 for 1100308004, 024 for 1100305023, 027 for 1080416025
+LOG=True
 Pressure=True
-Param='EDENA'
+Param='EDENM'
+B2=True
+B2_Param='Ne'
 
 TeVAC=0.02 #Hard-wired Electron Temperature in EIRENE vacuum cells
 NeVAC=1e8 #Hard-wired Electron Density in EIRENE vacuum cells
@@ -30,7 +36,7 @@ ED2P=(2/3)*1.20173129e-18 #Conversion from Energy Density to Pressure (eV*m^-3 t
 
 P0=np.empty((2))
 P0.fill(np.nan)  #[1.65,-0.65])
-P1=np.empty((2))  
+P1=np.empty((2))
 P1.fill(np.nan)  #[2,-1.1])
 #Thresh=0.05
 
@@ -41,7 +47,7 @@ if 'd3d' in Shot:
     BASEDRT = '{}{}'.format(BASEDRT,Shot)
     DRT = '{}/Attempt{}/EirOutput'.format(BASEDRT, str(Attempt))
 else:
-    BASEDRT = '{}cmod/0{}home'.format(BASEDRT, Shot[-2:])
+    BASEDRT = '{}cmod/{}home'.format(BASEDRT, Shot)
     DRT = '{}/Attempt{}/EirOutput'.format(BASEDRT, str(Attempt))
 
 tz=np.loadtxt('{}/TriangVertLoc{}'.format(DRT,Attempt),usecols = (2))
@@ -62,11 +68,17 @@ Data=np.loadtxt('{}/{}{}'.format(DRT,Parameter['FileName'],Attempt),usecols = (2
 
 if 'EDEN' in Param and Pressure:
     Data=ED2P*Data
-    Parameter['Label']=r'Pressure $(mTorr)$'
+    if Param[-1]=='M':
+        Parameter['Label']=r'Molecular D2 Pressure $(mTorr)$'
+    elif Param[-1]=='A':
+        Parameter['Label']=r'Atomic D Pressure $(mTorr)$'    
     
 if LOG:
     Data=np.ma.log10(Data)
     Data=Data.filled(np.floor(Data.min()))
+    LogTxt='Log_10 of '
+else:
+    LogTxt=''
 
 Nodes=np.fromfile('{}/{}.tria.{}.nodes'.format(BASEDRT,Device,MeshID),sep=' ') #Alternatively use fort.33
 NN=int(Nodes[0])
@@ -93,7 +105,7 @@ for n in range(0,NT):
 '''
 Contour = EirFig.add_subplot(gs[0:2,1])
 Profile = EirFig.add_subplot(gs[0,0])
-Profile.set_xlabel('Distance along Chord from Core Boundary (m)')
+Profile.set_xlabel('Distance along Chord from P0 (m)')
 Profile.set_ylabel(Parameter['Label'])
 
 P0_point, =Contour.plot(np.nan,np.nan,'rx')
@@ -103,6 +115,7 @@ ChordA, =Contour.plot(np.nan,np.nan,'k-')
 ChordB, =Contour.plot(np.nan,np.nan,'k-')
 ChordXY, =Contour.plot(np.nan,np.nan,'r.')
 Prof1, =Profile.plot(np.nan,np.nan,'k.')
+Prof2, =Profile.plot(np.nan,np.nan,'r-')
 
 #resetax = plt.axes([0.125, 0.025, 0.05, 0.05])
 #Reset = Button(resetax, 'Reset', hovercolor='0.975') 
@@ -135,7 +148,7 @@ plotax = plt.axes([0.45, 0.25, 0.1, 0.05])
 PlotChord = Button(plotax, 'Plot Chord',image=button1)
 
 axslide = plt.axes([0.15, 0.1, 0.4, 0.03])
-sslide = Slider(axslide, 'Threshhold', 0.005, 0.1, valinit=0.05, valfmt='%0.3f', valstep=0.005)
+sslide = Slider(axslide, 'Threshhold', 0.005, 0.1, valinit=0.015, valfmt='%0.3f', valstep=0.005)
 
 Contour.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000,'k-')
 IM=Contour.tripcolor(TP,Data)
@@ -143,7 +156,7 @@ Contour.set_aspect('equal')
 Contour.grid()
 Contour.set_xlabel('Radial Position R (m)')
 Contour.set_ylabel('Vertical Position Z (m)')
-Contour.set_title('{}, Shot{} Attempt{}'.format(Parameter['Label'],Shot,Attempt))
+Contour.set_title('{}{} \n Shot{} Attempt{}'.format(LogTxt,Parameter['Label'],Shot,Attempt))
 plt.colorbar(IM,ax=Contour)
 
 def ClearP0(event): 
@@ -199,13 +212,13 @@ P1Y_Text.on_submit(submitP1Y)
 
 def pointclickP0(event):
     if event.button==1 and event.inaxes == Contour:
-        print(event.xdata,event.ydata)
+        #print(event.xdata,event.ydata)
         P0[0]=round(event.xdata,3)
         P0[1]=round(event.ydata,3)
 
 def pointclickP1(event):
     if event.button==1 and event.inaxes == Contour:
-        print(event.xdata,event.ydata)
+        #print(event.xdata,event.ydata)
         P1[0]=round(event.xdata,3)
         P1[1]=round(event.ydata,3)
 
@@ -270,15 +283,36 @@ def chordplot(event):
     Chord=Chord-Chord.min()
     Band=np.ma.array(Data,mask=~Mask).compressed()
 
-    print('Distance along Chord:{}'.format(Chord))
-    print('{}:{}'.format(Parameter['Label'],Band))
-    print('Average {}: {}'.format(Parameter['Label'],np.mean(Band)))
+    #print('Distance along Chord:{}'.format(Chord))
+    #print('{}:{}'.format(Parameter['Label'],Band))
     
-    Prof1.set_data(Chord,Band)
+    if LOG:
+        Avg_Band = 10**np.mean(Band)
+    else:
+        Avg_Band = np.mean(Band)
+    
+    print('Average {}: {:.3}'.format(Parameter['Label'],Avg_Band ))
+    
+    if LOG and Pressure:
+        Prof1.set_data(Chord,10**Band)
+    else:
+        Prof1.set_data(Chord,Band)
+
+    Xline=np.linspace(P0[0],P1[0])
+    Yline=np.linspace(P0[1],P1[1])
+
+    Vals=griddata((tr,tz),Data,(Xline,Yline),method='linear')
+    Dist=np.sqrt((Xline-P0[0])**2 + (Yline-P0[1])**2)
+    Dist=Dist-Dist.min()
+    
+    if LOG and Pressure:
+        Prof2.set_data(Dist,10**Vals)
+    else:
+        Prof2.set_data(Dist,Vals)
     
     Profile.relim()
     Profile.autoscale_view(True,True,True)
-    Profile.set_title(r'Average {}: {}'.format(Parameter['Label'],np.mean(Band)))
+    Profile.set_title(r'Average {}: {:.3}'.format(Parameter['Label'],Avg_Band))
     
     EirFig.canvas.draw()
     
