@@ -8,6 +8,7 @@ Collection of general Tools to perform oft-repeated SOLPS data analyis and post-
 """
 import os
 import numpy as np
+import paramiko
 
 def SET_WDIR(BASEDRT,TOPDRT): #Function to set correct Working Directory Path depending on which machine is in use
     if os.environ['OS'] == 'Windows_NT':
@@ -31,6 +32,51 @@ def TANH(r,r0,h,d,b,m):
 
 def EXPFIT(x,A,l):  #Removed vertical displacement variable B; seemed to cause 'overfitting'
     return A*np.exp(l*x)
+
+def JumpConnect(host, user, ssh_home, jumphost):
+    client = paramiko.SSHClient()
+    client.load_system_host_keys(filename='{}known_hosts'.format(ssh_home))
+    jh_client = paramiko.SSHClient()
+    jh_client.load_system_host_keys(filename='{}known_hosts'.format(ssh_home))
+    jh_client.connect(jumphost, username=user, key_filename='{}id_rsa'.format(ssh_home))
+    sock = jh_client.get_transport().open_channel(
+            'direct-tcpip', (host, 22), ('', 0)
+            )
+    kwargs = dict(
+        hostname=host,
+        port=22,
+        username=user,
+        key_filename='{}id_rsa'.format(ssh_home),
+        sock=sock,
+    )
+    client.connect(**kwargs)
+    return client
+
+def OpenRemoteFile(filepath, readtype='r',
+                   host='bora.sciclone.wm.edu', 
+                   user='rmreksoatmodjo', 
+                   ssh_home='C:/cygwin64/home/18313/.ssh/', 
+                   jumphost=None):
+    if jumphost:
+        client=JumpConnect(host, user, ssh_home, jumphost)
+    else:
+        client = paramiko.SSHClient()
+        client.load_system_host_keys(filename='{}known_hosts'.format(ssh_home))
+        client.connect(host,username=user,key_filename='{}id_rsa'.format(ssh_home))
+    sftp_client=client.open_sftp()
+    file=sftp_client.file(filepath, readtype)
+    return file
+
+def SSH_config():
+    if os.name == 'nt':
+        if os.environ['USERNAME'] == '18313':
+            Kwargs = dict(
+                host='bora.sciclone.wm.edu',
+                user='rmreksoatmodjo',
+                ssh_home='C:/cygwin64/home/18313/.ssh/',
+                jumphost='stat.wm.edu')
+    return Kwargs
+            
 '''
 class FORT44(object): #Class of methods used to parse and organize SOLPS fort.44 data
     
