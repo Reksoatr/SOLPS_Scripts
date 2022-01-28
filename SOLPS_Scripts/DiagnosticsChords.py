@@ -64,7 +64,7 @@ def SOLPSDiagnostiChorder(filepath,
             MAT=MAT.T
             np.savetxt(Output,MAT,
                        fmt=['%.3f','%.3f','%.3f','%.3f','%.3f','%.3f','%d'],
-                       header="'{}' {}".format(oname,n))
+                       header="'{}' 100".format(oname))
         elif ofmt == '.pkl':
             MAT={'start':C0,'end':C1}
             pkl.dump(MAT,open(Output,'xb'))
@@ -91,12 +91,14 @@ def SOLPSDiagnostiChorder(filepath,
 if __name__=='__main__':
     
     
-    A=SOLPSDiagnostiChorder('lya_coords_ext.pkl', 
+    A=SOLPSDiagnostiChorder('LYA_MID_WALL_Zero.chords', 
                               device='CMOD', plot=True, RemoteSave=False, 
                               RemotePath=None, EndKey='end',
                               Output=None)
     
-        
-        
-        
+'''       
+Etendue=np.array([4.8e-9,5.5e-9,5.9e-9,6.3e-9,6.7e-9,6.9e-9,7.3e-9,
+                  7.5e-9,7.7e-9,7.8e-9,7.9e-9,8.0e-9,7.9e-9,7.8e-9,
+                  7.7e-9,7.5e-9,7.4e-9,7.1e-9,6.7e-9,6.5e-9,6.2e-9,5.8e-9])        
+'''        
         
