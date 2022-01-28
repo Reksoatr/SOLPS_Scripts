@@ -116,7 +116,15 @@ class B2PtGen(tk.Tk):
         IonsRad.grid(column=3,row=4)           
         
         Coeff = Combobox(app, width = 45, font=("Bold",12))
-        Coeff['values'] = ('1 [dna0] particle density-driven diffusivity', '2 [dpa0] particle pressure-driven diffusivity', '3 [hcib] ion thermal anomalous diffusivity', '4 [hce0] electron thermal anomalous diffusivity', '5 [vla0x] Poloidal-component of the anomalous ”pinch” velocity', '6 [vla0y] Radial-component of the anomalous ”pinch” velocity','7 [vsa0] anomalous viscosity', '8 [sig0] anomalous radial electrical conductivity', '9 [alf0] anomalous radial thermo-electric coefficient')
+        Coeff['values'] = ('1 [dna0] particle density-driven diffusivity',
+                           '2 [dpa0] particle pressure-driven diffusivity',
+                           '3 [hcib] ion thermal anomalous diffusivity',
+                           '4 [hce0] electron thermal anomalous diffusivity',
+                           '5 [vla0x] Poloidal-component of the anomalous ”pinch” velocity',
+                           '6 [vla0y] Radial-component of the anomalous ”pinch” velocity',
+                           '7 [vsa0] anomalous viscosity',
+                           '8 [sig0] anomalous radial electrical conductivity',
+                           '9 [alf0] anomalous radial thermo-electric coefficient')
         Coeff.current(0)
         Coeff.grid(row=6, columnspan=4)
 

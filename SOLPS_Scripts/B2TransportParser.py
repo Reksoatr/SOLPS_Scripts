@@ -24,7 +24,7 @@ def B2TransportInputfileParser(file='b2.transport.inputfile'):
         for mm in range(PtNo):
             XList.append(float(re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",dataList[mm+ii+1])[4]))
             YList.append(float(re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",dataList[mm+ii+1])[9]))
-        Points[CoeffID] = dict(zip(XList,YList))
+        Points[CoeffID] = {'X':XList,'Y':YList}
         ii=ii+PtNo+1
         
     return Points
