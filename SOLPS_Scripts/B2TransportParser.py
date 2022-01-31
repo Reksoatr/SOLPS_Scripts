@@ -6,8 +6,19 @@ Created on Fri Jan 28 14:34:44 2022
 """
 
 import re
+import matplotlib.pyplot as plt
 
-def B2TransportInputfileParser(file='b2.transport.inputfile'):
+def B2TransportInputfileParser(file='b2.transport.inputfile', plot=False):
+    
+    Coefficients = {'1':'Particle density-driven diffusivity',
+                       '2': 'Particle pressure-driven diffusivity',
+                       '3': 'Ion thermal anomalous diffusivity',
+                       '4': 'Electron thermal anomalous diffusivity',
+                       '5': 'Poloidal-component of the anomalous ”pinch” velocity',
+                       '6': 'Radial-component of the anomalous ”pinch” velocity',
+                       '7': 'Anomalous viscosity',
+                       '8': 'Anomalous radial electrical conductivity',
+                       '9': 'Anomalous radial thermo-electric coefficient'}    
     
     with open(file) as f:
         dataList=f.readlines()
@@ -27,8 +38,17 @@ def B2TransportInputfileParser(file='b2.transport.inputfile'):
         Points[CoeffID] = {'X':XList,'Y':YList}
         ii=ii+PtNo+1
         
+    if plot:
+        dd=len(Points.keys())
+        fig1,ax1=plt.subplots(nrows=1,ncols=dd)
+        for ii, jj in enumerate(Points.keys()):
+            ax1[ii].plot(Points[jj]['X'],Points[jj]['Y'])
+            ax1[ii].set_title(r'Radial profile of {}'.format(Coefficients[jj]))
+            ax1[ii].set_xlabel(r'$R-R_{sep}$')
+            ax1[ii].set_ylabel(r'{} $[m^2/s]$'.format(Coefficients[jj]))
+        
     return Points
 
 if __name__=='__main__':
     
-    Points=B2TransportInputfileParser(file='b2.transport.inputfile.DekeyserV18')
+    Points=B2TransportInputfileParser(file='b2.transport.inputfile.DekeyserV18',plot=True)
