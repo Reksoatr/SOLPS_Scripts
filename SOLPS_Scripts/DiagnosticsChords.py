@@ -12,12 +12,13 @@ import pickle as pkl
 import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptchs
-from TOOLS import OpenRemoteFile, SSH_config, JumpConnect
+from TOOLS import WALL_INTERSECT, OpenRemoteFile, SSH_config, JumpConnect
 
 def SOLPSDiagnostiChorder(filepath, 
                           device='CMOD', plot=True,
                           RemoteSave=False, RemotePath=None,
-                          Output=None, EndKey='tang'):
+                          Output=None, EndKey='tang', 
+                          Extend2wall=False, Reverse=False):
     
     filename,fmt=os.path.splitext(filepath)
     
@@ -42,27 +43,44 @@ def SOLPSDiagnostiChorder(filepath,
         n=len(C0['Z'])
         
         if 'R' and 'phi' in C0.keys(): #Convert R,phi to X,Y coords
-            C0['X']=[C0['R'][i]*np.cos(np.radians(C0['phi'][i])) for i in range(n)]
-            C0['Y']=[C0['R'][i]*np.sin(np.radians(C0['phi'][i])) for i in range(n)]
-            C1['X']=[C1['R'][i]*np.cos(np.radians(C1['phi'][i])) for i in range(n)]
-            C1['Y']=[C1['R'][i]*np.sin(np.radians(C1['phi'][i])) for i in range(n)]
+            C0['X']=np.array([C0['R'][i]*np.cos(np.radians(C0['phi'][i])) for i in range(n)])
+            C0['Y']=np.array([C0['R'][i]*np.sin(np.radians(C0['phi'][i])) for i in range(n)])
+            C1['X']=np.array([C1['R'][i]*np.cos(np.radians(C1['phi'][i])) for i in range(n)])
+            C1['Y']=np.array([C1['R'][i]*np.sin(np.radians(C1['phi'][i])) for i in range(n)])
             
     elif fmt == '.chords': #.chords format ONLY has X,Y,Z coords
         HH=np.loadtxt(file,skiprows=1)
         HH=HH.T
         n=len(HH[0])
-        C0={'X':HH[0],'Y':HH[1],'Z':HH[2]}
-        C1={'X':HH[3],'Y':HH[4],'Z':HH[5]}
+        C0={'X':np.array(HH[0]),'Y':np.array(HH[1]),'Z':np.array(HH[2])}
+        C1={'X':np.array(HH[3]),'Y':np.array(HH[4]),'Z':np.array(HH[5])}
+    
+    if Extend2wall:
+        P1,P2=WALL_INTERSECT(C0,C1,r2)
+        C1['X']=P1['X']
+        C1['Y']=P1['Y']
         
     if Output:
         outpath,savename=os.path.split(Output)
         oname,ofmt=os.path.splitext(savename)
         
+        for key in C0.keys():
+            if type(C0[key]) is float:
+                C0[key]=C0[key]*np.ones(n)
+        for key in C1.keys():
+            if type(C1[key]) is float:
+                C1[key]=C1[key]*np.ones(n)                
+        
         ii=[i+1 for i in range(n)]
         if ofmt == '.chords':
-            MAT=np.array([C0['X'],C0['Y'],C0['Z'],C1['X'],C1['Y'],C1['Z'],ii])
+            if Reverse:
+                MAT=np.array([C0['X'],C0['Y'],C0['Z'],C1['X'],C1['Y'],C1['Z']])
+                MAT=np.flip(MAT,axis=1)
+                MAT=np.vstack((MAT,ii))
+            else:                              
+                MAT=np.array([C0['X'],C0['Y'],C0['Z'],C1['X'],C1['Y'],C1['Z'],ii])
             MAT=MAT.T
-            np.savetxt(Output,MAT,
+            np.savetxt(Output,MAT,comments='',
                        fmt=['%.3f','%.3f','%.3f','%.3f','%.3f','%.3f','%d'],
                        header="'{}' 100".format(oname))
         elif ofmt == '.pkl':
@@ -99,6 +117,9 @@ if __name__=='__main__':
 '''       
 Etendue=np.array([4.8e-9,5.5e-9,5.9e-9,6.3e-9,6.7e-9,6.9e-9,7.3e-9,
                   7.5e-9,7.7e-9,7.8e-9,7.9e-9,8.0e-9,7.9e-9,7.8e-9,
-                  7.7e-9,7.5e-9,7.4e-9,7.1e-9,6.7e-9,6.5e-9,6.2e-9,5.8e-9])        
+                  7.7e-9,7.5e-9,7.4e-9,7.1e-9,6.7e-9,6.5e-9,6.2e-9,5.8e-9])  
+
+RemotePath='/sciclone/data10/rmreksoatmodjo/solps-iter/data/chords/XXX'  
+RemotePath='/sciclone/data10/rmreksoatmodjo/gfileProcessing/cmod_files/'    
 '''        
         

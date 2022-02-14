@@ -43,6 +43,9 @@ class SOLPSPLOT(object):
     DEV = 'cmod' > Tokamak device being investigated
     EXP = True > Plot Experimental Data Points
     LOG10 = 0 > Plot Base-10 Logarithm of Parameter Data (0, 1, or 2)
+        0 : No log plot or log processing of data
+        1 : Take base-10 log of data, then plot on linear y-scale (ticks will be 0, 1, 2,...)
+        2 : Plot data as is, then change y-axis scale to logarithmic (ticks will be 0, 10, 100,...)
     GRAD = False > Calculate Gradient of Parameter Data
     ELEV = 75 > Elevation of viewing angle
     AZIM = 270 > Azimuthal viewing angle for Surface Plot
@@ -143,7 +146,7 @@ class SOLPSPLOT(object):
                      'AX' : None,
                      'BASEDRT': 'solps-iter/runs/',
                      'TOPDRT' : '',
-                     'ROOTSHOT' : '1160718'}
+                     'ROOTSHOT' : ''} #1160718
         
         for key, value in self.DefaultSettings.items():
             if key not in kwargs.keys():
@@ -175,7 +178,9 @@ class SOLPSPLOT(object):
                      'AHAL': r'Atomic $H_\alpha$ emissivity $(photons*m^{-3}s^{-1})$',
                      'MHAL': r'Molecular $H_\alpha$ emissivity $(photons*m^{-3}s^{-1})$',
                      'NTI' : r'Test Ion (D2+) Density $n_{ti}\;(m^{-3})$',
-                     'TestIonTemp' : r'Test Ion (D2+) Temperature $T_{testion}\;(eV)$'}
+                     'TestIonTemp' : r'Test Ion (D2+) Temperature $T_{testion}\;(eV)$',
+                     'LyaEmiss' : r'Lyman-alpha Emissivity $(photons*m^{-3}s^{-1}sr^{-1})$',
+                     'LyaEmissW' : r'Converted Lyman-alpha Emissivity $(W*m^{-3})$'}
         
         self._LoadSOLPSData()
         
@@ -194,6 +199,7 @@ class SOLPSPLOT(object):
         AVG = self.KW['AVG']
         JXA = self.KW['JXA']
         JXI = self.KW['JXI']
+        EXP = self.KW['EXP']
         Publish = self.KW['Publish']
         DIVREG = self.KW['DIVREG']
         TimeRange = self.KW['TimeRange']
@@ -267,10 +273,10 @@ class SOLPSPLOT(object):
                 BASEDRT = '{}cmod/{}home'.format(BASEDRT,Shot)
                 GFILE = glob.glob('{}gfileProcessing/cmod_files/g{}*'.format(TOPDRT,Shot))
                 print(GFILE)
-                GF = eq.equilibrium(gfile=GFILE[0])
-                
-                ExpFile = Shot
-                ExpData = loadmat('{}gfileProcessing/cmod_files/{}.mat'.format(TOPDRT, ExpFile))
+                GF = eq.equilibrium(gfile=GFILE[-1])
+                if EXP:
+                    ExpFile = Shot
+                    ExpData = loadmat('{}gfileProcessing/cmod_files/{}.mat'.format(TOPDRT, ExpFile))
             
             else: 
                 
@@ -286,60 +292,61 @@ class SOLPSPLOT(object):
                 #print(ExpFile)
                 ExpData = loadmat(ExpFile[0])    
                 
-            ti = 0
-            while TimeRange[0] > ExpData['time'].flatten()[ti]:
-                ti = ti+1           
-            tf = 0
-            while TimeRange[1] > ExpData['time'].flatten()[tf]:
-                tf = tf+1
-            
-            Rmid = ExpData['rmid'][:,ti:tf]
-            RmidAvg = np.mean(Rmid, axis=1)
-
-            try:
-                Psin = ExpData['psin'][:,ti:tf]
-                PsinAvg = np.mean(Psin, axis=1)
-            except:
-                print('Psin coordinates not found. Attempting to approximate experimental psin from gfile')
-                PsinAvg = GF.psiN(RmidAvg,np.zeros(RmidAvg.shape))[0]
-            
-            #Robust Statistics -> Use MEDIAN, not MEAN, of TS Data
-            
-            Nemid = ExpData['ne'][:,ti:tf]
-            NemidAvg=np.median(Nemid, axis=1)
-            ErrNe=np.median(ExpData['nerr'][:,ti:tf], axis=1)
-            '''
-            Nemid[Nemid == 0] = np.nan
-            NemidAvg = np.nanmean(Nemid, axis=1)
-            ErrNe = np.nanmean(ExpData['nerr'][:,ti:tf], axis=1)
-            '''
-            NeThresh = (ErrNe*2)/NemidAvg
-
-            for NT in range(len(NeThresh)):
-                if np.abs(NeThresh[NT]) > 2.0:
-                    NemidAvg[NT] = np.nan
-                    ErrNe[NT] = np.nan
-            
-            Temid = ExpData['te'][:,ti:tf]
-            TemidAvg=np.median(Temid, axis=1)
-            ErrTe=np.median(ExpData['terr'][:,ti:tf], axis=1)
-            '''
-            Temid[Temid == 0] = np.nan
-            TemidAvg = np.nanmean(Temid, axis=1)
-            ErrTe = np.nanmean(ExpData['terr'][:,ti:tf], axis=1)
-            '''
-            TeThresh = (ErrTe*2)/TemidAvg
-            
-            for TT in range(len(TeThresh)):
-                if np.abs(TeThresh[TT]) > 2.0:
-                    TemidAvg[TT] = np.nan
-                    ErrTe[TT] = np.nan
-            
-            
-            self.ExpDict['NemidAvg'] = NemidAvg
-            self.ExpDict['ErrNe'] = ErrNe
-            self.ExpDict['TemidAvg'] = TemidAvg
-            self.ExpDict['ErrTe'] = ErrTe        
+            if EXP:
+                ti = 0
+                while TimeRange[0] > ExpData['time'].flatten()[ti]:
+                    ti = ti+1           
+                tf = 0
+                while TimeRange[1] > ExpData['time'].flatten()[tf]:
+                    tf = tf+1
+                
+                Rmid = ExpData['rmid'][:,ti:tf]
+                RmidAvg = np.mean(Rmid, axis=1)
+    
+                try:
+                    Psin = ExpData['psin'][:,ti:tf]
+                    PsinAvg = np.mean(Psin, axis=1)
+                except:
+                    print('Psin coordinates not found. Attempting to approximate experimental psin from gfile')
+                    PsinAvg = GF.psiN(RmidAvg,np.zeros(RmidAvg.shape))[0]
+                
+                #Robust Statistics -> Use MEDIAN, not MEAN, of TS Data
+                
+                Nemid = ExpData['ne'][:,ti:tf]
+                NemidAvg=np.median(Nemid, axis=1)
+                ErrNe=np.median(ExpData['nerr'][:,ti:tf], axis=1)
+                '''
+                Nemid[Nemid == 0] = np.nan
+                NemidAvg = np.nanmean(Nemid, axis=1)
+                ErrNe = np.nanmean(ExpData['nerr'][:,ti:tf], axis=1)
+                '''
+                NeThresh = (ErrNe*2)/NemidAvg
+    
+                for NT in range(len(NeThresh)):
+                    if np.abs(NeThresh[NT]) > 2.0:
+                        NemidAvg[NT] = np.nan
+                        ErrNe[NT] = np.nan
+                
+                Temid = ExpData['te'][:,ti:tf]
+                TemidAvg=np.median(Temid, axis=1)
+                ErrTe=np.median(ExpData['terr'][:,ti:tf], axis=1)
+                '''
+                Temid[Temid == 0] = np.nan
+                TemidAvg = np.nanmean(Temid, axis=1)
+                ErrTe = np.nanmean(ExpData['terr'][:,ti:tf], axis=1)
+                '''
+                TeThresh = (ErrTe*2)/TemidAvg
+                
+                for TT in range(len(TeThresh)):
+                    if np.abs(TeThresh[TT]) > 2.0:
+                        TemidAvg[TT] = np.nan
+                        ErrTe[TT] = np.nan
+                
+                
+                self.ExpDict['NemidAvg'] = NemidAvg
+                self.ExpDict['ErrNe'] = ErrNe
+                self.ExpDict['TemidAvg'] = TemidAvg
+                self.ExpDict['ErrTe'] = ErrTe        
         
         #Get dimensions of simulation grid 
         

@@ -9,6 +9,7 @@ Collection of general Tools to perform oft-repeated SOLPS data analyis and post-
 import os
 import numpy as np
 import paramiko
+from scipy import stats
 
 def SET_WDIR(BASEDRT,TOPDRT): #Function to set correct Working Directory Path depending on which machine is in use
     if os.environ['OS'] == 'Windows_NT':
@@ -33,22 +34,86 @@ def TANH(r,r0,h,d,b,m):
 def EXPFIT(x,A,l):  #Removed vertical displacement variable B; seemed to cause 'overfitting'
     return A*np.exp(l*x)
 
-def JumpConnect(host, user, ssh_home, jumphost):
+def WALL_INTERSECT(C0,C1,r):
+    '''
+    Calculate the intersection between a line or set of lines specified by points
+    C0 and C1, and a circle of radius r centered at the origin
+    
+    C0 : dict of floats or arrays
+        Starting coordinates of line(s), in the format C0={'X': ...,'Y': ...}
+    C1 : dict of floats or arrays
+        Ending coordinates of line(s), in the format C1={'X': ...,'Y': ...}
+    r : float
+        Radius of circle    
+    '''
+    dx=C1['X']-C0['X']
+    dy=C1['Y']-C0['Y']
+    dr=np.sqrt(dx**2+dy**2)
+    D=C0['X']*C1['Y']-C1['X']*C0['Y']
+    delta=(r**2)*(dr**2)-D**2
+    
+    X1=(D*dy+np.sign(dy)*dx*np.sqrt(delta))/dr**2
+    Y1=(-D*dx+np.abs(dy)*np.sqrt(delta))/dr**2
+    X2=(D*dy-np.sign(dy)*dx*np.sqrt(delta))/dr**2
+    Y2=(-D*dx-np.abs(dy)*np.sqrt(delta))/dr**2
+        
+    P1={'X':X1,'Y':Y1}
+    P2={'X':X2,'Y':Y2}
+    
+    return P1,P2  
+
+def gaussian_shading(ax, x, y, y_unc, c='k', min_val=0.0):
+    ''' Plot profile with uncertainties displayed as a shading whose color intensity represents a 
+    gaussian PDF.
+    Adapted from Francesco's method in lyman_single.py
+    '''
+    norm_val = stats.norm.pdf(0)
+    
+    num=50  # discrete number of shades    
+    for ij in np.arange(num):
+
+        # below mean
+        ax.fill_between(x,
+                        np.maximum(y - 5*y_unc*(ij-1)/num, min_val),
+                        np.maximum(y - 5*y_unc*ij/num, min_val),
+                        alpha=stats.norm.pdf(5*ij/num)/norm_val,
+                        linewidth=0.0,
+                        color=c)
+
+    # start looping from 2 to avoid overshading the same region
+    for ij in np.arange(2,num):
+        # above mean
+        ax.fill_between(x, 
+                        y + 5*y_unc*(ij-1.)/num,
+                        y + 5*y_unc*ij/num,
+                        alpha=stats.norm.pdf(5*ij/num)/norm_val,
+                        linewidth=0.0,
+                        color=c)
+
+def JumpConnect(host, user, ssh_home, jumphost,port=22):
     client = paramiko.SSHClient()
     client.load_system_host_keys(filename='{}known_hosts'.format(ssh_home))
-    jh_client = paramiko.SSHClient()
-    jh_client.load_system_host_keys(filename='{}known_hosts'.format(ssh_home))
-    jh_client.connect(jumphost, username=user, key_filename='{}id_rsa'.format(ssh_home))
-    sock = jh_client.get_transport().open_channel(
-            'direct-tcpip', (host, 22), ('', 0)
-            )
-    kwargs = dict(
-        hostname=host,
-        port=22,
-        username=user,
-        key_filename='{}id_rsa'.format(ssh_home),
-        sock=sock,
-    )
+    if jumphost:
+        jh_client = paramiko.SSHClient()
+        jh_client.load_system_host_keys(filename='{}known_hosts'.format(ssh_home))
+        jh_client.connect(jumphost, username=user, key_filename='{}id_rsa'.format(ssh_home))
+        sock = jh_client.get_transport().open_channel(
+                'direct-tcpip', (host, 22), ('', 0)
+                )
+        kwargs = dict(
+            hostname=host,
+            port=port,
+            username=user,
+            key_filename='{}id_rsa'.format(ssh_home),
+            sock=sock,
+        )
+    else:
+        kwargs = dict(
+            hostname=host,
+            port=port,
+            username=user,
+            key_filename='{}id_rsa'.format(ssh_home),
+        )
     client.connect(**kwargs)
     return client
 
@@ -67,14 +132,22 @@ def OpenRemoteFile(filepath, readtype='r',
     file=sftp_client.file(filepath, readtype)
     return file
 
-def SSH_config():
+def SSH_config(server):
     if os.name == 'nt':
         if os.environ['USERNAME'] == '18313':
-            Kwargs = dict(
-                host='bora.sciclone.wm.edu',
-                user='rmreksoatmodjo',
-                ssh_home='C:/cygwin64/home/18313/.ssh/',
-                jumphost='stat.wm.edu')
+            if server == 'bora':
+                Kwargs = dict(
+                    host='bora.sciclone.wm.edu',
+                    user='rmreksoatmodjo',
+                    ssh_home='C:/cygwin64/home/18313/.ssh/',
+                    jumphost='stat.wm.edu')
+            elif server == 'cmod':
+                Kwargs = dict(
+                    host='mfews08.psfc.mit.edu',
+                    user='reksoatr',
+                    ssh_home='C:/cygwin64/home/18313/.ssh/',
+                    jumphost=None,
+                    port=9224)
     return Kwargs
             
 '''
