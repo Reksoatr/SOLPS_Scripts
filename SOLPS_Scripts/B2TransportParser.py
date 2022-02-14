@@ -40,15 +40,16 @@ def B2TransportInputfileParser(file='b2.transport.inputfile', plot=False):
         
     if plot:
         dd=len(Points.keys())
-        fig1,ax1=plt.subplots(nrows=1,ncols=dd)
+        fig1,ax1=plt.subplots(nrows=dd,ncols=1,sharex=True)
         for ii, jj in enumerate(Points.keys()):
             ax1[ii].plot(Points[jj]['X'],Points[jj]['Y'])
-            ax1[ii].set_title(r'Radial profile of {}'.format(Coefficients[jj]))
-            ax1[ii].set_xlabel(r'$R-R_{sep}$')
+            ax1[ii].set_title(r'Radial profile of {}'.format(Coefficients[jj]),y=0.9)
             ax1[ii].set_ylabel(r'{} $[m^2/s]$'.format(Coefficients[jj]))
+            
+        ax1[-1].set_xlabel(r'$R-R_{sep}$')
         
     return Points
 
 if __name__=='__main__':
     
-    Points=B2TransportInputfileParser(file='b2.transport.inputfile.DekeyserV18',plot=True)
+    Points=B2TransportInputfileParser(file='b2.transport.inputfile.NewV125',plot=True)
