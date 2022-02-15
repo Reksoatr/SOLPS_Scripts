@@ -89,6 +89,18 @@ def T_Lit(x, a=0, b=1, c=3,d=0,e=.1,f=0):
     y= .5*(a+b*x**c)*(1-np.tanh((x-d)/e))+f
     return y
 
+def DoubleGauss(x, a=1.0, b=0.005, c=0.1,d=0.5,e=0.0001):
+    '''
+    Double-Gaussian Function
+    a = Maximum (base) value of transport coefficient (typically 1.0)
+    b = Width parameter of major gaussian b>e
+    c = Minimum (trough) value of transport coefficient 0<c<a
+    d = Fraction of max coefficient value where minor gaussian begins (c/a)<d<1
+    e = Width parameter of minor gaussian e<b
+    '''
+    y = -(a-d*a)*(np.exp(-x**2/b))-(d*a-c)*(np.exp(-x**2/e))+a
+    return y
+
 #joint methods in SOLPS
 #compare input D to output D
 # look at individual error plot, decide if certain areas need increased weight
@@ -115,11 +127,11 @@ def mean_squared_error(y_true, y_predicted, ):
 # Gradient Descent Function
 # Here iterations, learning_rate, stopping_threshold
 # are hyperparameters that can be tuned
-
-x = np.linspace(-.15, .1, 20)
-y = Trainer(x)
-gen_test = point_finder(x,Trainer)
-Generate(gen_test)
+if __name__ == '__main__':
+    x = np.linspace(-.15, .15, 20)
+    y = DoubleGauss(x)
+    gen_test = point_finder(x,Trainer)
+    Generate(gen_test)
 '''
 y_Lit = T_Lit(x)
 Points = B2TransportInputfileParser()

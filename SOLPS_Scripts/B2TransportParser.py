@@ -43,9 +43,9 @@ def B2TransportInputfileParser(file='b2.transport.inputfile', plot=False):
         fig1,ax1=plt.subplots(nrows=dd,ncols=1,sharex=True)
         for ii, jj in enumerate(Points.keys()):
             ax1[ii].plot(Points[jj]['X'],Points[jj]['Y'])
-            ax1[ii].set_title(r'Radial profile of {}'.format(Coefficients[jj]),y=0.9)
             ax1[ii].set_ylabel(r'{} $[m^2/s]$'.format(Coefficients[jj]))
-            
+        
+        ax1[0].set_title(file)    
         ax1[-1].set_xlabel(r'$R-R_{sep}$')
         
     return Points
