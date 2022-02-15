@@ -18,7 +18,15 @@ from VesselPlotterNew import SOLPSPLOT
 BASE,TOP = SET_WDIR('','')
 Plot= True
 RADC='radial' #'psin' #
+EMISS='tomo' #'tree'#
 
+if EMISS=='tree':
+    Remiss_idx=2
+    emiss_idx=3
+elif EMISS=='tomo':
+    Remiss_idx=4
+    emiss_idx=5
+    
 # Load Experimental Data
 
 GFCMOD='{}gfileProcessing/cmod_files/'.format(TOP)
@@ -27,9 +35,9 @@ GF308=eq.equilibrium(gfile='{}g1100308004.01000'.format(GFCMOD))
 GF108=eq.equilibrium(gfile='{}g1080416025.01000'.format(GFCMOD))
 GF305=eq.equilibrium(gfile='{}g1100305023.01000'.format(GFCMOD))
 
-bright308=pkl.load(open('{}Brightness_Profiles/lya_brightness_1100308004.pkl'.format(GFCMOD),'rb'))
-bright108=pkl.load(open('{}Brightness_Profiles/lya_brightness_1080416025.pkl'.format(GFCMOD),'rb'))
-bright305=pkl.load(open('{}Brightness_Profiles/lya_brightness_1100305023.pkl'.format(GFCMOD),'rb'))
+bright308=pkl.load(open('lya_brightness_1100308004.pkl','rb'))
+bright108=pkl.load(open('lya_brightness_1080416025.pkl','rb'))
+bright305=pkl.load(open('lya_brightness_1100305023.pkl','rb'))
 
 nn308=pkl.load(open('{}Brightness_Profiles/lyman_data_1100308004.pkl'.format(GFCMOD),'rb'))
 nn108=pkl.load(open('{}Brightness_Profiles/lyman_data_1080416025.pkl'.format(GFCMOD),'rb'))
@@ -70,9 +78,9 @@ if Plot:
         Rbright108=bright108[0]
         Rbright305=bright305[0]
         
-        Remiss308=bright308[2]
-        Remiss108=bright108[2]
-        Remiss305=bright305[2]
+        Remiss308=bright308[Remiss_idx]
+        Remiss108=bright108[Remiss_idx]
+        Remiss305=bright305[Remiss_idx]
         
         Rnn308=np.array([[j for j,k in zip(*GF308.get_fluxsurface(i)) if j > GF308.axis.r and k==0] 
                          for i in nn308[0]])[:,0]
@@ -96,9 +104,9 @@ if Plot:
         Rbright108=GF108.psiN(bright108[0],0)[0]
         Rbright305=GF305.psiN(bright305[0],0)[0]
         
-        Remiss308=GF308.psiN(bright308[2],0)[0]
-        Remiss108=GF108.psiN(bright108[2],0)[0]
-        Remiss305=GF305.psiN(bright305[2],0)[0]
+        Remiss308=GF308.psiN(bright308[Remiss_idx],0)[0]
+        Remiss108=GF108.psiN(bright108[Remiss_idx],0)[0]
+        Remiss305=GF305.psiN(bright305[Remiss_idx],0)[0]
         
         Rnn308=nn308[0]
         Rnn108=nn108[0]
@@ -123,7 +131,7 @@ if Plot:
     ax308[0].plot(RLYMID308,LYMID308[1],color='#1f77b4ff',linestyle='-',linewidth='3.0')
     ax308[0].plot(Rbright308,bright308[1],'--*',color='#ff7f0eff')
     ax308[0].legend(['SOLPS','LYMID'])
-    ax308[1].plot(Remiss308,bright308[3][1100,:],'--*')
+    ax308[1].plot(Remiss308,bright308[emiss_idx],'--*')
     ax308[1].legend(['SOLPS','LYMID'])
     gaussian_shading(ax308[2],Rnn308,np.log10(nn308[1]),nnlogerr308,c='#ff7f0eff')
     ax308[2].legend(['SOLPS','LYMID'])
@@ -133,7 +141,7 @@ if Plot:
     ax308[0].set_title(r'1100308004')
     ax308[0].set_ylabel(r'Brightness ($W/m^2$)')
     ax308[1].set_title('')
-    ax308[1].set_ylabel(r'Emissivity ($W/m^3$)')
+    ax308[1].set_ylabel(r'Emissivity ({}) ($W/m^3$)'.format(EMISS))
     ax308[1].set_xlabel('')
     ax308[2].set_title('')
     ax308[2].set_ylabel(r'$Log_{10}$ of Neutral Density ($10^y m^{-3}$)')
@@ -144,7 +152,7 @@ if Plot:
     ax108[0].plot(RLYMID108,LYMID108[1],color='#1f77b4ff',linestyle='-',linewidth='3.0')
     ax108[0].plot(Rbright108,bright108[1],'--*',color='#ff7f0eff')
     ax108[0].legend(['SOLPS','LYMID'])
-    ax108[1].plot(Remiss108,bright108[3][1100,:],'--*')
+    ax108[1].plot(Remiss108,bright108[emiss_idx],'--*')
     ax108[1].legend(['SOLPS','LYMID'])
     gaussian_shading(ax108[2],Rnn108,np.log10(nn108[1]),nnlogerr108,c='#ff7f0eff')
     ax108[2].legend(['SOLPS','LYMID'])
@@ -154,7 +162,7 @@ if Plot:
     ax108[0].set_title(r'1080416025')
     ax108[0].set_ylabel(r'Brightness ($W/m^2$)')
     ax108[1].set_title('')
-    ax108[1].set_ylabel(r'Emissivity ($W/m^3$)')
+    ax108[1].set_ylabel(r'Emissivity ({}) ($W/m^3$)'.format(EMISS))
     ax108[1].set_xlabel('')
     ax108[2].set_title('')
     ax108[2].set_ylabel(r'$Log_{10}$ of Neutral Density ($10^y m^{-3}$)')
@@ -165,7 +173,7 @@ if Plot:
     ax305[0].plot(RLYMID305,LYMID305[1],color='#1f77b4ff',linestyle='-',linewidth='3.0')
     ax305[0].plot(Rbright305,bright305[1],'--*',color='#ff7f0eff')
     ax305[0].legend(['SOLPS','LYMID'])
-    ax305[1].plot(Remiss305,bright305[3][1100,:],'--*')
+    ax305[1].plot(Remiss305,bright305[emiss_idx],'--*')
     ax305[1].legend(['SOLPS','LYMID'])
     gaussian_shading(ax305[2],Rnn305,np.log10(nn305[1]),nnlogerr305,c='#ff7f0eff')
     ax305[2].legend(['SOLPS','LYMID'])
@@ -175,7 +183,7 @@ if Plot:
     ax305[0].set_title(r'1100305023')
     ax305[0].set_ylabel(r'Brightness ($W/m^2$)')
     ax305[1].set_title('')
-    ax305[1].set_ylabel(r'Emissivity ($W/m^3$)')
+    ax305[1].set_ylabel(r'Emissivity ({}) ($W/m^3$)'.format(EMISS))
     ax305[1].set_xlabel('')
     ax305[2].set_title('')
     ax305[2].set_ylabel(r'$Log_{10}$ of Neutral Density ($10^y m^{-3}$)')

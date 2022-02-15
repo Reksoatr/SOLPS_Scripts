@@ -85,6 +85,7 @@ def B2TransportInputfileParser(file='b2.transport.inputfile', plot=False):
 def Trainer(x, a=1.05, b=2.5, c=.002,d=2.4,e=1,f=1):
     y = -a*(np.exp(-x**2/c)+1)-b*(x)+d
     return y
+
 def T_Lit(x, a=0, b=1, c=3,d=0,e=.1,f=0):
     y= .5*(a+b*x**c)*(1-np.tanh((x-d)/e))+f
     return y
@@ -130,7 +131,7 @@ def mean_squared_error(y_true, y_predicted, ):
 if __name__ == '__main__':
     x = np.linspace(-.15, .15, 20)
     y = DoubleGauss(x)
-    gen_test = point_finder(x,Trainer)
+    gen_test = point_finder(x,DoubleGauss)
     Generate(gen_test)
 '''
 y_Lit = T_Lit(x)
