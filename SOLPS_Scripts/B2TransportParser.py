@@ -8,7 +8,7 @@ Created on Fri Jan 28 14:34:44 2022
 import re
 import matplotlib.pyplot as plt
 
-def B2TransportInputfileParser(file='b2.transport.inputfile', plot=False):
+def InputfileParser(file='b2.transport.inputfile', plot=False):
     
     Coefficients = {'1':'Particle density-driven diffusivity',
                        '2': 'Particle pressure-driven diffusivity',
@@ -50,6 +50,33 @@ def B2TransportInputfileParser(file='b2.transport.inputfile', plot=False):
         
     return Points
 
+def Generate(trans_pts):
+    '''
+    Function that is used to turn the radial points into a readable
+    b2.transport.inputfile
+
+    Parameters
+    ----------
+    trans_pts : should be 2d point array, x coordinates being r-r_sep and
+    y coordinates the diffusivity at that point
+
+    Returns a data frame for use in the b2.transport.inputfile
+    -------
+    
+
+    '''
+    #J = 1
+          #print(self._points)
+    n = len(trans_pts)
+    m = 0
+    i = 1
+    j = 1
+    r = trans_pts
+    print(' ndata(1, {0}, {1})= {2},'.format(i,j,n))
+    for m in range(n):
+        print(' tdata(1, {0}, {1}, {2})= {3}, tdata(2, {0}, {1}, {2})= {4},'.format(m+1,i,j,round(r[m][0],5),round(r[m][1],5)))
+
+
 if __name__=='__main__':
     
-    Points=B2TransportInputfileParser(file='b2.transport.inputfile.NewV125',plot=True)
+    Points=InputfileParser(file='b2.transport.inputfile.NewV125',plot=True)
