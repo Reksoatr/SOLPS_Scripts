@@ -7,6 +7,7 @@ Created on Fri Jan 28 14:34:44 2022
 
 import re
 import matplotlib.pyplot as plt
+import numpy as np
 
 def InputfileParser(file='b2.transport.inputfile', plot=False):
     
@@ -35,14 +36,14 @@ def InputfileParser(file='b2.transport.inputfile', plot=False):
         for mm in range(PtNo):
             XList.append(float(re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",dataList[mm+ii+1])[4]))
             YList.append(float(re.findall("[-+]?[.]?[\d]+(?:,\d\d\d)*[\.]?\d*(?:[eE][-+]?\d+)?",dataList[mm+ii+1])[9]))
-        Points[CoeffID] = {'X':XList,'Y':YList}
+        Points[CoeffID] = np.array([XList,YList])
         ii=ii+PtNo+1
         
     if plot:
         dd=len(Points.keys())
         fig1,ax1=plt.subplots(nrows=dd,ncols=1,sharex=True)
         for ii, jj in enumerate(Points.keys()):
-            ax1[ii].plot(Points[jj]['X'],Points[jj]['Y'])
+            ax1[ii].plot(Points[jj][0],Points[jj][1])
             ax1[ii].set_ylabel(r'{} $[m^2/s]$'.format(Coefficients[jj]))
         
         ax1[0].set_title(file)    
@@ -50,32 +51,62 @@ def InputfileParser(file='b2.transport.inputfile', plot=False):
         
     return Points
 
-def Generate(trans_pts):
+def Generate(trans_pts, CoeffID=1, SpeciesID=1, M=[1]):
     '''
     Function that is used to turn the radial points into a readable
     b2.transport.inputfile
 
     Parameters
     ----------
-    trans_pts : should be 2d point array, x coordinates being r-r_sep and
-    y coordinates the diffusivity at that point
+    trans_pts : nx2 array, x coordinates being r-r_sep and
+    y coordinates the coefficient value at that point
 
-    Returns a data frame for use in the b2.transport.inputfile
-    -------
+    CoeffID : int, integer specifier of transport coefficient 
+    type according to SOLPS manual (1 by default)
     
+    SpeciesID : int, integer index of transport species (1 by default)
+    
+    M : float or list, factor to multiply all transport coefficient values by.
+    If list, creates a separate multiplied string block for each listed factor
 
+    Returns a formatted string block for use in the b2.transport.inputfile
+    -------
     '''
-    #J = 1
-          #print(self._points)
+    if type(M) is not list:
+        M=[M]
+        
     n = len(trans_pts)
     m = 0
-    i = 1
-    j = 1
+    i = CoeffID
+    j = SpeciesID
     r = trans_pts
-    print(' ndata(1, {0}, {1})= {2},'.format(i,j,n))
-    for m in range(n):
-        print(' tdata(1, {0}, {1}, {2})= {3}, tdata(2, {0}, {1}, {2})= {4},'.format(m+1,i,j,round(r[m][0],5),round(r[m][1],5)))
-
+    inputfile={}
+    
+    for MM in M:
+        inputfile[MM] = ' ndata(1, {0}, {1})= {2},\n'.format(i,j,n)
+        for m in range(n):
+            inputfile[MM] = inputfile[MM] + ' tdata(1, {0}, {1}, {2})= {3}, tdata(2, {0}, {1}, {2})= {4},\n'.format(m+1,i,j,round(r[m][0],5),round(r[m][1]*MM,5))
+            
+    return inputfile
+    
+def WriteInputfile(file='b2.transport.inputfile', points={}, M=[1]):
+    inputfile={}
+    if points:
+        for k in points.keys():
+            inputfile[k]=Generate(points[k],CoeffID=int(k),M=M)
+    else:
+        points=InputfileParser(file)
+        for k in points.keys():
+            inputfile[k]=Generate(points[k].T,CoeffID=int(k),M=M)
+            
+    for MM in M:
+        with open('{}.f{}'.format(file,MM),'w') as f:
+            f.write(' &TRANSPORT\n')
+            for k in inputfile.keys():
+                f.writelines(inputfile[k][MM])
+            f.write(' no_pflux=.false.\n /')
+        
+    
 
 if __name__=='__main__':
     
