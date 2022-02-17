@@ -104,7 +104,7 @@ def WriteInputfile(file='b2.transport.inputfile', points={}, M=[1]):
             f.write(' &TRANSPORT\n')
             for k in inputfile.keys():
                 f.writelines(inputfile[k][MM])
-            f.write(' no_pflux=.false.\n /')
+            f.write(' no_pflux=.false.\n /\n')
         
     
 
