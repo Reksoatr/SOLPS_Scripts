@@ -25,7 +25,7 @@ fig10,ax10 = plt.subplots(nrows=4, ncols=3, sharex=True, sharey='row')
 shot_list = [1100308004,1080416025,1100305023]
 labels = ['L-mode', 'I-mode', 'H-mode']
 
-run_list = ['/Attempt14NP/Output','/Attempt18N/Output','/Attempt24/Output']
+run_list = ['/Attempt14R/Output','/Attempt18R/Output','/Attempt24R/Output']
 
 path_list = ['{}cmod/{}home'.format(BASE,s) for s in shot_list]
 
