@@ -106,7 +106,12 @@ def WriteInputfile(file='b2.transport.inputfile', points={}, M=[1]):
                 f.writelines(inputfile[k][MM])
             f.write(' no_pflux=.false.\n /\n')
         
-    
+def replace_line(file_name, line_num, text):
+    lines = open(file_name, 'r').readlines()
+    lines[line_num] = text
+    out = open(file_name, 'w')
+    out.writelines(lines)
+    out.close()
 
 if __name__=='__main__':
     

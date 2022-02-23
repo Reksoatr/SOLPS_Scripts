@@ -10,9 +10,9 @@ import scipy.optimize as spop
 import scipy as sp
 import matplotlib.pyplot as plt
 import re
-import matplotlib.pyplot as plt
-from B2TransportParser import InputfileParser, Generate
-
+from B2TransportParser import InputfileParser, Generate, WriteInputfile, replace_line
+from scipy.interpolate import InterpolatedUnivariateSpline
+import os
 #The beginning functions for optimization
 def Trainer(x, a=1.05, b=2.5, c=.002,d=2.4,e=1,f=1):
     y = -a*(np.exp(-x**2/c)+1)-b*(x)+d
@@ -54,6 +54,45 @@ def mean_squared_error(y_true, y_predicted, ):
     return cost
 
 
+def Loss(func, exper_shot, sol_run, iterations = 100):
+    ius = InterpolatedUnivariateSpline(sol_run[0], sol_run[1])
+    sol_pts = point_finder(exper_shot[0],ius)
+    loss = mean_squared_error(exper_shot[1], sol_pts)
+    return loss
+
+def Opt_BruteForce(func, params, exper_shot, sol_run,attempt_path,initial = True, points = 50, steps = 4):
+    '''Algorithm to create multiple runs across parameter space'''
+#    n = len(params)
+    space = []
+    for i in params:
+        ticks = (i[1] - i[0])/steps
+        meep = []
+        for j in range(steps+1):
+            meep.append(i[0] +j*ticks)
+        space.append(meep)
+    for i in space[0]:
+        for j in space[1]:
+            for k in space[2]:
+                x = np.linspace(-.15, .1, 50)
+                diff = func(x)
+              #  os.system('nano b2.transport.inputfile')
+                Points0 = InputfileParser(file='b2.transport.inputfile.V0')
+                D_Points={'1' : [[x],[diff]]} #This is where the optimization method comes in
+                Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
+                mkdir = 'cp -r base Attempt_{}{}{}'.format(i,j,k)            
+                enter = 'cd Attempt_{}{}{}'.format(i,j,k)
+                os.system(mkdir)
+                os.system(enter)
+                WriteInputfile(file='b2.transport.inputfile',points=Full_Points)
+                path_name = '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01'
+                Attempt = 'Attempt_{}{}{}'.format(i,j,k)
+                #replaces the name and directory lines
+                replace_line('batch', 4, Attempt)
+                replace_line('batch', 11, path_name)
+                batch_run = 'qsub batch_{}{}{}'.format(i,j,k)
+                os.system(batch_run)
+                
+#need to add error/iteration graph
 
 #Initial Case, for optimization algorithm, plus verification plots
 
