@@ -8,6 +8,7 @@ Created on Fri Jan 28 14:34:44 2022
 import re
 import matplotlib.pyplot as plt
 import numpy as np
+import equilibrium
 
 def InputfileParser(file='b2.transport.inputfile', plot=False):
     
@@ -112,6 +113,21 @@ def replace_line(file_name, line_num, text):
     out = open(file_name, 'w')
     out.writelines(lines)
     out.close()
+
+def R2PsiN(GF,R):
+    '''uses equilibrium to convert from R to PsiN
+        G-File must be formatted as an equilibrium object.'''
+    PP=GF.psiN(R,0)[0]
+    
+    return PP
+
+def PsiN2R(GF,psin):
+    '''uses equilibrium to convert from PsiN to R
+       G-File must be formatted as an equilibrium object.'''
+    Rlfs=[i for i in GF.R if i>GF.axis.r]
+    RR=np.interp(psin,R2PsiN(GF,Rlfs),Rlfs)
+    
+    return RR
 
 if __name__=='__main__':
     
