@@ -8,6 +8,7 @@ Created on Fri Jan 28 14:34:44 2022
 import re
 import matplotlib.pyplot as plt
 import numpy as np
+import equilibrium
 
 def InputfileParser(file='b2.transport.inputfile', plot=False):
     
@@ -85,7 +86,7 @@ def Generate(trans_pts, CoeffID=1, SpeciesID=1, M=[1]):
     for MM in M:
         inputfile[MM] = ' ndata(1, {0}, {1})= {2},\n'.format(i,j,n)
         for m in range(n):
-            inputfile[MM] = inputfile[MM] + ' tdata(1, {0}, {1}, {2})= {3}, tdata(2, {0}, {1}, {2})= {4},\n'.format(m+1,i,j,round(r[m][0],5),round(r[m][1]*MM,5))
+            inputfile[MM] = inputfile[MM] + ' tdata(1, {0}, {1}, {2})= {3}, tdata(2, {0}, {1}, {2})= {4},\n'.format(m+1,i,j,np.round(r[m][0],5),np.round(r[m][1]*MM,5))
             
     return inputfile
     
@@ -106,7 +107,27 @@ def WriteInputfile(file='b2.transport.inputfile', points={}, M=[1]):
                 f.writelines(inputfile[k][MM])
             f.write(' no_pflux=.false.\n /\n')
         
+def replace_line(file_name, line_num, text):
+    lines = open(file_name, 'r').readlines()
+    lines[line_num] = text
+    out = open(file_name, 'w')
+    out.writelines(lines)
+    out.close()
+
+def R2PsiN(GF,R):
+    '''uses equilibrium to convert from R to PsiN
+        G-File must be formatted as an equilibrium object.'''
+    PP=GF.psiN(R,0)[0]
     
+    return PP
+
+def PsiN2R(GF,psin):
+    '''uses equilibrium to convert from PsiN to R
+       G-File must be formatted as an equilibrium object.'''
+    Rlfs=[i for i in GF.R if i>GF.axis.r]
+    RR=np.interp(psin,R2PsiN(GF,Rlfs),Rlfs)
+    
+    return RR
 
 if __name__=='__main__':
     

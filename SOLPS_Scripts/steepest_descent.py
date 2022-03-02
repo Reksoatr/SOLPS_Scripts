@@ -6,13 +6,13 @@ Created on Fri Feb  4 13:35:33 2022
 """
 
 import numpy as np
-import scipy.optimize as spop
 import scipy as sp
 import matplotlib.pyplot as plt
 import re
-import matplotlib.pyplot as plt
-from B2TransportParser import InputfileParser, Generate
-
+from B2TransportParser import InputfileParser, Generate, WriteInputfile, replace_line
+from scipy.interpolate import InterpolatedUnivariateSpline
+import os
+from equilibrium import equilibrium
 #The beginning functions for optimization
 def Trainer(x, a=1.05, b=2.5, c=.002,d=2.4,e=1,f=1):
     y = -a*(np.exp(-x**2/c)+1)-b*(x)+d
@@ -38,11 +38,13 @@ def DoubleGauss(x, a=1.0, b=0.005, c=0.1,d=0.5,e=0.0001):
 #compare input D to output D
 # look at individual error plot, decide if certain areas need increased weight
 #gets points at the same location as true values
-def point_finder(x, func):
+def point_finder(x, func, y_only = False):
     func_val = []
     for i in x:
-        temp = [i, func(i)]
-
+        if y_only == False:
+            temp = [i, func(i)]
+        elif y_only == True:
+            temp = i
         func_val.append((temp))
     return np.array(func_val)
 
@@ -54,17 +56,96 @@ def mean_squared_error(y_true, y_predicted, ):
     return cost
 
 
+def Loss(exper_shot, sol_run):
+    ius = InterpolatedUnivariateSpline(sol_run[0], sol_run[1])
+    sol_pts = point_finder(exper_shot[0],ius, y_only = True)
+    loss = mean_squared_error(exper_shot[1], sol_pts)
+    return loss
 
+def Setup(func, params, points = 50, steps = 4):
+    '''Sets up and runs many runs over the given parameter space, with steps
+    determining how many grid points in each direction.'''
+#    n = len(params)
+    space = []
+    for i in params:
+        ticks = (i[1] - i[0])/steps
+        meep = []
+        for j in range(steps+1):
+            meep.append(i[0] +j*ticks)
+        space.append(meep)
+    print(space)
+    x = np.linspace(-.15, .1, 50)
+    for i_ct, i in enumerate(space[0]):
+        for j_ct, j in enumerate(space[1]):
+            for k_ct, k in enumerate(space[2]):
+#                enter = 'cd Attempt_{}{}{}'.format(i,j,k)
+                diff = func(x, i, j, k, 2)
+                #os.system('nano b2.transport.inputfile')
+                Points0 = InputfileParser(file='b2.transport.inputfile.vi')
+                D_Points={'1' : np.array([x,diff]).T} #This is where the optimization method comes in
+                Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
+                mkdir = 'cp -r base Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
+                os.system(mkdir)
+                WriteInputfile(file='Attempt_{}{}{}/b2.transport.inputfile'.format(i_ct,j_ct,k_ct),points=Full_Points)
+                path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
+                Attempt = '#PBS -N Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
+                #replaces the name and directory lines
+                replace_line('Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 4, Attempt)
+                replace_line('Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 9, path_name)
+                batch_run = 'qsub Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct)
+                os.system(batch_run)
+                os.system('cd ../')
+                    
+def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
+    '''Post Step Analysis using a comparison of a given experimental shot
+    to analyize loss and provided desired run for further optimization.'''
+#    n = len(params)
+    space = []
+    loss_pts = []
+    eq = equilibrium(gfile)
+    for i in params:
+        ticks = (i[1] - i[0])/steps
+        meep = []
+        for j in range(steps+1):
+            meep.append(i[0] +j*ticks)
+        space.append(meep)
+    for i_ct, i in enumerate(space[0]):
+        for j_ct, j in enumerate(space[1]):
+            for k_ct, k in enumerate(space[2]):
+                exp_data = np.loadtxt(exper_shot, usecols = (0,1))
+                enter = 'cd Attempt_{}{}{}'.format(i,j,k)            
+                os.system(enter)
+                os.system('2d_Profiles')
+                Attempt = np.loadtxt('ne3da.last10')
+                if len(Attempt) != 0:
+                    # talk to richard about psi_calc = eq.('MAST')
+                    flux = eq.get_fluxsurface(psiN = 1)
+                    for i in flux:
+                        if i[1] == 0:
+                            R_sep = i[0]
+                    for i in Attempt:
+                        i[0] += R_sep
+                        i[0] = eq.psiN(i[0],0)
+                    l = Loss(exp_data, Attempt)
+                    loss_pts.append([l,i,j,k]) 
+                os.system('cd ../')
+    b = np.amin(loss_pts, axis = 0)
+    for i in loss_pts:
+        if b[0] == i[0]: 
+            return i
+#need to add error/iteration graph
+
+MAST_params = [[.75,1.25],
+          [.0005,.0075],
+          [1.5,3.5],
+          [1,3]]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
 # Here iterations, learning_rate, stopping_threshold
 # are hyperparameters that can be tuned
 if __name__ == '__main__':
-    x = np.linspace(-.15, .15, 20)
-    y = DoubleGauss(x)
-    gen_test = point_finder(x,DoubleGauss)
-    Generate(gen_test)
+    Setup(Trainer, MAST_params)
 '''
 y_Lit = T_Lit(x)
 Points = B2TransportInputfileParser()
