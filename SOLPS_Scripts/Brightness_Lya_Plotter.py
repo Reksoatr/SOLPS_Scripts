@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import equilibrium as eq
 from TOOLS import SET_WDIR, gaussian_shading
 from VesselPlotterNew import SOLPSPLOT
+from B2TransportParser import R2PsiN, PsiN2R
 
 BASE,TOP = SET_WDIR('','')
 Plot= True
@@ -35,17 +36,6 @@ GFCMOD='{}gfileProcessing/cmod_files/'.format(TOP)
 GF308=eq.equilibrium(gfile='{}g1100308004.01000'.format(GFCMOD))
 GF108=eq.equilibrium(gfile='{}g1080416025.01000'.format(GFCMOD))
 GF305=eq.equilibrium(gfile='{}g1100305023.01000'.format(GFCMOD))
-
-def R2PsiN(GF,R):
-    PP=GF.psiN(R,0)[0]
-    
-    return PP
-
-def PsiN2R(GF,psin):
-    Rlfs=[i for i in GF.R if i>GF.axis.r]
-    RR=np.interp(psin,R2PsiN(GF,Rlfs),Rlfs)
-    
-    return RR
 
 bright308=pkl.load(open('lya_brightness_1100308004.pkl','rb'))
 bright108=pkl.load(open('lya_brightness_1080416025.pkl','rb'))
