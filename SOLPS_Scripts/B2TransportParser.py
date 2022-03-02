@@ -85,7 +85,7 @@ def Generate(trans_pts, CoeffID=1, SpeciesID=1, M=[1]):
     for MM in M:
         inputfile[MM] = ' ndata(1, {0}, {1})= {2},\n'.format(i,j,n)
         for m in range(n):
-            inputfile[MM] = inputfile[MM] + ' tdata(1, {0}, {1}, {2})= {3}, tdata(2, {0}, {1}, {2})= {4},\n'.format(m+1,i,j,round(r[m][0],5),round(r[m][1]*MM,5))
+            inputfile[MM] = inputfile[MM] + ' tdata(1, {0}, {1}, {2})= {3}, tdata(2, {0}, {1}, {2})= {4},\n'.format(m+1,i,j,np.round(r[m][0],5),np.round(r[m][1]*MM,5))
             
     return inputfile
     
