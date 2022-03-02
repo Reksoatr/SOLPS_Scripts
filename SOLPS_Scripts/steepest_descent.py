@@ -86,13 +86,13 @@ def Setup(func, params, points = 50, steps = 4):
                 Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
                 mkdir = 'cp -r base Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
                 os.system(mkdir)
-                WriteInputfile(file='Attempt_{}{}{}/b2.transport.inputfile'.format(i,j,k),points=Full_Points)
-                path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}'.format(i,j,k)
-                Attempt = '#PBS -N Attempt_{}{}{}'.format(i,j,k)
+                WriteInputfile(file='Attempt_{}{}{}/b2.transport.inputfile'.format(i_ct,j_ct,k_ct),points=Full_Points)
+                path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
+                Attempt = '#PBS -N Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
                 #replaces the name and directory lines
-                replace_line('batch', 4, Attempt)
-                replace_line('batch', 9, path_name)
-                batch_run = 'qsub batch'
+                replace_line('Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 4, Attempt)
+                replace_line('Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 9, path_name)
+                batch_run = 'qsub Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct)
                 os.system(batch_run)
                 os.system('cd ../')
                     
