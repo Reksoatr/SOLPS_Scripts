@@ -73,16 +73,16 @@ def Setup(func, params, points = 50, steps = 4):
         for j in range(steps+1):
             meep.append(i[0] +j*ticks)
         space.append(meep)
+    print space
+    x = np.linspace(-.15, .1, 50)
     for i in space[0]:
         for j in space[1]:
             for k in space[2]:
                 enter = 'cd Attempt_{}{}{}'.format(i,j,k)
-                x = np.linspace(-.15, .1, 50)
                 diff = func(x, i, j, k, 2)
                 #os.system('nano b2.transport.inputfile')
                 Points0 = InputfileParser(file='b2.transport.inputfile.vi')
                 D_Points={'1' : np.array([x,diff]).T} #This is where the optimization method comes in
-                print(D_Points)
                 Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
                 mkdir = 'cp -r base Attempt_{}{}{}'.format(i,j,k)            
                 os.system(mkdir)
@@ -109,10 +109,10 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
         for j in range(steps+1):
             meep.append(i[0] +j*ticks)
         space.append(meep)
-    for i in space[0]:
-        for j in space[1]:
-            for k in space[2]:
-                exp_data = np.loadtxt(exper_shot)
+    for i_ct, i in enumerate(space[0]):
+        for j_ct, j in enumerate(space[1]):
+            for k_ct, k in enumerate(space[2]):
+                exp_data = np.loadtxt(exper_shot, usecols = (0,1))
                 enter = 'cd Attempt_{}{}{}'.format(i,j,k)            
                 os.system(enter)
                 os.system('2d_Profiles')
