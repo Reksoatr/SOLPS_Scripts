@@ -78,15 +78,15 @@ def Setup(func, params, points = 50, steps = 4):
             for k in space[2]:
                 enter = 'cd Attempt_{}{}{}'.format(i,j,k)
                 x = np.linspace(-.15, .1, 50)
-                diff = func(x, i, j, k, 1)
+                diff = func(x, i, j, k, 2)
                 #os.system('nano b2.transport.inputfile')
                 Points0 = InputfileParser(file='b2.transport.inputfile.vi')
-                D_Points={'1' : [[x],[diff]]} #This is where the optimization method comes in
+                D_Points={'1' : np.array([x,diff]).T} #This is where the optimization method comes in
+                print(D_Points)
                 Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
                 mkdir = 'cp -r base Attempt_{}{}{}'.format(i,j,k)            
                 os.system(mkdir)
-                os.system(enter)
-                WriteInputfile(file='b2.transport.inputfile',points=Full_Points)
+                WriteInputfile(file='Attempt_{}{}{}/b2.transport.inputfile'.format(i,j,k),points=Full_Points)
                 path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}'.format(i,j,k)
                 Attempt = '#PBS -N Attempt_{}{}{}'.format(i,j,k)
                 #replaces the name and directory lines
