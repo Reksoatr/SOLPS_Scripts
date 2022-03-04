@@ -113,6 +113,14 @@ def replace_line(file_name, line_num, text):
     out = open(file_name, 'w')
     out.writelines(lines)
     out.close()
+    
+def batch_writer(dest, i, j, k):
+    f = open('batch_use', 'w')
+    f.writelines(['#!/bin/tcsh','#PBS -l nodes=1:hima:ppn=1','#PBS -l walltime=02:00:00','#PBS -N Attempt{}{}{}'.format(i,j,k),'#PBS -j oe','','env','',dest,'b2run b2mn > run.log'])
+    f.close()
+
+
+
 
 def R2PsiN(GF,R):
     '''Uses equilibrium to convert from R to PsiN
