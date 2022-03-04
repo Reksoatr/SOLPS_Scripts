@@ -115,15 +115,17 @@ def replace_line(file_name, line_num, text):
     out.close()
 
 def R2PsiN(GF,R):
-    '''uses equilibrium to convert from R to PsiN
-        G-File must be formatted as an equilibrium object.'''
+    '''Uses equilibrium to convert from R to PsiN
+        Must provide gfile (GF) loaded as an equilibrium object
+        Assumes Z=0'''
     PP=GF.psiN(R,0)[0]
     
     return PP
 
 def PsiN2R(GF,psin):
     '''uses equilibrium to convert from PsiN to R
-       G-File must be formatted as an equilibrium object.'''
+       Must provide gfile (GF) loaded as an equilibrium object
+       Assumes Z=0'''
     Rlfs=[i for i in GF.R if i>GF.axis.r]
     RR=np.interp(psin,R2PsiN(GF,Rlfs),Rlfs)
     
