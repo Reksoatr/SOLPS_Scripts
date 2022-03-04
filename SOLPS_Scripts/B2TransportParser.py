@@ -116,7 +116,7 @@ def replace_line(file_name, line_num, text):
     
 def batch_writer(dest, i, j, k):
     f = open('batch_use', 'w')
-    f.writelines(['\n#!/bin/tcsh','\n#PBS -l nodes=1:hima:ppn=1','\n#PBS -l walltime=02:00:00','\n#PBS -N Attempt{}{}{}'.format(i,j,k),'\n#PBS -j oe','\n','\nenv','\n',dest,'\n','\nb2run b2mn > run.log'])
+    f.writelines(['#!/bin/tcsh','\n#PBS -l nodes=1:hima:ppn=1','\n#PBS -l walltime=02:00:00','\n#PBS -N Attempt{}{}{}'.format(i,j,k),'\n#PBS -j oe','\n','\nenv','\n','\n',dest,'\n','\nb2run b2mn > run.log'])
     f.close()
 
 
