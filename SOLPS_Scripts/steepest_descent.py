@@ -90,8 +90,8 @@ def Setup(func, params, points = 50, steps = 4):
                 path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
                 Attempt = '#PBS -N Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
                 #replaces the name and directory lines
-                replace_line('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 4, Attempt)
-                replace_line('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 9, path_name)
+                replace_line('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 3, Attempt)
+                replace_line('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 7, path_name)
                 batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct)
                 os.system(batch_run)
                 os.system('cd ../')
