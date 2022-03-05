@@ -82,7 +82,7 @@ def Setup(func, params, points = 50, steps = 4):
                 diff = func(x, i, j, k, 2)
                 #os.system('nano b2.transport.inputfile')
                 Points0 = InputfileParser(file='b2.transport.inputfile.vi')
-                D_Points={'1' : np.array([x,diff]).T} #This is where the optimization method comes in
+                D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
                 Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
                 mkdir = 'cp -r base Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
                 os.system(mkdir)
