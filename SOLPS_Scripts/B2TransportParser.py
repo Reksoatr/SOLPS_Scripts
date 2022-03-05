@@ -94,7 +94,7 @@ def WriteInputfile(file='b2.transport.inputfile', points={},M_1 = True, M=[1]):
     inputfile={}
     if points:
         for k in points.keys():
-            inputfile[k]=Generate(points[k],CoeffID=int(k),M=M)
+            inputfile[k]=Generate(points[k].T,CoeffID=int(k),M=M)
     else:
         points=InputfileParser(file)
         for k in points.keys():
