@@ -117,12 +117,12 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
                 exp_data = np.loadtxt(exper_shot, usecols = (0,1))
                 enter = 'cd Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)    
                 os.system(enter)
-                try:
+                '''try:
                     f = open("run.log.gz")
                     # Do something with the file
                 except IOError:
                     os.system('cd ../')
-                    continue
+                    continue'''
                 os.system('2d_profiles')
                 Attempt = np.loadtxt('ne3da.last10')
                 if len(Attempt) != 0:
