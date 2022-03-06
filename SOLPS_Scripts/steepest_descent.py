@@ -134,7 +134,7 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
     b = np.amin(loss_pts, axis = 0)
     for i in loss_pts:
         if b[0] == i[0]: 
-            return i
+            print(i)
 #need to add error/iteration graph
 
 MAST_params = [[.75,1.25],
@@ -147,7 +147,14 @@ MAST_params = [[.75,1.25],
 # Here iterations, learning_rate, stopping_threshold
 # are hyperparameters that can be tuned
 if __name__ == '__main__':
-    Setup(Trainer, MAST_params)
+    initializing = input('Is this your first run? (y or n)')
+    if initializing == 'y':
+        Setup(Trainer, MAST_params)
+    if initializing == 'n':
+        data_analysis = input('Is this data analysis after a run? (y or n)')
+        if data_analysis == 'y':
+            Loss_Analysis(MAST_params, 'yag.txt', 'g027205.00275_efitpp')
+        #if data_analysis == 'n':
 '''
 y_Lit = T_Lit(x)
 Points = B2TransportInputfileParser()
