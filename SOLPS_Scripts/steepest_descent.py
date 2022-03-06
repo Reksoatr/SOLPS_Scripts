@@ -74,7 +74,7 @@ def Setup(func, params, points = 50, steps = 4):
             meep.append(i[0] +j*ticks)
         space.append(meep)
     print(space)
-    x = np.linspace(-.15, .1, 50)
+    x = np.linspace(-.15, .12, 25)
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
