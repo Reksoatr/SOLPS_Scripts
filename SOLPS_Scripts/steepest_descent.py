@@ -117,7 +117,7 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
                 exp_data = np.loadtxt(exper_shot, usecols = (0,1))
                 enter = 'cd Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
                 os.system(enter)
-                os.system('2d_Profiles')
+                os.system('2d_profiles')
                 Attempt = np.loadtxt('ne3da.last10')
                 if len(Attempt) != 0:
                     # talk to richard about psi_calc = eq.('MAST')
@@ -147,7 +147,7 @@ MAST_params = [[.75,1.25],
 # Here iterations, learning_rate, stopping_threshold
 # are hyperparameters that can be tuned
 if __name__ == '__main__':
-    initializing = input('Is this your first run? (y or n)')
+    initializing = input('Is this before your first run? (y or n)')
     if initializing == 'y':
         Setup(Trainer, MAST_params)
     if initializing == 'n':
