@@ -124,6 +124,7 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
                     os.system('cd ../')
                     continue'''
                 os.system('2d_profiles')
+                print('Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
                 Attempt = np.loadtxt('ne3da.last10')
                 if len(Attempt) != 0:
                     print('in Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
