@@ -115,7 +115,7 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
                 exp_data = np.loadtxt(exper_shot, usecols = (0,1))
-                enter = 'cd Attempt_{}{}{}'.format(i,j,k)            
+                enter = 'cd Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
                 os.system(enter)
                 os.system('2d_Profiles')
                 Attempt = np.loadtxt('ne3da.last10')
