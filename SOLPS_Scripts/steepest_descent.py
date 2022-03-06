@@ -115,16 +115,18 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
                 exp_data = np.loadtxt(exper_shot, usecols = (0,1))
-                enter = 'cd Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
+                enter = 'cd Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)    
                 os.system(enter)
                 try:
                     f = open("run.log.gz")
                     # Do something with the file
                 except IOError:
+                    os.system('cd ../')
                     continue
                 os.system('2d_profiles')
                 Attempt = np.loadtxt('ne3da.last10')
                 if len(Attempt) != 0:
+                    print('in Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
                     # talk to richard about psi_calc = eq.('MAST')
                     flux = eq.get_fluxsurface(psiN = 1)
                     for i in flux:
