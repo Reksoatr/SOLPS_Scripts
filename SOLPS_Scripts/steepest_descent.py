@@ -117,6 +117,7 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
                 exp_data = np.loadtxt(exper_shot, usecols = (0,1))
                 enter = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)    
                 os.system(enter)
+                os.system('pwd')
                 '''try:
                     f = open("run.log.gz")
                     # Do something with the file
