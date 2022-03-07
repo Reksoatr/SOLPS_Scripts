@@ -212,7 +212,7 @@ if __name__ == '__main__':
     if initializing == 'n':
         data_analysis = input('Is this data analysis after a run? (y or n)')
         if data_analysis == 'y':
-            Loss_Analysis(MAST_params, 'yag.txt', 'g027205.00275_efitpp')
+            Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp')
         #if data_analysis == 'n':
 '''
 
