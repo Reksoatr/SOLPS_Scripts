@@ -1007,7 +1007,7 @@ class SOLPSPLOT(object):
             else:    
                 ax.set_ylabel(PARAM.name)
             if RadProfKW['Publish']==[]:
-                ax.legend(Attempts)
+                ax.legend()
                 ax.set_title('Discharge 0{} Attempt(s) {} Midplane Radial {}'.format(str(Shot), str(Attempts), PARAM.name))
             else:
                 ax.legend()
