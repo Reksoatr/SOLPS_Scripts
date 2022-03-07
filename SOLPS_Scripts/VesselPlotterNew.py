@@ -977,11 +977,11 @@ class SOLPSPLOT(object):
                         if pn == 'Ne':
                             NemidAvg = self.ExpDict['NemidAvg']
                             ErrNe = self.ExpDict['ErrNe']
-                            ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7, label=Publish)
+                            ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7, label='Exp')
                         elif pn == 'Te':
                             TemidAvg = self.ExpDict['TemidAvg']
                             ErrTe = self.ExpDict['ErrTe']
-                            ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7, label=Publish)
+                            ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7, label='Exp')
                     
                     if 'd3d' in Shot:
                         if pn == 'Ne':

@@ -58,10 +58,10 @@ nn305[2]=1e6*nn305[2]
 nnlogerr305=0.434*nn305[2]/nn305[1]
 
 
-solps308=SOLPSPLOT('1100308004', ['14Rf0.7'], Markers=False, JXA=40, JXI=59)
-solps108=SOLPSPLOT('1080416025', ['18Rf0.6'], Markers=False, JXA=40, JXI=58, 
+solps308=SOLPSPLOT('1100308004', ['14Rf0.35','14Rf0.7','14Rf1.05'], Markers=False, JXA=40, JXI=59)
+solps108=SOLPSPLOT('1080416025', ['18Rf0.3','18Rf0.6','18Rf0.9'], Markers=False, JXA=40, JXI=58, 
                    PsinOffset=0.02, RadOffset=0.005)
-solps305=SOLPSPLOT('1100305023', ['24Rf2.0'], Markers=False, 
+solps305=SOLPSPLOT('1100305023', ['24Rf1.0','24Rf2.0','24Rf3.0'], Markers=False, 
                    PsinOffset=-0.014, RadOffset=-0.007)
 
 LYMID_coords=pkl.load(open('{}lya_coords_v3.pkl'.format(GFCMOD),'rb'))
