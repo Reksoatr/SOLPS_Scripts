@@ -9,7 +9,7 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 import re
-from B2TransportParser import InputfileParser, Generate, WriteInputfile, batch_writer
+from B2TransportParser import InputfileParser, Generate, WriteInputfile, batch_writer, R2PsiN
 from scipy.interpolate import InterpolatedUnivariateSpline
 import os
 from equilibrium import equilibrium
@@ -131,14 +131,16 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
                 if len(Attempt) != 0:
                     #print('in Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
                     # talk to richard about psi_calc = eq.('MAST')
-                    flux = eq.get_fluxsurface(psiN = 1)
+                    for R in Attempt:
+                        R = R2PsiN(eq,R)
+#                    flux = eq.get_fluxsurface(psiN = 1)
 #                    for i in flux:
 #                        if i[1] == 0:
-                    R_sep = flux[0]
-                    print(R_sep)
-                    for i in Attempt:
-                        i[0] += R_sep
-                        i[0] = eq.psiN(i[0],0)
+#                    R_sep = flux[0]
+#                    print(R_sep)
+#                    for i in Attempt:
+#                        i[0] += R_sep
+#                        i[0] = eq.psiN(i[0],0)
                     l = Loss(exp_data, Attempt)
                     loss_pts.append([l,i,j,k]) 
     b = np.amin(loss_pts, axis = 0)
