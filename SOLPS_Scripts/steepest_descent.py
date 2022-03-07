@@ -135,6 +135,7 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
 #                    for i in flux:
 #                        if i[1] == 0:
                     R_sep = flux[0]
+                    print(R_sep)
                     for i in Attempt:
                         i[0] += R_sep
                         i[0] = eq.psiN(i[0],0)
