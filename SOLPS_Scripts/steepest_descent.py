@@ -99,13 +99,13 @@ def Setup(func, params, steps = 4):
                 os.system(batch_run)
                 os.system('cd ../')
                     
-def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
+def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
     '''Post Step Analysis using a comparison of a given experimental shot
     to analyize loss and provided desired run for further optimization.'''
 #    n = len(params)
     space = []
     loss_pts = []
-    eq = equilibrium(gfile)
+    eq = equilibrium(gfile=gfilen)
     for i in params:
         ticks = (i[1] - i[0])/steps
         meep = []
