@@ -90,22 +90,29 @@ def Generate(trans_pts, CoeffID=1, SpeciesID=1, M=[1]):
             
     return inputfile
     
-def WriteInputfile(file='b2.transport.inputfile', points={}, M=[1]):
+def WriteInputfile(file='b2.transport.inputfile', points={},M_1 = True, M=[1]):
     inputfile={}
     if points:
         for k in points.keys():
-            inputfile[k]=Generate(points[k],CoeffID=int(k),M=M)
+            inputfile[k]=Generate(points[k].T,CoeffID=int(k),M=M)
     else:
         points=InputfileParser(file)
         for k in points.keys():
             inputfile[k]=Generate(points[k].T,CoeffID=int(k),M=M)
-            
-    for MM in M:
-        with open('{}.f{}'.format(file,MM),'w') as f:
-            f.write(' &TRANSPORT\n')
-            for k in inputfile.keys():
-                f.writelines(inputfile[k][MM])
-            f.write(' no_pflux=.false.\n /\n')
+    if M_1 == True:
+        for MM in M:
+            with open('{}'.format(file),'w') as f:
+                f.write(' &TRANSPORT\n')
+                for k in inputfile.keys():
+                    f.writelines(inputfile[k][MM])
+                f.write(' no_pflux=.false.\n /\n')
+    else:
+        for MM in M:
+            with open('{}.f{}'.format(file,MM),'w') as f:
+                f.write(' &TRANSPORT\n')
+                for k in inputfile.keys():
+                    f.writelines(inputfile[k][MM])
+                f.write(' no_pflux=.false.\n /\n')
         
 def replace_line(file_name, line_num, text):
     lines = open(file_name, 'r').readlines()
@@ -113,6 +120,14 @@ def replace_line(file_name, line_num, text):
     out = open(file_name, 'w')
     out.writelines(lines)
     out.close()
+    
+def batch_writer(dest, i, j, k):
+    f = open('batch_use', 'w')
+    f.writelines(['#!/bin/tcsh','\n#PBS -l nodes=1:hima:ppn=1','\n#PBS -l walltime=02:00:00','\n#PBS -N Attempt{}{}{}'.format(i,j,k),'\n#PBS -j oe','\n','\nenv','\n','\n',dest,'\n','\nb2run b2mn > run.log'])
+    f.close()
+
+
+
 
 def R2PsiN(GF,R):
     '''Uses equilibrium to convert from R to PsiN
