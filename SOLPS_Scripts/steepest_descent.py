@@ -115,8 +115,8 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
                 exp_data = np.loadtxt(exper_shot, usecols = (0,1))
-                enter = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)    
-                os.system(enter)
+                enter = '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)    
+                os.chdir(enter)
                 os.system('pwd')
                 '''try:
                     f = open("run.log.gz")
@@ -139,7 +139,6 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
                         i[0] = eq.psiN(i[0],0)
                     l = Loss(exp_data, Attempt)
                     loss_pts.append([l,i,j,k]) 
-                os.system('cd ../')
     b = np.amin(loss_pts, axis = 0)
     for i in loss_pts:
         if b[0] == i[0]: 
