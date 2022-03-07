@@ -146,7 +146,8 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
                     loss_pts.append([l,i,j,k]) 
     b = np.amin(loss_pts, axis = 0)
     params_new = []
-    params_new.append(b[1], b[2], b[3])
+    b_star = [b[1], b[2], b[3]]
+    params_new.append(b_star)
     #loss_pts.remove(b)
     #b1 = np.amin(loss_pts, axis = 0)
     #params_new.append(b1[1], b1[2], b1[3])
