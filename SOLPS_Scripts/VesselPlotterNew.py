@@ -888,6 +888,9 @@ class SOLPSPLOT(object):
         
         RR, Rexp, Rstr = self.GetRadCoords(RADC,Offset)
         
+        if not Publish:
+            Publish=Attempts
+        
         if Parameter is None:
             self.PltParams = self.Parameter
         elif isinstance(Parameter,str):
