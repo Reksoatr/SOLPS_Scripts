@@ -131,7 +131,7 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
                 if len(Attempt) != 0:
                     #print('in Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
                     # talk to richard about psi_calc = eq.('MAST')
-                    for R in Attempt:
+                    for R in Attempt[0]:
                         R = R2PsiN(eq,R)
 #                    flux = eq.get_fluxsurface(psiN = 1)
 #                    for i in flux:
