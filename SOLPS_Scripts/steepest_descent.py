@@ -13,6 +13,7 @@ from B2TransportParser import InputfileParser, Generate, WriteInputfile, batch_w
 from scipy.interpolate import InterpolatedUnivariateSpline
 import os
 from equilibrium import equilibrium
+import csv
 #The beginning functions for optimization
 def Trainer(x, a=1.05, b=2.5, c=.002,d=2.4,e=1,f=1):
     y = -a*(np.exp(-x**2/c)+1)-b*(x)+d
@@ -62,7 +63,7 @@ def Loss(exper_shot, sol_run):
     loss = mean_squared_error(exper_shot[1], sol_pts)
     return loss
 
-def Setup(func, params, points = 50, steps = 4):
+def Setup(func, params, steps = 4):
     '''Sets up and runs many runs over the given parameter space, with steps
     determining how many grid points in each direction.'''
 #    n = len(params)
@@ -128,7 +129,7 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
                 print('Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
                 Attempt = np.loadtxt('ne3da.last10')
                 if len(Attempt) != 0:
-                    print('in Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
+                    #print('in Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
                     # talk to richard about psi_calc = eq.('MAST')
                     flux = eq.get_fluxsurface(psiN = 1)
                     for i in flux:
@@ -140,11 +141,57 @@ def Loss_Analysis(params, exper_shot, gfile, points = 50, steps = 4):
                     l = Loss(exp_data, Attempt)
                     loss_pts.append([l,i,j,k]) 
     b = np.amin(loss_pts, axis = 0)
+    params_new = []
+    params_new.append(b[1], b[2], b[3])
+    #loss_pts.remove(b)
+    #b1 = np.amin(loss_pts, axis = 0)
+    #params_new.append(b1[1], b1[2], b1[3])
     for i in loss_pts:
         if b[0] == i[0]: 
             print(i)
+    
+    #with open('loss_over_iteration.csv', 'a', encoding='UTF8') as f:
+        #writer = csv.writer(f)
+        #writer.writerows([b])
 #need to add error/iteration graph
+'''def Loss_Graph(csv):
+    y = np.loadtxt(csv, usecols = 0)
+    x= range(0, len(y))
+    fig, axs = plt.subplots(1,1,dpi = 200)
+    axs.plot(x,y)
+    axs.set_xlabel('Iterations')
+    axs.set_ylabel('Loss from Error')
 
+def Further_Steps(func, params, alpha = .2):
+    space = []
+    
+    for i in params:
+        step = alpha*(i[1]-i[0])
+        i[1] = step
+    for i_ct, i in enumerate(space[0]):
+        for j_ct, j in enumerate(space[1]):
+            for k_ct, k in enumerate(space[2]):
+#                enter = 'cd Attempt_{}{}{}'.format(i,j,k)
+                diff = func(x, i, j, k, 2)
+                #os.system('nano b2.transport.inputfile')
+                Points0 = InputfileParser(file='b2.transport.inputfile.vi')
+                D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
+                Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
+                mkdir = 'cp -r base Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
+                os.system(mkdir)
+                WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/b2.transport.inputfile'.format(i_ct,j_ct,k_ct),points=Full_Points)
+                path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
+                #Attempt = '#PBS -N Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
+                #replaces the name and directory lines
+                #replace_line('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 3, Attempt)
+                #replace_line('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 7, path_name)
+                batch_writer(path_name, i_ct, j_ct, k_ct)
+                os.system('cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct))
+                batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct)
+                os.system(batch_run)  
+    
+'''    
+    
 MAST_params = [[.75,1.25],
           [.0005,.0075],
           [1.5,3.5],
@@ -164,12 +211,7 @@ if __name__ == '__main__':
             Loss_Analysis(MAST_params, 'yag.txt', 'g027205.00275_efitpp')
         #if data_analysis == 'n':
 '''
-y_Lit = T_Lit(x)
-Points = B2TransportInputfileParser()
-test = Points['1']['X']
-test_y = Points['1']['Y']
-pointy = point_finder(test,Trainer)
-#print(test)
+
 fig, axs = plt.subplots(1,1, dpi = 200)
 axs.plot(test, test_y, color = 'b', label = 'Original')
 axs.plot(x, y, color = 'g', label = 'Training')
