@@ -941,34 +941,34 @@ class SOLPSPLOT(object):
                             print('Gradient can not be calculated unless radial coordinate is in meters (RADC=rrsep)')
                     
                     if RadProfKW['LOG10'] == 2:
-                        ax.semilogy(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n], label=Publish)
+                        ax.semilogy(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n], label=Publish[n])
                     else:
-                        ax.plot(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n],linewidth=3, label=Publish)
+                        ax.plot(RR.loc[:,JXA,Attempts[n]], PARAM.loc[:,JXA,Attempts[n]],PlotScheme[n],linewidth=3, label=Publish[n])
                         
-                    if RadProfKW['EXP'] is True and RadProfKW['RADC'] != 'rrsep' and RadProfKW['RADC'] != 'Y':
-                        if 'd3d' not in Shot:
-                            if pn == 'Ne':
-                                NemidAvg = self.ExpDict['NemidAvg']
-                                ErrNe = self.ExpDict['ErrNe']
-                                ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[n][0], label=Publish)
-                            elif pn == 'Te':
-                                TemidAvg = self.ExpDict['TemidAvg']
-                                ErrTe = self.ExpDict['ErrTe']
-                                ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[n][0], label=Publish)
-                        
-                        if 'd3d' in Shot:
-                            if pn == 'Ne':
-                                PsinNe = Rexp[0]
-                                Ned3d = self.ExpDict['Ned3d']
-                                ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0], label=Publish)
-                            elif pn == 'Te':
-                                PsinTe = Rexp[1]
-                                Ted3d = self.ExpDict['Ted3d']
-                                ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0], label=Publish)
-                            elif pn == 'Ti':
-                                PsinTi = Rexp[2]
-                                Tid3d = self.ExpDict['Tid3d']
-                                ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3,color=PlotScheme[n][0], label=Publish)
+                if RadProfKW['EXP'] is True and RadProfKW['RADC'] != 'rrsep' and RadProfKW['RADC'] != 'Y':
+                    if 'd3d' not in Shot:
+                        if pn == 'Ne':
+                            NemidAvg = self.ExpDict['NemidAvg']
+                            ErrNe = self.ExpDict['ErrNe']
+                            ax.errorbar(Rexp,NemidAvg,yerr=ErrNe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[0][0], label='Exp')
+                        elif pn == 'Te':
+                            TemidAvg = self.ExpDict['TemidAvg']
+                            ErrTe = self.ExpDict['ErrTe']
+                            ax.errorbar(Rexp,TemidAvg,yerr=ErrTe,fmt='o',markersize=7,linewidth=3,capsize=7,color=PlotScheme[0][0], label='Exp')
+                    
+                    if 'd3d' in Shot:
+                        if pn == 'Ne':
+                            PsinNe = Rexp[0]
+                            Ned3d = self.ExpDict['Ned3d']
+                            ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3,color=PlotScheme[0][0], label='Exp')
+                        elif pn == 'Te':
+                            PsinTe = Rexp[1]
+                            Ted3d = self.ExpDict['Ted3d']
+                            ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3,color=PlotScheme[0][0], label='Exp')
+                        elif pn == 'Ti':
+                            PsinTi = Rexp[2]
+                            Tid3d = self.ExpDict['Tid3d']
+                            ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3,color=PlotScheme[0][0], label='Exp')
             else:
                 if RadProfKW['LOG10'] == 2:
                     ax.semilogy(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:], label=Publish)
@@ -990,15 +990,15 @@ class SOLPSPLOT(object):
                         if pn == 'Ne':
                             PsinNe = Rexp[0]
                             Ned3d = self.ExpDict['Ned3d']
-                            ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3, label=Publish)
+                            ax.plot(PsinNe,Ned3d,'o',markersize=7,linewidth=3, label='Exp')
                         elif pn == 'Te':
                             PsinTe = Rexp[1]
                             Ted3d = self.ExpDict['Ted3d']
-                            ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3, label=Publish)
+                            ax.plot(PsinTe,Ted3d,'o',markersize=7,linewidth=3, label='Exp')
                         elif pn == 'Ti':
                             PsinTi = Rexp[2]
                             Tid3d = self.ExpDict['Tid3d']
-                            ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3, label=Publish)
+                            ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3, label='Exp')
             
             ax.set_xlabel(Rstr)
             
