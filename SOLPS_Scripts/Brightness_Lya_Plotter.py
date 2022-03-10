@@ -162,7 +162,7 @@ if Plot:
     ax305[1,0].plot(Remiss308,bright308[emiss_idx],'--*',color='red',label='LYMID')
     ax305[1,0].legend()
     gaussian_shading(ax305[2,0],Rnn308,np.log10(nn308[1]),nnlogerr308,c='red')
-    ax305[2,0].legend()
+    ax305[2,0].legend(['$\pm50\%$','Base','_nolabel','LYMID'],loc=2)
     solps308.RadProf('Ne',RADC=RADC,AX=ax305[3,0],PlotScheme=['r--','b-','b--'],Publish=['$\pm50\%$','Base',None])
     ax305[3,0].legend(loc=2)
     solps308.RadProf('Te',RADC=RADC,AX=ax305[4,0],PlotScheme=['r--','b-','b--'],Publish=['$\pm50\%$','Base',None])
@@ -213,7 +213,7 @@ if Plot:
     ax305[1,1].plot(Remiss108,bright108[emiss_idx],'--*',color='red',label='LYMID')
     ax305[1,1].legend()
     gaussian_shading(ax305[2,1],Rnn108,np.log10(nn108[1]),nnlogerr108,c='red')
-    ax305[2,1].legend()
+    ax305[2,1].legend(['$\pm50\%$','Base','_nolabel','LYMID'],loc=2)
     solps108.RadProf('Ne',RADC=RADC,AX=ax305[3,1],PlotScheme=['r--','b-','b--'],Publish=['$\pm50\%$','Base',None])
     ax305[3,1].legend(loc=2)
     solps108.RadProf('Te',RADC=RADC,AX=ax305[4,1],PlotScheme=['r--','b-','b--'], Publish=['$\pm50\%$','Base',None])
@@ -259,7 +259,7 @@ if Plot:
     ax305[1,2].plot(Remiss305,bright305[emiss_idx],'--*',color='red',label='LYMID')
     ax305[1,2].legend()
     gaussian_shading(ax305[2,2],Rnn305,np.log10(nn305[1]),nnlogerr305,c='red')
-    ax305[2,2].legend()
+    ax305[2,2].legend(['$\pm50\%$','Base','_nolabel','LYMID'],loc=2)
     solps305.RadProf('Ne',RADC=RADC,AX=ax305[3,2],PlotScheme=['r--','b-','b--'], Publish=['$\pm50\%$','Base',None])
     ax305[3,2].legend(loc=2)
     solps305.RadProf('Te',RADC=RADC,AX=ax305[4,2],PlotScheme=['r--','b-','b--'], Publish=['$\pm50\%$','Base',None])
@@ -307,6 +307,16 @@ if Plot:
     ax2_308.set_xlabel('Major Radius [m]')
     ax2_108.set_xlabel('Major Radius [m]')
     ax2_305.set_xlabel('Major Radius [m]')
+    
+    for i in range(5):
+        for n in range(3):
+            RR=ax305[i,n].get_lines()
+            ax305[i,n].fill_between(RR[0].get_xdata(),RR[0].get_ydata(),RR[2].get_ydata(),alpha=0.5,color='blue')
+    
+    for n in range(3):
+        RR=ax305[5,n].get_lines()
+        ax305[5,n].fill_between(RR[0].get_xdata(),RR[0].get_ydata(),RR[2].get_ydata(),alpha=0.5,color='green')
+        ax305[5,n].fill_between(RR[3].get_xdata(),RR[3].get_ydata(),RR[5].get_ydata(),alpha=0.5,color='magenta')
     
     fig305.subplots_adjust(wspace=0, hspace=0)
     
