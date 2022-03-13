@@ -201,11 +201,11 @@ MAST_params = [[1,2],
 # Gradient Descent Function
 # Here iterations, learning_rate, stopping_threshold
 # are hyperparameters that can be tuned
-'''
+
 if __name__ == '__main__':
     initializing = input('Is this before your first run? (y or n)')
     if initializing == 'y':
-        Setup(Trainer, MAST_params)
+        Setup(DoubleGauss, MAST_params)
     if initializing == 'n':
         data_analysis = input('Is this data analysis after a run? (y or n)')
         if data_analysis == 'y':
@@ -224,44 +224,7 @@ axs.plot(test, test_y, color = 'b', label = 'Original')
 axs.plot(x, y, color = 'g', label = 'Training')
 #axs.plot(x, y_Lit, color = 'm', label = 'Literature')
 axs.legend()
-
+'''
 #Testing
 #x=  np.linspace(-.2,.1)
 #plt.plot(x,Trainer(x))
-
-'''
-
-def gradient_descent(x, y, iterations = 1000, learning_rate = 0.0001,
-                     stopping_threshold = 1e-6):
-     
-   
-    # Estimation of optimal parameters
-    for i in range(iterations):
-         
-        # Making predictions
-        y_predicted = (current_weight * x) + current_bias
-         
-        # Calculationg the current cost
-        current_cost = mean_squared_error(y, y_predicted)
- 
-        # If the change in cost is less than or equal to
-        # stopping_threshold we stop the gradient descent
-        if previous_cost and abs(previous_cost-current_cost)<=stopping_threshold:
-            break
-         
-        previous_cost = current_cost
- 
-        costs.append(current_cost)
-        weights.append(current_weight)
-         
-        # Calculating the gradients
-        weight_derivative = -(2/n) * sum(x * (y-y_predicted))
-        bias_derivative = -(2/n) * sum(y-y_predicted)
-         
-        # Updating weights and bias
-        current_weight = current_weight - (learning_rate * weight_derivative)
-        current_bias = current_bias - (learning_rate * bias_derivative)
-                 
-        # Printing the parameters for each 1000th iteration
-        print(f"Iteration {i+1}: Cost {current_cost}, Weight \
-        {current_weight}, Bias {current_bias}")'''
