@@ -9,7 +9,7 @@ import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
 import re
-from B2TransportParser import InputfileParser, Generate, WriteInputfile, batch_writer, R2PsiN
+from B2TransportParser import InputfileParser, Generate, WriteInputfile, batch_writer, R2PsiN, PsiN2R
 from scipy.interpolate import InterpolatedUnivariateSpline
 import os
 from equilibrium import equilibrium
@@ -23,7 +23,7 @@ def T_Lit(x, a=0, b=1, c=3,d=0,e=.1,f=0):
     y= .5*(a+b*x**c)*(1-np.tanh((x-d)/e))+f
     return y
 
-def DoubleGauss(x, a=1.0, b=0.005, c=0.1,d=0.5,e=0.0001):
+def DoubleGauss(x, a=1.6, b=0.0035, c=0.1,d=0.5,e=0.0007):
     '''
     Double-Gaussian Function
     a = Maximum (base) value of transport coefficient (typically 1.0)
@@ -80,7 +80,7 @@ def Setup(func, params, steps = 4):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
 #                enter = 'cd Attempt_{}{}{}'.format(i,j,k)
-                diff = func(x, i, j, k, 2)
+                diff = func(x, a = i, b= j, e=k)
                 #os.system('nano b2.transport.inputfile')
                 Points0 = InputfileParser(file='b2.transport.inputfile.vi')
                 D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
@@ -132,16 +132,10 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
                     #print('in Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
                     # talk to richard about psi_calc = eq.('MAST')
                     Attempt = Attempt.T
+                    R_sep = PsiN2R(eq, 1.0)
                     for R in Attempt[0]:
-                        R = R2PsiN(eq,R)
-#                    flux = eq.get_fluxsurface(psiN = 1)
-#                    for i in flux:
-#                        if i[1] == 0:
-#                    R_sep = flux[0]
-#                    print(R_sep)
-#                    for i in Attempt:
-#                        i[0] += R_sep
-#                        i[0] = eq.psiN(i[0],0)
+                        R = R2PsiN(eq,R+R_sep)
+
                     l = Loss(exp_data, Attempt)
                     loss_pts.append([l,i,j,k]) 
     b = np.amin(loss_pts, axis = 0)
@@ -154,7 +148,9 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
     for i in loss_pts:
         if b[0] == i[0]: 
             print(i)
-    
+#add last10 notes to look at different last10 file, check if last10 files need deleted
+#use mv command rm b2mn.prt  
+#ls -al
     #with open('loss_over_iteration.csv', 'a', encoding='UTF8') as f:
         #writer = csv.writer(f)
         #writer.writerows([b])
@@ -197,15 +193,15 @@ def Further_Steps(func, params, alpha = .2):
     
 '''    
     
-MAST_params = [[.75,1.25],
-          [.0005,.0075],
-          [1.5,3.5],
-          [1,3]]
+MAST_params = [[1,2],
+          [.002,.0075],
+          [.0005,.003]]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
 # Here iterations, learning_rate, stopping_threshold
 # are hyperparameters that can be tuned
+'''
 if __name__ == '__main__':
     initializing = input('Is this before your first run? (y or n)')
     if initializing == 'y':
@@ -217,6 +213,12 @@ if __name__ == '__main__':
         #if data_analysis == 'n':
 '''
 
+
+x = np.linspace(-.25,.20)
+y = DoubleGauss(x, b=.0075, e = .003)
+Points = InputfileParser('b2.transport.inputfile.dblgausstest')
+test = Points['1'][0]
+test_y = Points['1'][1]
 fig, axs = plt.subplots(1,1, dpi = 200)
 axs.plot(test, test_y, color = 'b', label = 'Original')
 axs.plot(x, y, color = 'g', label = 'Training')
@@ -227,7 +229,7 @@ axs.legend()
 #x=  np.linspace(-.2,.1)
 #plt.plot(x,Trainer(x))
 
-
+'''
 
 def gradient_descent(x, y, iterations = 1000, learning_rate = 0.0001,
                      stopping_threshold = 1e-6):
