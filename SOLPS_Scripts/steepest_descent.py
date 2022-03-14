@@ -125,6 +125,7 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
                 except IOError:
                     os.system('cd ../')
                     continue'''
+                os.system('rm *.last10')
                 os.system('2d_profiles')
                 print('Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
                 Attempt = np.loadtxt('ne3da.last10')
