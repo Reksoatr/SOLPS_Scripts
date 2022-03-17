@@ -45,12 +45,12 @@ def point_finder(x, func, y_only = False):
         if y_only == False:
             temp = [i, func(i)]
         elif y_only == True:
-            temp = i
+            temp = func(i)
         func_val.append((temp))
     return np.array(func_val)
 
 
-def mean_squared_error(y_true, y_predicted, ):
+def mean_squared_error(y_true, y_predicted):
      
     # Calculating the loss or cost
     cost = np.sum((y_true-y_predicted)**2) / len(y_true)
@@ -58,10 +58,9 @@ def mean_squared_error(y_true, y_predicted, ):
 
 
 def Loss(exper_shot, sol_run):
-    ius = InterpolatedUnivariateSpline(sol_run[0], sol_run[1])
-    
-    sol_pts = point_finder(exper_shot[0],ius, y_only = True)
-    loss = mean_squared_error(exper_shot[1], sol_pts)
+    ius = InterpolatedUnivariateSpline(exper_shot[0], exper_shot[1])
+    sol_pts = point_finder(sol_run[0],ius, y_only = True)
+    loss = mean_squared_error(sol_run[1], sol_pts)
     return loss
 
 def Setup(func, params, steps = 4):
