@@ -59,6 +59,7 @@ def mean_squared_error(y_true, y_predicted, ):
 
 def Loss(exper_shot, sol_run):
     ius = InterpolatedUnivariateSpline(sol_run[0], sol_run[1])
+    
     sol_pts = point_finder(exper_shot[0],ius, y_only = True)
     loss = mean_squared_error(exper_shot[1], sol_pts)
     return loss
@@ -111,11 +112,19 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
         meep = []
         for j in range(steps+1):
             meep.append(i[0] +j*ticks)
-        space.append(meep)
+        space.append(meep)                    
+    STARTING = .75
+    ENDING = 1.03
+    exp_data = np.loadtxt(exper_shot, usecols = (0,1))
+    exp_new = []
+    for R in exp_data:
+        if R[0] > STARTING:
+            if R[0] < ENDING:
+                exp_new.append(R)
+    exp_data = np.array(exp_new).T
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
-                exp_data = np.loadtxt(exper_shot, usecols = (0,1))
                 enter = '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)    
                 os.chdir(enter)
                 os.system('pwd')
@@ -136,7 +145,6 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
                     R_sep = PsiN2R(eq, 1.0)
                     for R in Attempt[0]:
                         R = R2PsiN(eq,R+R_sep)
-
                     l = Loss(exp_data, Attempt)
                     loss_pts.append([l,i,j,k]) 
     b = np.amin(loss_pts, axis = 0)
@@ -204,6 +212,7 @@ MAST_params = [[1,2],
 # are hyperparameters that can be tuned
 
 if __name__ == '__main__':
+    print(np.loadtxt('yag.txt'))
     initializing = input('Is this before your first run? (y or n)')
     if initializing == 'y':
         Setup(DoubleGauss, MAST_params)
