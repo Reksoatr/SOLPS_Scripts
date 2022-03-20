@@ -53,7 +53,7 @@ def point_finder(x, func, y_only = False):
 def mean_squared_error(y_true, y_predicted):
      
     # Calculating the loss or cost
-    cost = np.sum((y_true-y_predicted)**2) / len(y_true)
+    cost = np.sqrt(np.sum((y_true-y_predicted)**2)) / len(y_true)
     return cost
 
 
@@ -75,7 +75,7 @@ def Setup(func, params, steps = 4):
             meep.append(i[0] +j*ticks)
         space.append(meep)
     print(space)
-    x = np.linspace(-.15, .12, 25)
+    x = np.linspace(-.14, .08, 25)
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
@@ -89,10 +89,6 @@ def Setup(func, params, steps = 4):
                 os.system(mkdir)
                 WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/b2.transport.inputfile'.format(i_ct,j_ct,k_ct),points=Full_Points)
                 path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
-                #Attempt = '#PBS -N Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
-                #replaces the name and directory lines
-                #replace_line('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 3, Attempt)
-                #replace_line('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 7, path_name)
                 batch_writer(path_name, i_ct, j_ct, k_ct)
                 os.system('cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct))
                 batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct)
@@ -120,19 +116,15 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
         if R[0] > STARTING:
             if R[0] < ENDING:
                 exp_new.append(R)
-    exp_data = np.array(exp_new).T
+    exp_Data = np.array(exp_new)
+    exp_data = exp_Data.T
+    print(exp_data)
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
                 enter = '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)    
                 os.chdir(enter)
                 os.system('pwd')
-                '''try:
-                    f = open("run.log.gz")
-                    # Do something with the file
-                except IOError:
-                    os.system('cd ../')
-                    continue'''
                 os.system('rm *.last10')
                 os.system('2d_profiles')
                 print('Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
@@ -150,12 +142,16 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
     params_new = []
     b_star = [b[1], b[2], b[3]]
     params_new.append(b_star)
-    #loss_pts.remove(b)
-    #b1 = np.amin(loss_pts, axis = 0)
-    #params_new.append(b1[1], b1[2], b1[3])
+    loss_ptsb = loss_pts
+    loss_ptsb.remove(b)
+    b1 = np.amin(loss_ptsb, axis = 0)
+    params_new.append(b1[1], b1[2], b1[3])
     for i in loss_pts:
         if b[0] == i[0]: 
+            print('Minimum loss is at:')
             print(i)
+    params_news =  params_new.T
+    return params_news
 #add last10 notes to look at different last10 file, check if last10 files need deleted
 #use mv command rm b2mn.prt  
 #ls -al
@@ -163,7 +159,7 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
         #writer = csv.writer(f)
         #writer.writerows([b])
 #need to add error/iteration graph
-'''def Loss_Graph(csv):
+def Loss_Graph(csv):
     y = np.loadtxt(csv, usecols = 0)
     x= range(0, len(y))
     fig, axs = plt.subplots(1,1,dpi = 200)
@@ -171,18 +167,18 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
     axs.set_xlabel('Iterations')
     axs.set_ylabel('Loss from Error')
 
-def Further_Steps(func, params, alpha = .2):
+def Further_Steps(func, params, alpha = .2, Post_Analysis = False, exper_shot = None, gfilen = None):
     space = []
-    
+    if Post_Analysis == False:
+        params = Loss_Analysis(params, exper_shot, gfilen)
     for i in params:
         step = alpha*(i[1]-i[0])
         i[1] = step
+    x = np.linspace(-.14, .08, 25)
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
-#                enter = 'cd Attempt_{}{}{}'.format(i,j,k)
-                diff = func(x, i, j, k, 2)
-                #os.system('nano b2.transport.inputfile')
+                diff = func(x, a = i, b= j, e=k)
                 Points0 = InputfileParser(file='b2.transport.inputfile.vi')
                 D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
                 Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
@@ -190,16 +186,13 @@ def Further_Steps(func, params, alpha = .2):
                 os.system(mkdir)
                 WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/b2.transport.inputfile'.format(i_ct,j_ct,k_ct),points=Full_Points)
                 path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
-                #Attempt = '#PBS -N Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
-                #replaces the name and directory lines
-                #replace_line('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 3, Attempt)
-                #replace_line('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_01/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct), 7, path_name)
                 batch_writer(path_name, i_ct, j_ct, k_ct)
                 os.system('cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct))
                 batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct)
-                os.system(batch_run)  
+                os.system(batch_run)
+                os.system('cd ../')
     
-'''    
+   
     
 MAST_params = [[1,2],
           [.002,.0075],
@@ -219,7 +212,8 @@ if __name__ == '__main__':
         data_analysis = input('Is this data analysis after a run? (y or n)')
         if data_analysis == 'y':
             Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp')
-        #if data_analysis == 'n':
+        if data_analysis == 'n':
+            Further_Steps(DoubleGauss, MAST_params)
 '''
 
 
