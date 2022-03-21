@@ -144,7 +144,7 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
     params_new = []
     b_star = [b[1], b[2], b[3]]
     params_new.append(b_star)
-    loss_ptsb = np.delete(loss_pts, b[4])
+    loss_ptsb = np.delete(loss_pts, b[4],0)
     b1 = np.amin(loss_ptsb, axis = 0)
     params_new.append(b1[1], b1[2], b1[3])
     for i in loss_pts:
@@ -152,6 +152,7 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
             print('Minimum loss is at:')
             print(i)
     params_news =  params_new.T
+    print(params_news)
     return params_news
 #add last10 notes to look at different last10 file, check if last10 files need deleted
 #use mv command rm b2mn.prt  
