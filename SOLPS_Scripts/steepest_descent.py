@@ -223,11 +223,12 @@ if __name__ == '__main__':
     if initializing == 'y':
         Setup(DoubleGauss, MAST_params)
     if initializing == 'n':
+        blep = input('What Iteration is this?')
+        blep =int(blep)
         data_analysis = input('Is this data analysis after a run? (y or n)')
         if data_analysis == 'y':
-            Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp')
+            Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
         elif data_analysis == 'n':
-            blep = int(input('What Iteration is this?'))
             Further_Steps(DoubleGauss, MAST_params_it, run_step= blep)
 '''
 
