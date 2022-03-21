@@ -146,7 +146,8 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
     params_new.append(b_star)
     loss_ptsb = np.delete(loss_pts, b[4],0)
     b1 = np.amin(loss_ptsb, axis = 0)
-    params_new.append(b1[1], b1[2], b1[3])
+    b_star1 = [b1[1], b1[2], b1[3]]
+    params_new.append(b_star1)
     for i in loss_pts:
         if b[0] == i[0]: 
             print('Minimum loss is at:')
