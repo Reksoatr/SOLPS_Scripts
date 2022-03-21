@@ -95,7 +95,7 @@ def Setup(func, params, steps = 4):
                 os.system(batch_run)
                 os.system('cd ../')
                     
-def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
+def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 1):
     '''Post Step Analysis using a comparison of a given experimental shot
     to analyize loss and provided desired run for further optimization.'''
 #    n = len(params)
@@ -129,7 +129,10 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
                 os.system('rm *.last10')
                 os.system('2d_profiles')
                 print('Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
-                Attempt = np.loadtxt('ne3da.last10')
+                try:
+                    Attempt = np.loadtxt('ne3da.last10')
+                except:
+                    continue
                 if len(Attempt) != 0:
                     Attempt = Attempt.T
                     R_sep = PsiN2R(eq, 1.0)
