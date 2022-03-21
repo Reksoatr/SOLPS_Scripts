@@ -126,8 +126,8 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
                 enter = '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)    
                 os.chdir(enter)
                 os.system('pwd')
-                os.system('rm *.last10')
-                os.system('2d_profiles')
+                #os.system('rm *.last10')
+                #os.system('2d_profiles')
                 print('Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
                 Attempt = np.loadtxt('ne3da.last10')
                 if len(Attempt) != 0:
@@ -144,7 +144,9 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
     params_new = []
     b_star = [b[1], b[2], b[3]]
     params_new.append(b_star)
-    loss_ptsb = np.delete(loss_pts, b[4],0)
+    temp = int(b[4])
+    print(b[4])
+    loss_ptsb = np.delete(loss_pts, temp,0)
     b1 = np.amin(loss_ptsb, axis = 0)
     b_star1 = [b1[1], b1[2], b1[3]]
     params_new.append(b_star1)
