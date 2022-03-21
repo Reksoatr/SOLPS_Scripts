@@ -252,9 +252,6 @@ if __name__ == '__main__':
         if data_analysis == 'y':
             Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
         elif data_analysis == 'n':
-            Further_Steps(DoubleGauss, MAST_params_it, run_step= blep)
-'''
-
 
 x = np.linspace(-.25,.20)
 y = DoubleGauss(x, b=.0075, e = .003)
