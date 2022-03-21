@@ -177,7 +177,7 @@ def Loss_Graph(csv):
     axs.set_xlabel('Iterations')
     axs.set_ylabel('Loss from Error')
     
-#stackabuse.com steepest descent
+
 def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, exper_shot = None, gfilen = None):
     space = []
     if Post_Analysis == False:
@@ -204,8 +204,26 @@ def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, ex
                 os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch')
                 batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch'
                 os.system(batch_run)
-    
+guess_init=[1.6, 0.0035, 0.1,0.5,0.0007]
    #check errors if they are going down/flat space for convergence check initial run
+def Single_Guess(func, guess, alpha = .2, run_step=2, lib=5, Post_Analysis = False, exper_shot = None, gfilen = None):
+    if Post_Analysis ==False:
+        x = np.linspace(-.14, .08, 25)
+        diff = func(x, a = guess[0], b= guess[1], c=guess[2], d = guess[3], e = guess[4])
+        Points0 = InputfileParser(file='b2.transport.inputfile.vi')
+        D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
+        Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
+        mkdir = f'cp -r base Attempt_mk{run_step}'         
+        os.system(mkdir)
+        WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/b2.transport.inputfile',points=Full_Points)
+        path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}'
+        batch_writer(path_name, run_step, 0, 0)
+        os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/batch')
+        batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/batch'
+        os.system(batch_run)
+
+
+
     
 MAST_params = [[1,2],
           [.002,.0075],
@@ -222,6 +240,8 @@ MAST_params_it = [[1.000e+00, 1.250e+00],
 # are hyperparameters that can be tuned
 
 if __name__ == '__main__':
+    Single_Guess(DoubleGauss, guess_init, run_step = 1)
+    '''
     initializing = input('Is this before your first run? (y or n)')
     if initializing == 'y':
         Setup(DoubleGauss, MAST_params)
