@@ -126,13 +126,11 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
                 enter = '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)    
                 os.chdir(enter)
                 os.system('pwd')
-                #os.system('rm *.last10')
-                #os.system('2d_profiles')
+                os.system('rm *.last10')
+                os.system('2d_profiles')
                 print('Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
                 Attempt = np.loadtxt('ne3da.last10')
                 if len(Attempt) != 0:
-                    #print('in Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
-                    #talk to richard about psi_calc = eq.('MAST')
                     Attempt = Attempt.T
                     R_sep = PsiN2R(eq, 1.0)
                     for R in Attempt[0]:
@@ -183,6 +181,8 @@ def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = False, e
     for i in params:
         step = alpha*(i[1]-i[0])
         i[1] = step
+        i.append(2*alpha*(i[1]-i[0]))
+    space = params
     x = np.linspace(-.14, .08, 25)
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
@@ -206,6 +206,11 @@ def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = False, e
 MAST_params = [[1,2],
           [.002,.0075],
           [.0005,.003]]
+
+MAST_params_it = [[1.000e+00, 1.250e+00]
+                  [7.500e-03, 6.125e-03]
+                  [1.125e-03, 1.750e-03]]
+
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
@@ -221,8 +226,8 @@ if __name__ == '__main__':
         if data_analysis == 'y':
             Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp')
         if data_analysis == 'n':
-            blep = input('What Iteration is this?')
-            Further_Steps(DoubleGauss, MAST_params, run_step= blep)
+            blep = int(input('What Iteration is this?'))
+            Further_Steps(DoubleGauss, MAST_params_it, run_step= blep)
 '''
 
 
