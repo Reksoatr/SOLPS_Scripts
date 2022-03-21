@@ -132,7 +132,7 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
                 Attempt = np.loadtxt('ne3da.last10')
                 if len(Attempt) != 0:
                     #print('in Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
-                    # talk to richard about psi_calc = eq.('MAST')
+                    #talk to richard about psi_calc = eq.('MAST')
                     Attempt = Attempt.T
                     R_sep = PsiN2R(eq, 1.0)
                     for R in Attempt[0]:
@@ -141,21 +141,22 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
                     loss_pts.append([l,i,j,k,tick])
                 tick += 1
     b = np.amin(loss_pts, axis = 0)
-    params_new = []
-    b_star = [b[1], b[2], b[3]]
-    params_new.append(b_star)
-    temp = int(b[4])
-    print('a is:' ,b[1])
-    print('b is:', b[2])
-    print('c is:', b[3])
-    loss_ptsb = np.delete(loss_pts, temp,0)
-    b1 = np.amin(loss_ptsb, axis = 0)
-    b_star1 = [b1[1], b1[2], b1[3]]
-    params_new.append(b_star1)
     for i in loss_pts:
         if b[0] == i[0]: 
+            b_new = i 
             print('Minimum loss is at:')
             print(i)
+    params_new = []
+    b_star = [b_new[1], b_new[2], b_new[3]]
+    params_new.append(b_star)
+    temp = int(b_new[4])
+    loss_ptsb = np.delete(loss_pts, temp,0)
+    b1 = np.amin(loss_ptsb, axis = 0)
+    for i in loss_ptsb:
+        if b1[0] == i[0]: 
+            b_new = i 
+    b_star1 = [b_new[1], b_new[2], b_new[3]]
+    params_new.append(b_star1)
     params_new = np.array(params_new)
     params_news =  params_new.T
     print(params_news)
