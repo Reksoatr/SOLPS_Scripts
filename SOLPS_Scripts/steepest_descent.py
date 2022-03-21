@@ -207,8 +207,8 @@ MAST_params = [[1,2],
           [.002,.0075],
           [.0005,.003]]
 
-MAST_params_it = [[1.000e+00, 1.250e+00]
-                  [7.500e-03, 6.125e-03]
+MAST_params_it = [[1.000e+00, 1.250e+00],
+                  [7.500e-03, 6.125e-03],
                   [1.125e-03, 1.750e-03]]
 
 #Initial Case, for optimization algorithm, plus verification plots
