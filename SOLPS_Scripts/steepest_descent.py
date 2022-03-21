@@ -88,14 +88,14 @@ def Setup(func, params, steps = 4):
                 mkdir = 'cp -r base Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
                 os.system(mkdir)
                 WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/b2.transport.inputfile'.format(i_ct,j_ct,k_ct),points=Full_Points)
-                path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
+                path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct) #finish adding mk0
                 batch_writer(path_name, i_ct, j_ct, k_ct)
                 os.system('cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct))
                 batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct)
                 os.system(batch_run)
                 os.system('cd ../')
                     
-def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
+def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
     '''Post Step Analysis using a comparison of a given experimental shot
     to analyize loss and provided desired run for further optimization.'''
 #    n = len(params)
@@ -123,7 +123,7 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
-                enter = '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)    
+                enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}' 
                 os.chdir(enter)
                 os.system('pwd')
                 os.system('rm *.last10')
@@ -184,6 +184,7 @@ def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, ex
         i.append(2*alpha*(i[1]-i[0]))
     space = params
     x = np.linspace(-.14, .08, 25)
+    os.system('cp base/b2fstate base/b2fstati')
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
@@ -193,13 +194,12 @@ def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, ex
                 Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
                 mkdir = f'cp -r base Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}'         
                 os.system(mkdir)
-                WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/b2.transport.inputfile'.format(i_ct,j_ct,k_ct),points=Full_Points)
-                path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)
+                WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/b2.transport.inputfile',points=Full_Points)
+                path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}'
                 batch_writer(path_name, i_ct, j_ct, k_ct)
-                os.system('cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct))
-                batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct)
+                os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch')
+                batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch'
                 os.system(batch_run)
-                os.system('cd ../')
     
    
     
