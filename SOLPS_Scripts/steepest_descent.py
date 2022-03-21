@@ -165,7 +165,7 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
     with open('loss_over_iteration.csv', 'a', encoding='UTF8') as f:
         writer = csv.writer(f)
         writer.writerows([b])
-#need to add error/iteration graph
+#need to add error/iteration graph,, all parameters need to be optimized
 def Loss_Graph(csv):
     y = np.loadtxt(csv, usecols = 0)
     x= range(0, len(y))
@@ -173,7 +173,8 @@ def Loss_Graph(csv):
     axs.plot(x,y)
     axs.set_xlabel('Iterations')
     axs.set_ylabel('Loss from Error')
-
+    
+#stackabuse.com steepest descent
 def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, exper_shot = None, gfilen = None):
     space = []
     if Post_Analysis == False:
@@ -201,7 +202,7 @@ def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, ex
                 batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch'
                 os.system(batch_run)
     
-   
+   #check errors if they are going down/flat space for convergence check initial run
     
 MAST_params = [[1,2],
           [.002,.0075],
