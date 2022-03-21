@@ -174,7 +174,7 @@ def Loss_Graph(csv):
     axs.set_xlabel('Iterations')
     axs.set_ylabel('Loss from Error')
 
-def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = False, exper_shot = None, gfilen = None):
+def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, exper_shot = None, gfilen = None):
     space = []
     if Post_Analysis == False:
         params = Loss_Analysis(params, exper_shot, gfilen)
@@ -225,7 +225,7 @@ if __name__ == '__main__':
         data_analysis = input('Is this data analysis after a run? (y or n)')
         if data_analysis == 'y':
             Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp')
-        if data_analysis == 'n':
+        elif data_analysis == 'n':
             blep = int(input('What Iteration is this?'))
             Further_Steps(DoubleGauss, MAST_params_it, run_step= blep)
 '''
