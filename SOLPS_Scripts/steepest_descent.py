@@ -152,6 +152,7 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
         if b[0] == i[0]: 
             print('Minimum loss is at:')
             print(i)
+    params_new = np.array(params_new)
     params_news =  params_new.T
     print(params_news)
     return params_news
