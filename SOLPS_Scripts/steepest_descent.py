@@ -119,6 +119,7 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
     exp_Data = np.array(exp_new)
     exp_data = exp_Data.T
     print(exp_data)
+    tick = 0
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
@@ -137,13 +138,13 @@ def Loss_Analysis(params, exper_shot, gfilen, points = 50, steps = 4):
                     for R in Attempt[0]:
                         R = R2PsiN(eq,R+R_sep)
                     l = Loss(exp_data, Attempt)
-                    loss_pts.append([l,i,j,k]) 
+                    loss_pts.append([l,i,j,k,tick])
+                tick += 1
     b = np.amin(loss_pts, axis = 0)
     params_new = []
     b_star = [b[1], b[2], b[3]]
     params_new.append(b_star)
-    loss_ptsb = list(loss_pts)
-    loss_ptsb.remove(b)
+    loss_ptsb = np.delete(loss_pts, b[4])
     b1 = np.amin(loss_ptsb, axis = 0)
     params_new.append(b1[1], b1[2], b1[3])
     for i in loss_pts:
