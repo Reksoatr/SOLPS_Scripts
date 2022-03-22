@@ -210,18 +210,18 @@ def Single_Guess(func, guess, alpha = .2, run_step=2, lib=5, Post_Analysis = Fal
     if Post_Analysis ==False:
         x = np.linspace(-.14, .08, 15)
         y = np.linspace(.003, .006, 10)
-        for i in y:
+        for i_ct, i in enumerate(y):
             diff = func(x, a = guess[0], b= i, c=guess[2], d = guess[3], e = guess[4])
             Points0 = InputfileParser(file='b2.transport.inputfile.vi')
             D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
             Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
-            mkdir = f'cp -r base Attempt_mk{run_step}'         
+            mkdir = f'cp -r base Attempt_mk{run_step}{i_ct}'         
             os.system(mkdir)
-            WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/b2.transport.inputfile',points=Full_Points)
-            path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}'
+            WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}/b2.transport.inputfile',points=Full_Points)
+            path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}'
             batch_writer(path_name, run_step, 0, 0)
-            os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/batch')
-            batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/batch'
+            os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}/batch')
+            batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}/batch'
             os.system(batch_run)
 
 
