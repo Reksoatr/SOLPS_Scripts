@@ -23,7 +23,7 @@ def T_Lit(x, a=0, b=1, c=3,d=0,e=.1,f=0):
     y= .5*(a+b*x**c)*(1-np.tanh((x-d)/e))+f
     return y
 
-def DoubleGauss(x, a=1.6, b=0.006, c=0.3,d=0.5,e=0.0007):
+def DoubleGauss(x, a=.6, b=0.006, c=0.3,d=0.5,e=0.0007):
     '''
     Double-Gaussian Function
     a = Maximum (base) value of transport coefficient (typically 1.0)
@@ -234,7 +234,7 @@ MAST_params = [[1,2],
 MAST_params_it = [[1.000e+00, 1.250e+00],
                   [7.500e-03, 6.125e-03],
                   [1.125e-03, 1.750e-03]]
-guess_init=[1.6, 0.005, 0.25,0.5,0.0007]
+guess_init=[0.6, 0.005, 0.25,0.5,0.0007]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
@@ -254,7 +254,7 @@ if __name__ == '__main__':
         if data_analysis == 'y':
             Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
         elif data_analysis == 'n':
-
+    
 x = np.linspace(-.25,.20)
 y = DoubleGauss(x, c=.3)
 Points = InputfileParser('b2.transport.inputfile.dblgausstest')
