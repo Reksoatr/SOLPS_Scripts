@@ -219,7 +219,7 @@ def Single_Guess(func, guess, alpha = .2, run_step=2, lib=5, Post_Analysis = Fal
             os.system(mkdir)
             WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}/b2.transport.inputfile',points=Full_Points)
             path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}'
-            batch_writer(path_name, run_step, 0, 0)
+            batch_writer(path_name, run_step, i_ct, 0)
             os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}/batch')
             batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}/batch'
             os.system(batch_run)
