@@ -242,7 +242,7 @@ guess_init=[1.6, 0.005, 0.25,0.5,0.0007]
 # are hyperparameters that can be tuned
 
 if __name__ == '__main__':
-    Single_Guess(DoubleGauss, guess_init, run_step = 1)
+    Single_Guess(DoubleGauss, guess_init, run_step =3)
     '''
     initializing = input('Is this before your first run? (y or n)')
     if initializing == 'y':
