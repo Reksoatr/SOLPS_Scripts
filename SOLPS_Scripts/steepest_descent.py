@@ -208,7 +208,7 @@ def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, ex
    #check errors if they are going down/flat space for convergence check initial run
 def Single_Guess(func, guess, alpha = .2, run_step=2, lib=5, Post_Analysis = False, exper_shot = None, gfilen = None):
     if Post_Analysis ==False:
-        x = np.linspace(-.14, .08, 15)
+        x = np.linspace(-.15, .09, 10)
         y = np.linspace(.003, .006, 10)
         for i_ct, i in enumerate(y):
             diff = func(x, a = guess[0], b= i, c=guess[2], d = guess[3], e = guess[4])
