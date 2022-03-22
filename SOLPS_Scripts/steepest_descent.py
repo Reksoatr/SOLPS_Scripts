@@ -23,7 +23,7 @@ def T_Lit(x, a=0, b=1, c=3,d=0,e=.1,f=0):
     y= .5*(a+b*x**c)*(1-np.tanh((x-d)/e))+f
     return y
 
-def DoubleGauss(x, a=1.6, b=0.0035, c=0.1,d=0.5,e=0.0007):
+def DoubleGauss(x, a=1.6, b=0.006, c=0.3,d=0.5,e=0.0007):
     '''
     Double-Gaussian Function
     a = Maximum (base) value of transport coefficient (typically 1.0)
@@ -204,23 +204,25 @@ def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, ex
                 os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch')
                 batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch'
                 os.system(batch_run)
-guess_init=[1.6, 0.0035, 0.1,0.5,0.0007]
+
    #check errors if they are going down/flat space for convergence check initial run
 def Single_Guess(func, guess, alpha = .2, run_step=2, lib=5, Post_Analysis = False, exper_shot = None, gfilen = None):
     if Post_Analysis ==False:
-        x = np.linspace(-.14, .08, 25)
-        diff = func(x, a = guess[0], b= guess[1], c=guess[2], d = guess[3], e = guess[4])
-        Points0 = InputfileParser(file='b2.transport.inputfile.vi')
-        D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
-        Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
-        mkdir = f'cp -r base Attempt_mk{run_step}'         
-        os.system(mkdir)
-        WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/b2.transport.inputfile',points=Full_Points)
-        path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}'
-        batch_writer(path_name, run_step, 0, 0)
-        os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/batch')
-        batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/batch'
-        os.system(batch_run)
+        x = np.linspace(-.14, .08, 15)
+        y = np.linspace(.003, .006, 10)
+        for i in y:
+            diff = func(x, a = guess[0], b= i, c=guess[2], d = guess[3], e = guess[4])
+            Points0 = InputfileParser(file='b2.transport.inputfile.vi')
+            D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
+            Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
+            mkdir = f'cp -r base Attempt_mk{run_step}'         
+            os.system(mkdir)
+            WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/b2.transport.inputfile',points=Full_Points)
+            path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}'
+            batch_writer(path_name, run_step, 0, 0)
+            os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/batch')
+            batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}/batch'
+            os.system(batch_run)
 
 
 
@@ -232,7 +234,7 @@ MAST_params = [[1,2],
 MAST_params_it = [[1.000e+00, 1.250e+00],
                   [7.500e-03, 6.125e-03],
                   [1.125e-03, 1.750e-03]]
-
+guess_init=[1.6, 0.005, 0.25,0.5,0.0007]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
@@ -254,7 +256,7 @@ if __name__ == '__main__':
         elif data_analysis == 'n':
 
 x = np.linspace(-.25,.20)
-y = DoubleGauss(x, b=.0075, e = .003)
+y = DoubleGauss(x, c=.3)
 Points = InputfileParser('b2.transport.inputfile.dblgausstest')
 test = Points['1'][0]
 test_y = Points['1'][1]
@@ -264,6 +266,3 @@ axs.plot(x, y, color = 'g', label = 'Training')
 #axs.plot(x, y_Lit, color = 'm', label = 'Literature')
 axs.legend()
 '''
-#Testing
-#x=  np.linspace(-.2,.1)
-#plt.plot(x,Trainer(x))
