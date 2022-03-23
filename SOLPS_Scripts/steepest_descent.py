@@ -15,7 +15,7 @@ import os
 from equilibrium import equilibrium
 import csv
 #The beginning functions for optimization
-def Trainer(x, a=1.05, b=2.5, c=.002,d=2.4,e=1,f=1):
+def Trainer(x, a=1.6, b=2.5, c=.002,d=2.4,e=1,f=1):
     y = -a*(np.exp(-x**2/c)+1)-b*(x)+d
     return y
 
@@ -32,7 +32,7 @@ def DoubleGauss(x, a=.6, b=0.006, c=0.3,d=0.5,e=0.0007):
     d = Fraction of max coefficient value where minor gaussian begins (c/a)<d<1
     e = Width parameter of minor gaussian e<b
     '''
-    y = -(a-d*a)*(np.exp(-x**2/b))-(d*a-c)*(np.exp(-x**2/e))+a
+    y = -(a-d*a)*(np.exp(-(x-.01)**2/b))-(d*a-c)*(np.exp(-(x-.01)**2/e))+a
     return y
 
 #joint methods in SOLPS
@@ -234,7 +234,7 @@ MAST_params = [[1,2],
 MAST_params_it = [[1.000e+00, 1.250e+00],
                   [7.500e-03, 6.125e-03],
                   [1.125e-03, 1.750e-03]]
-guess_init=[0.6, 0.005, 0.25,0.5,0.0007]
+guess_init=[1.6, 0.005, 0.25,0.5,0.0007]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
@@ -242,7 +242,7 @@ guess_init=[0.6, 0.005, 0.25,0.5,0.0007]
 # are hyperparameters that can be tuned
 
 if __name__ == '__main__':
-    Single_Guess(DoubleGauss, guess_init, run_step =4)
+    Single_Guess(DoubleGauss, guess_init, run_step =5)
     '''
     initializing = input('Is this before your first run? (y or n)')
     if initializing == 'y':
@@ -255,8 +255,8 @@ if __name__ == '__main__':
             Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
         elif data_analysis == 'n':
     
-x = np.linspace(-.25,.20)
-y = DoubleGauss(x, c=.3)
+x = np.linspace(-.20,.20)
+y = DoubleGauss(x, a=1.6,c=.3, b=.007)
 Points = InputfileParser('b2.transport.inputfile.dblgausstest')
 test = Points['1'][0]
 test_y = Points['1'][1]
