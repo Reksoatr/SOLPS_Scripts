@@ -50,17 +50,17 @@ def point_finder(x, func, y_only = False):
     return np.array(func_val)
 
 
-def mean_squared_error(y_true, y_predicted):
+def error(y_true, y_predicted):
      
     # Calculating the loss or cost
-    cost = np.sqrt(np.sum((y_true-y_predicted)**2)) / len(y_true)
+    cost = -(np.sum((y_true-y_predicted)/y_true))
     return cost
 
 
 def Loss(exper_shot, sol_run):
     ius = InterpolatedUnivariateSpline(exper_shot[0], exper_shot[1])
     sol_pts = point_finder(sol_run[0],ius, y_only = True)
-    loss = mean_squared_error(sol_run[1], sol_pts)
+    loss = error(sol_run[1], sol_pts)
     return loss
 
 def Setup(func, params, steps = 4):
@@ -149,6 +149,10 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 1):
             print(i)
     params_new = []
     b_star = [b_new[1], b_new[2], b_new[3]]
+    try:
+        np.loadtxt('error.csv')
+    except:
+        csv.writer()
     params_new.append(b_star)
     temp = int(b_new[4])
     loss_ptsb = np.delete(loss_pts, temp,0)
@@ -182,6 +186,7 @@ def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, ex
     space = []
     if Post_Analysis == False:
         params = Loss_Analysis(params, exper_shot, gfilen)
+        
     for i in params:
         step = alpha*(i[1]-i[0])
         i[1] = step
@@ -208,13 +213,13 @@ def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, ex
    #check errors if they are going down/flat space for convergence check initial run
 def Single_Guess(func, guess, alpha = .2, run_step=2, lib=5, Post_Analysis = False, exper_shot = None, gfilen = None):
     if Post_Analysis ==False:
-        x = np.linspace(-.15, .09, 10)
-        y = np.linspace(.003, .006, 10)
+        x = np.linspace(-.05, .05, 10)
+        y = np.linspace(.0001, .001, 10)
         for i_ct, i in enumerate(y):
             diff = func(x, a = guess[0], b= i, c=guess[2], d = guess[3], e = guess[4])
             Points0 = InputfileParser(file='b2.transport.inputfile.vi')
-            D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
-            Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
+            D_Points={'3' : np.array([x,diff]), '4' : np.array([x,diff])} #This is where the optimization method comes in
+            Full_Points={'1':Points0['1'],'3':D_Points['3'],'4':D_Points['4']}
             mkdir = f'cp -r base Attempt_mk{run_step}{i_ct}'         
             os.system(mkdir)
             WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}/b2.transport.inputfile',points=Full_Points)
@@ -254,10 +259,12 @@ if __name__ == '__main__':
         if data_analysis == 'y':
             Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
         elif data_analysis == 'n':
-    
-x = np.linspace(-.20,.20)
-y = DoubleGauss(x, a=1.6,c=.3, b=.007)
+   
+   
+x = np.linspace(-.08,.08)
+y = DoubleGauss(x, a=1.6,c=.3, b=.0005)
 Points = InputfileParser('b2.transport.inputfile.dblgausstest')
+
 test = Points['1'][0]
 test_y = Points['1'][1]
 fig, axs = plt.subplots(1,1, dpi = 200)
