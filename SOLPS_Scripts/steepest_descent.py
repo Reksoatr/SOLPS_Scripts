@@ -32,7 +32,7 @@ def DoubleGauss(x, a=.6, b=0.006, c=0.3,d=0.5,e=0.0007):
     d = Fraction of max coefficient value where minor gaussian begins (c/a)<d<1
     e = Width parameter of minor gaussian e<b
     '''
-    y = -(a-d*a)*(np.exp(-(x-.01)**2/b))-(d*a-c)*(np.exp(-(x-.01)**2/e))+a
+    y = -(a-d*a)*(np.exp(-(x+.01)**2/b))-(d*a-c)*(np.exp(-(x+.01)**2/e))+a
     return y
 
 #joint methods in SOLPS
@@ -239,7 +239,7 @@ MAST_params = [[1,2],
 MAST_params_it = [[1.000e+00, 1.250e+00],
                   [7.500e-03, 6.125e-03],
                   [1.125e-03, 1.750e-03]]
-guess_init=[1.6, 0.005, 0.25,0.5,0.0007]
+guess_init=[1.6, 0.005, 0.5,0.5,0.0007]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
