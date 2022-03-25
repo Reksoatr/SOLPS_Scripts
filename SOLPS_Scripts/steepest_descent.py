@@ -239,7 +239,7 @@ MAST_params = [[1,2],
 MAST_params_it = [[1.000e+00, 1.250e+00],
                   [7.500e-03, 6.125e-03],
                   [1.125e-03, 1.750e-03]]
-guess_init=[1.6, 0.005, 0.5,0.5,0.0007]
+guess_init=[0.7, 0.005, 0.5,0.5,0.0007]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
@@ -247,7 +247,7 @@ guess_init=[1.6, 0.005, 0.5,0.5,0.0007]
 # are hyperparameters that can be tuned
 
 if __name__ == '__main__':
-    Single_Guess(DoubleGauss, guess_init, run_step =6)
+    Single_Guess(DoubleGauss, guess_init, run_step =7)
     '''
     initializing = input('Is this before your first run? (y or n)')
     if initializing == 'y':
