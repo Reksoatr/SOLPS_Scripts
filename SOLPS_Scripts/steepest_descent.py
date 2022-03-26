@@ -75,7 +75,7 @@ def Setup(func, params, steps = 4, lib =11):
             meep.append(i[0] +j*ticks)
         space.append(meep)
     print(space)
-    x_1 = np.linspace(-.12, -.02, 5)
+    x_1 = np.linspace(-.12, -.03, 5)
     x_2 = np.linspace(-.02, .02, 10)
     x = np.append(x_1, x_2)
     for i_ct, i in enumerate(space[0]):
@@ -90,7 +90,7 @@ def Setup(func, params, steps = 4, lib =11):
                 mkdir = 'cp -r base Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
                 os.system(mkdir)
                 WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}/b2.transport.inputfile'.format(lib,i_ct,j_ct,k_ct),points=Full_Points)
-                path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}'.format(lib,i_ct,j_ct,k_ct) #finish adding mk0
+                path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}' #finish adding mk0
                 batch_writer(path_name, i_ct, j_ct, k_ct)
                 os.system('cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}/batch'.format(lib,i_ct,j_ct,k_ct))
                 batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}/batch'.format(lib,i_ct,j_ct,k_ct)
@@ -251,7 +251,7 @@ guess_init=[1.5, 0.005, 0.5,0.5,0.0007]
 # are hyperparameters that can be tuned
 
 if __name__ == '__main__':
-    Single_Guess(DoubleGauss, guess_init, run_step =1)
+    #Single_Guess(DoubleGauss, guess_init, run_step =1)
     
     initializing = input('Is this before your first run? (y or n)')
     if initializing == 'y':
