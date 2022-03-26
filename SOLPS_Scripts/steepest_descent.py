@@ -125,7 +125,10 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 1):
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
-                enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_11/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}' 
+                if run_step==1:
+                    enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_11/Attempt_{i_ct}{j_ct}{k_ct}'
+                else:
+                    enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_11/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}' 
                 os.chdir(enter)
                 os.system('pwd')
                 os.system('rm *.last10')
