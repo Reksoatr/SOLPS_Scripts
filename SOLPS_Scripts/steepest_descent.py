@@ -63,7 +63,7 @@ def Loss(exper_shot, sol_run):
     loss = error(sol_run[1], sol_pts)
     return loss
 
-def Setup(func, params, steps = 4):
+def Setup(func, params, steps = 4, lib =11):
     '''Sets up and runs many runs over the given parameter space, with steps
     determining how many grid points in each direction.'''
 #    n = len(params)
@@ -75,7 +75,9 @@ def Setup(func, params, steps = 4):
             meep.append(i[0] +j*ticks)
         space.append(meep)
     print(space)
-    x = np.linspace(-.14, .08, 25)
+    x_1 = np.linspace(-.12, -.02, 5)
+    x_2 = np.linspace(-.02, .02, 10)
+    x = np.append(x_1, x_2)
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
@@ -87,11 +89,11 @@ def Setup(func, params, steps = 4):
                 Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
                 mkdir = 'cp -r base Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
                 os.system(mkdir)
-                WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/b2.transport.inputfile'.format(i_ct,j_ct,k_ct),points=Full_Points)
-                path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}'.format(i_ct,j_ct,k_ct) #finish adding mk0
+                WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}/b2.transport.inputfile'.format(lib,i_ct,j_ct,k_ct),points=Full_Points)
+                path_name = 'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}'.format(lib,i_ct,j_ct,k_ct) #finish adding mk0
                 batch_writer(path_name, i_ct, j_ct, k_ct)
-                os.system('cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct))
-                batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{}{}{}/batch'.format(i_ct,j_ct,k_ct)
+                os.system('cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}/batch'.format(lib,i_ct,j_ct,k_ct))
+                batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}/batch'.format(lib,i_ct,j_ct,k_ct)
                 os.system(batch_run)
                 os.system('cd ../')
                     
@@ -182,7 +184,7 @@ def Loss_Graph(csv):
     axs.set_ylabel('Loss from Error')
     
 
-def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, exper_shot = None, gfilen = None):
+def Further_Steps(func, params, alpha = .2, run_step=2, lib = 11,Post_Analysis = True, exper_shot = None, gfilen = None):
     space = []
     if Post_Analysis == False:
         params = Loss_Analysis(params, exper_shot, gfilen)
@@ -203,17 +205,19 @@ def Further_Steps(func, params, alpha = .2, run_step=2, Post_Analysis = True, ex
                 Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
                 mkdir = f'cp -r base Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}'         
                 os.system(mkdir)
-                WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/b2.transport.inputfile',points=Full_Points)
-                path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}'
+                WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/b2.transport.inputfile',points=Full_Points)
+                path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}'
                 batch_writer(path_name, i_ct, j_ct, k_ct)
-                os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch')
-                batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch'
+                os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch')
+                batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch'
                 os.system(batch_run)
 
    #check errors if they are going down/flat space for convergence check initial run
 def Single_Guess(func, guess, alpha = .2, run_step=2, lib=5, Post_Analysis = False, exper_shot = None, gfilen = None):
     if Post_Analysis ==False:
         x = np.linspace(-.05, .05, 10)
+        x_beginning = np.array([-.12])
+        x = np.append(x_beginning, x)
         y = np.linspace(.0001, .001, 10)
         for i_ct, i in enumerate(y):
             diff = func(x, a = guess[0], b= i, c=guess[2], d = guess[3], e = guess[4])
@@ -239,7 +243,7 @@ MAST_params = [[1,2],
 MAST_params_it = [[1.000e+00, 1.250e+00],
                   [7.500e-03, 6.125e-03],
                   [1.125e-03, 1.750e-03]]
-guess_init=[0.7, 0.005, 0.5,0.5,0.0007]
+guess_init=[1.5, 0.005, 0.5,0.5,0.0007]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
