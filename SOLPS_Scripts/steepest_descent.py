@@ -125,7 +125,7 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 1):
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
-                enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}' 
+                enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_11/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}' 
                 os.chdir(enter)
                 os.system('pwd')
                 os.system('rm *.last10')
@@ -151,10 +151,9 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 1):
             print(i)
     params_new = []
     b_star = [b_new[1], b_new[2], b_new[3]]
-    try:
-        np.loadtxt('error.csv')
-    except:
-        csv.writer()
+    with open('error.csv', mode = 'a') as f:
+        wri = csv.writer(f)
+        wri.writerow(b_new)
     params_new.append(b_star)
     temp = int(b_new[4])
     loss_ptsb = np.delete(loss_pts, temp,0)
