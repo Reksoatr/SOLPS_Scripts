@@ -213,7 +213,7 @@ def Further_Steps(func, params, alpha = .2, run_step=2, lib = 11,Post_Analysis =
                 os.system(batch_run)
 
    #check errors if they are going down/flat space for convergence check initial run
-def Single_Guess(func, guess, alpha = .2, run_step=2, lib=5, Post_Analysis = False, exper_shot = None, gfilen = None):
+def Single_Guess(func, guess, alpha = .2, run_step=1, lib=11, Post_Analysis = False, exper_shot = None, gfilen = None):
     if Post_Analysis ==False:
         x = np.linspace(-.05, .05, 10)
         x_beginning = np.array([-.12])
@@ -226,11 +226,11 @@ def Single_Guess(func, guess, alpha = .2, run_step=2, lib=5, Post_Analysis = Fal
             Full_Points={'1':Points0['1'],'3':D_Points['3'],'4':D_Points['4']}
             mkdir = f'cp -r base Attempt_mk{run_step}{i_ct}'         
             os.system(mkdir)
-            WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}/b2.transport.inputfile',points=Full_Points)
-            path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}'
+            WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_mk{run_step}{i_ct}/b2.transport.inputfile',points=Full_Points)
+            path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_mk{run_step}{i_ct}'
             batch_writer(path_name, run_step, i_ct, 0)
-            os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}/batch')
-            batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_0{lib}/Attempt_mk{run_step}{i_ct}/batch'
+            os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_mk{run_step}{i_ct}/batch')
+            batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_mk{run_step}{i_ct}/batch'
             os.system(batch_run)
 
 
@@ -251,8 +251,8 @@ guess_init=[1.5, 0.005, 0.5,0.5,0.0007]
 # are hyperparameters that can be tuned
 
 if __name__ == '__main__':
-    Single_Guess(DoubleGauss, guess_init, run_step =7)
-    '''
+    Single_Guess(DoubleGauss, guess_init, run_step =1)
+    
     initializing = input('Is this before your first run? (y or n)')
     if initializing == 'y':
         Setup(DoubleGauss, MAST_params)
@@ -262,9 +262,9 @@ if __name__ == '__main__':
         data_analysis = input('Is this data analysis after a run? (y or n)')
         if data_analysis == 'y':
             Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
-        elif data_analysis == 'n':
+        #elif data_analysis == 'n':
    
-   
+''' 
 x = np.linspace(-.08,.08)
 y = DoubleGauss(x, a=1.6,c=.3, b=.0005)
 Points = InputfileParser('b2.transport.inputfile.dblgausstest')
