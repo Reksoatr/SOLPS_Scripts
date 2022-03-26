@@ -97,7 +97,7 @@ def Setup(func, params, steps = 4, lib =11):
                 os.system(batch_run)
                 os.system('cd ../')
                     
-def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 1):
+def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
     '''Post Step Analysis using a comparison of a given experimental shot
     to analyize loss and provided desired run for further optimization.'''
 #    n = len(params)
