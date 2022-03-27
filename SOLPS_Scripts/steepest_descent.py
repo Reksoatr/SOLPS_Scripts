@@ -87,7 +87,7 @@ def Setup(func, params, run_step= 1, steps = 4, lib =11):
                 Points0 = InputfileParser(file='b2.transport.inputfile.vi')
                 D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
                 Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
-                mkdir = 'cp -r base Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
+                mkdir = 'cp -r base Attempt_{}{}{}_mk{}'.format(i_ct,j_ct,k_ct, run_step)            
                 os.system(mkdir)
                 WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}_mk{}/b2.transport.inputfile'.format(lib,i_ct,j_ct,k_ct,run_step),points=Full_Points)
                 path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}' #finish adding mk0
