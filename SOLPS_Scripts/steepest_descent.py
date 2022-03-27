@@ -186,7 +186,7 @@ def Loss_Graph(csv):
     axs.set_ylabel('Loss from Error')
     
 
-def Further_Steps(func, params, alpha = .2, run_step=2, lib = 11,Post_Analysis = True, exper_shot = None, gfilen = None):
+def Further_Steps(func, params, alpha = .3, run_step=2, lib = 11,Post_Analysis = True, exper_shot = None, gfilen = None):
     space = []
     if Post_Analysis == False:
         params = Loss_Analysis(params, exper_shot, gfilen)
@@ -196,7 +196,9 @@ def Further_Steps(func, params, alpha = .2, run_step=2, lib = 11,Post_Analysis =
         i[1] = step
         i.append(2*alpha*(i[1]-i[0]))
     space = params
-    x = np.linspace(-.14, .08, 25)
+    x_1 = np.linspace(-.12, -.03, 5)
+    x_2 = np.linspace(-.02, .02, 10)
+    x = np.append(x_1, x_2)
     os.system('cp base/b2fstate base/b2fstati')
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
@@ -242,9 +244,10 @@ MAST_params = [[1,2],
           [.002,.0075],
           [.0005,.003]]
 
-MAST_params_it = [[1.000e+00, 1.250e+00],
-                  [7.500e-03, 6.125e-03],
-                  [1.125e-03, 1.750e-03]]
+MAST_params_it = [[2.000e+00, 3.000e+00],
+                  [2.000e-03, 3.375e-03],
+                  [2.500e-04, 5.000e-04]]
+
 guess_init=[1.5, 0.005, 0.5,0.5,0.0007]
 #Initial Case, for optimization algorithm, plus verification plots
 
