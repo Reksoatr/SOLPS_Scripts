@@ -129,7 +129,10 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
                     enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_11/Attempt_{i_ct}{j_ct}{k_ct}'
                 else:
                     enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_11/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}' 
-                os.chdir(enter)
+                try:
+                    os.chdir(enter)
+                except:
+                    continue
                 os.system('pwd')
                 os.system('rm *.last10')
                 os.system('2d_profiles')
@@ -148,6 +151,7 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
                 tick += 1
     b = np.amin(loss_pts, axis = 0)
     print('initial guess is:', loss_pts[0])
+    print('Difference in loss is:', b[0]-loss_pts[0])
     for i in loss_pts:
         if b[0] == i[0]: 
             b_new = i 
@@ -246,6 +250,7 @@ def Single_Guess(func, guess, alpha = .2, run_step=1, lib=11, Post_Analysis = Fa
 #Minimum loss is at:
 #[85558.53276897759, 2.0, 0.002, 0.0005, 100]
 #[33795.46190967331, 2.0, 0.00303125, 0.0003125, 16]
+#[71323.66532682443, 2.25, 0.002959375, 0.00031249999999999995, 72]
 
     
 MAST_params = [[1,2],
