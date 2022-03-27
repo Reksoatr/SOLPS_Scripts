@@ -63,7 +63,7 @@ def Loss(exper_shot, sol_run):
     loss = error(sol_run[1], sol_pts)
     return loss
 
-def Setup(func, params, steps = 4, lib =11):
+def Setup(func, params, run_step= 1, steps = 4, lib =11):
     '''Sets up and runs many runs over the given parameter space, with steps
     determining how many grid points in each direction.'''
 #    n = len(params)
@@ -89,11 +89,11 @@ def Setup(func, params, steps = 4, lib =11):
                 Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
                 mkdir = 'cp -r base Attempt_{}{}{}'.format(i_ct,j_ct,k_ct)            
                 os.system(mkdir)
-                WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}/b2.transport.inputfile'.format(lib,i_ct,j_ct,k_ct),points=Full_Points)
-                path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}' #finish adding mk0
+                WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}_mk{}/b2.transport.inputfile'.format(lib,i_ct,j_ct,k_ct,run_step),points=Full_Points)
+                path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}' #finish adding mk0
                 batch_writer(path_name, i_ct, j_ct, k_ct)
-                os.system('cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}/batch'.format(lib,i_ct,j_ct,k_ct))
-                batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}/batch'.format(lib,i_ct,j_ct,k_ct)
+                os.system('cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}_mk{}/batch'.format(lib,i_ct,j_ct,k_ct,run_step))
+                batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}_mk{}/batch'.format(lib,i_ct,j_ct,k_ct,run_step)
                 os.system(batch_run)
                 os.system('cd ../')
                     
@@ -257,18 +257,15 @@ guess_init=[1.5, 0.005, 0.5,0.5,0.0007]
 
 if __name__ == '__main__':
     #Single_Guess(DoubleGauss, guess_init, run_step =1)
-    
-    initializing = input('Is this before your first run? (y or n)')
-    if initializing == 'y':
-        Setup(DoubleGauss, MAST_params)
-    if initializing == 'n':
-        blep = input('What Iteration is this?')
-        blep =int(blep)
-        data_analysis = input('Is this data analysis after a run? (y or n)')
-        if data_analysis == 'y':
-            Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
-        #elif data_analysis == 'n':
-   
+    blep = input('What Iteration is this?')
+    blep =int(blep)
+    data_analysis = input('Is this data analysis after a run? (y or n)')
+    if blep != 1:
+        MAST_params = MAST_params_it
+    if data_analysis == 'y':
+        Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
+    elif data_analysis == 'n':
+        Setup(DoubleGauss, MAST_params, run_step=blep)        
 ''' 
 x = np.linspace(-.08,.08)
 y = DoubleGauss(x, a=1.6,c=.3, b=.0005)
