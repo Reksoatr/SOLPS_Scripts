@@ -151,7 +151,7 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
                 tick += 1
     b = np.amin(loss_pts, axis = 0)
     print('initial guess is:', loss_pts[0])
-    print('Difference in loss is:', b[0]-loss_pts[0])
+    print('Difference in loss is:', b[0]-loss_pts[0][0])
     for i in loss_pts:
         if b[0] == i[0]: 
             b_new = i 
@@ -198,11 +198,13 @@ def Further_Steps(func, params, alpha = .3, run_step=2, lib = 11,Post_Analysis =
         
     for i in params:
         l =[]
-        step_0 = alpha*i+i
-        step_1 = 2*alpha*i+i
+        step_0 = .5*alpha*i+i
+        step_1 = alpha*i+i
+        step_2 = 1.5*alpha*i+i
         l.append(i)
         l.append(step_0)
         l.append(step_1)
+        l.append(step_2)
         space.append(l)
     print(space)
     x_1 = np.linspace(-.12, -.03, 5)
@@ -248,9 +250,10 @@ def Single_Guess(func, guess, alpha = .2, run_step=1, lib=11, Post_Analysis = Fa
 
 
 #Minimum loss is at:
-#[85558.53276897759, 2.0, 0.002, 0.0005, 100]
-#[33795.46190967331, 2.0, 0.00303125, 0.0003125, 16]
-#[71323.66532682443, 2.25, 0.002959375, 0.00031249999999999995, 72]
+#[85558.53276897759, 2.0, 0.002, 0.0005, 100] 1
+#[33795.46190967331, 2.0, 0.00303125, 0.0003125, 16] 2
+#[71323.66532682443, 2.25, 0.002959375, 0.0003125, 72] 4
+#[0.7605491455132665, 2.25, 0.002759375, 0.0003, 18] 5
 
     
 MAST_params = [[1,2],
@@ -261,8 +264,8 @@ MAST_params_it = [[2.125000e+00, 2.375000e+00],
                   [2.759375e-03, 2.959375e-03],
                   [3.000e-04, 3.25000e-04]]
 
-loss_val = .71
-guess_init=[2.0, 0.00303125, 0.0003125]
+loss_val = -.76
+guess_init=[2.25, 0.002759375, 0.0003]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
@@ -280,7 +283,16 @@ if __name__ == '__main__':
         Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
     elif data_analysis == 'n':
         Further_Steps(DoubleGauss, guess_init, run_step=blep, alpha = loss_val)        
-''' 
+'''
+
+data = [[1,	0.8555],
+[2,	0.337],
+[3,	0.713],
+[4,	0.7605]]
+data = np.array(data).T
+plt.plot(data[0], data[1], '-')
+
+
 x = np.linspace(-.08,.08)
 y = DoubleGauss(x, a=1.6,c=.3, b=.0005)
 Points = InputfileParser('b2.transport.inputfile.dblgausstest')
