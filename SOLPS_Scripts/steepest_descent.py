@@ -193,12 +193,13 @@ def Further_Steps(func, params, alpha = .3, run_step=2, lib = 11,Post_Analysis =
         params = Loss_Analysis(params, exper_shot, gfilen)
         
     for i in params:
+        l =[]
         step_0 = alpha*i+i
         step_1 = 2*alpha*i+i
-        i = [i]
-        i.append(step_0)
-        i.append(step_1)
-    space = params
+        l.append(i)
+        l.append(step_0)
+        l.append(step_1)
+        space.append(l)
     print(space)
     x_1 = np.linspace(-.12, -.03, 5)
     x_2 = np.linspace(-.02, .02, 10)
