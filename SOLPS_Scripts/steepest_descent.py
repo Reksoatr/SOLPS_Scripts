@@ -238,15 +238,18 @@ def Single_Guess(func, guess, alpha = .2, run_step=1, lib=11, Post_Analysis = Fa
             os.system(batch_run)
 
 
+#Minimum loss is at:
+#[85558.53276897759, 2.0, 0.002, 0.0005, 100]
+#[33795.46190967331, 2.0, 0.00303125, 0.0003125, 16]
 
     
 MAST_params = [[1,2],
           [.002,.0075],
           [.0005,.003]]
 
-MAST_params_it = [[2.000e+00, 3.000e+00],
-                  [2.000e-03, 3.375e-03],
-                  [2.500e-04, 5.000e-04]]
+MAST_params_it = [[2.00000e+00, 2.50000e+00],
+                  [2.34375e-03, 3.03125e-03],
+                  [3.12500e-04, 4.37500e-04]]
 
 guess_init=[1.5, 0.005, 0.5,0.5,0.0007]
 #Initial Case, for optimization algorithm, plus verification plots
