@@ -193,6 +193,7 @@ def Further_Steps(func, params, alpha = .3, run_step=2, lib = 11,Post_Analysis =
         params = Loss_Analysis(params, exper_shot, gfilen)
         
     for i in params:
+        i = [i]
         step = alpha*i+i
         i.append(step)
         i.append(2*alpha*i+i)
