@@ -195,12 +195,12 @@ def Further_Steps(func, params, alpha = .3, run_step=2, lib = 11,Post_Analysis =
     space = []
     if Post_Analysis == False:
         params = Loss_Analysis(params, exper_shot, gfilen)
-        
+    learn = .2
     for i in params:
         l =[]
-        step_0 = .5*alpha*i+i
-        step_1 = alpha*i+i
-        step_2 = 1.5*alpha*i+i
+        step_0 = learn*alpha*i+i
+        step_1 = 2*learn*alpha*i+i
+        step_2 = -1*learn*alpha*i+i
         l.append(i)
         l.append(step_0)
         l.append(step_1)
