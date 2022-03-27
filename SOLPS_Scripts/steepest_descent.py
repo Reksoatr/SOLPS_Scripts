@@ -53,7 +53,7 @@ def point_finder(x, func, y_only = False):
 def error(y_true, y_predicted):
      
     # Calculating the loss or cost
-    cost = -(np.sum((y_true-y_predicted)/y_true))
+    cost = -(np.sum((y_true-y_predicted)/y_true))/100000#/len(y_true)
     return cost
 
 
@@ -193,14 +193,14 @@ def Further_Steps(func, params, alpha = .3, run_step=2, lib = 11,Post_Analysis =
         params = Loss_Analysis(params, exper_shot, gfilen)
         
     for i in params:
-        step = alpha*(i[1]-i[0])
-        i[1] = step
-        i.append(2*alpha*(i[1]-i[0]))
+        step = alpha*i+i
+        i.append(step)
+        i.append(2*alpha*i+i)
     space = params
     x_1 = np.linspace(-.12, -.03, 5)
     x_2 = np.linspace(-.02, .02, 10)
     x = np.append(x_1, x_2)
-    os.system('cp base/b2fstate base/b2fstati')
+    #os.system('cp base/b2fstate base/b2fstati')
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
             for k_ct, k in enumerate(space[2]):
@@ -252,8 +252,8 @@ MAST_params_it = [[2.125000e+00, 2.375000e+00],
                   [2.759375e-03, 2.959375e-03],
                   [3.000e-04, 3.25000e-04]]
 
-
-guess_init=[1.5, 0.005, 0.5,0.5,0.0007]
+loss_val = .71
+guess_init=[2.0, 0.00303125, 0.0003125]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
@@ -270,7 +270,7 @@ if __name__ == '__main__':
     if data_analysis == 'y':
         Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
     elif data_analysis == 'n':
-        Setup(DoubleGauss, MAST_params, run_step=blep)        
+        Further_Steps(DoubleGauss, MAST_params, run_step=blep, alpha = loss_val)        
 ''' 
 x = np.linspace(-.08,.08)
 y = DoubleGauss(x, a=1.6,c=.3, b=.0005)
