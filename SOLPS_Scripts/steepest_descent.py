@@ -120,7 +120,7 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
                 exp_new.append(R)
     exp_Data = np.array(exp_new)
     exp_data = exp_Data.T
-    print(exp_data)
+    #print(exp_data)
     tick = 0
     for i_ct, i in enumerate(space[0]):
         for j_ct, j in enumerate(space[1]):
@@ -147,6 +147,7 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
                     loss_pts.append([l,i,j,k,tick])
                 tick += 1
     b = np.amin(loss_pts, axis = 0)
+    print('initial guess is:', loss_pts[0])
     for i in loss_pts:
         if b[0] == i[0]: 
             b_new = i 
@@ -247,9 +248,10 @@ MAST_params = [[1,2],
           [.002,.0075],
           [.0005,.003]]
 
-MAST_params_it = [[2.00000e+00, 2.50000e+00],
-                  [2.34375e-03, 3.03125e-03],
-                  [3.12500e-04, 4.37500e-04]]
+MAST_params_it = [[2.125000e+00, 2.375000e+00],
+                  [2.759375e-03, 2.959375e-03],
+                  [3.000e-04, 3.25000e-04]]
+
 
 guess_init=[1.5, 0.005, 0.5,0.5,0.0007]
 #Initial Case, for optimization algorithm, plus verification plots
