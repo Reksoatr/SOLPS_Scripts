@@ -194,9 +194,9 @@ def Further_Steps(func, params, alpha = .3, run_step=2, lib = 11,Post_Analysis =
         
     for i in params:
         i = [i]
-        step = alpha*i+i
+        step = alpha*i[0]+i[0]
         i.append(step)
-        i.append(2*alpha*i+i)
+        i.append(2*alpha*i[0]+i[0])
     space = params
     x_1 = np.linspace(-.12, -.03, 5)
     x_2 = np.linspace(-.02, .02, 10)
