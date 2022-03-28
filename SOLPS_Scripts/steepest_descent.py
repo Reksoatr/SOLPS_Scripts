@@ -183,19 +183,23 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
         writer.writerows([b])
         
         
-def Further_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
+def Further_Analysis(params, exper_shot, gfilen, lib = 21, alpha =.3, run_step = 1, steps = 4):
     '''Post Step Analysis using a comparison of a given experimental shot
     to analyize loss and provided desired run for further optimization.'''
 #    n = len(params)
-    space = []
-    loss_pts = []
     eq = equilibrium(gfile=gfilen)
+    space = []
+    learn = .1
+    loss_pts = []
     for i in params:
-        ticks = (i[1] - i[0])/steps
-        meep = []
-        for j in range(steps+1):
-            meep.append(i[0] +j*ticks)
-        space.append(meep)                    
+        l =[]
+        step_0 = learn*alpha*i+i
+        step_1 = -1*learn*alpha*i+i
+        l.append(i)
+        l.append(step_0)
+        l.append(step_1)
+        space.append(l)
+    space = np.array(space).T   
     STARTING = .75
     ENDING = 1.03
     exp_data = np.loadtxt(exper_shot, usecols = (0,1))
@@ -208,66 +212,46 @@ def Further_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
     exp_data = exp_Data.T
     #print(exp_data)
     tick = 0
-    for i_ct, i in enumerate(space[0]):
-        for j_ct, j in enumerate(space[1]):
-            for k_ct, k in enumerate(space[2]):
-                if run_step==1:
-                    enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_11/Attempt_{i_ct}{j_ct}{k_ct}'
-                else:
-                    enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_11/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}' 
-                try:
-                    os.chdir(enter)
-                except:
-                    continue
-                os.system('pwd')
-                os.system('rm *.last10')
-                os.system('2d_profiles')
-                print('Attempt_{}{}{}'.format(i_ct,j_ct,k_ct))
-                try:
-                    Attempt = np.loadtxt('ne3da.last10')
-                except:
-                    continue
-                if len(Attempt) != 0:
-                    Attempt = Attempt.T
-                    R_sep = PsiN2R(eq, 1.0)
-                    for R in Attempt[0]:
-                        R = R2PsiN(eq,R+R_sep)
-                    l = Loss(exp_data, Attempt)
-                    loss_pts.append([l,i,j,k,tick])
-                tick += 1
+    for i_ct, i in enumerate(space):
+        enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}'
+        try:
+            os.chdir(enter)
+        except:
+            continue
+        os.system('pwd')
+        os.system('rm *.last10')
+        os.system('2d_profiles')
+        print(f'Attempt_{i_ct}')
+        try:
+            Attempt = np.loadtxt('ne3da.last10')
+        except:
+            continue
+        if len(Attempt) != 0:
+            Attempt = Attempt.T
+            R_sep = PsiN2R(eq, 1.0)
+            for R in Attempt[0]:
+                R = R2PsiN(eq,R+R_sep)
+            l = Loss(exp_data, Attempt)
+            loss_pts.append([l,i[0],i[1], i[2], i[3], i_ct])
     b = np.amin(loss_pts, axis = 0)
     print('initial guess is:', loss_pts[0])
     print('Difference in loss is:', b[0]-loss_pts[0][0])
-    for i in loss_pts:
-        if b[0] == i[0]: 
-            b_new = i 
-            print('Minimum loss is at:')
-            print(i)
-    params_new = []
-    b_star = [b_new[1], b_new[2], b_new[3]]
+    if b[0] == loss_pts[0][0]:
+        print('guess too far')
+    elif b[0] == loss_pts[1][0]:
+        params_news = [loss_pts[1][1], loss_pts[1][2], loss_pts[1][3], loss_pts[1][4]]
+        print('go right')
+    elif b[0] == loss_pts[2][0]:
+        params_news = [loss_pts[2][1], loss_pts[2][2], loss_pts[2][3], loss_pts[2][4]]
+        print('go left')
     with open('error.csv', mode = 'a') as f:
         wri = csv.writer(f)
-        wri.writerow(b_new)
-    params_new.append(b_star)
-    temp = int(b_new[4])
-    loss_ptsb = np.delete(loss_pts, temp,0)
-    b1 = np.amin(loss_ptsb, axis = 0)
-    for i in loss_ptsb:
-        if b1[0] == i[0]: 
-            b_new = i 
-    b_star1 = [b_new[1], b_new[2], b_new[3]]
-    params_new.append(b_star1)
-    params_new = np.array(params_new)
-    params_news =  params_new.T
+        wri.writerow(run_step, b[0])
+    new_loss = b[0]
     print(params_news)
-    return params_news
-#add last10 notes to look at different last10 file, check if last10 files need deleted
-#use mv command rm b2mn.prt  
+    return params_news, new_loss
+
 #ls -al
-    with open('loss_over_iteration.csv', 'a', encoding='UTF8') as f:
-        writer = csv.writer(f)
-        writer.writerows([b])
-#need to add error/iteration graph,, all parameters need to be optimized
 def Loss_Graph(csv):
     y = np.loadtxt(csv, usecols = 0)
     x= range(0, len(y))
@@ -279,8 +263,6 @@ def Loss_Graph(csv):
 
 def Further_Steps(func, params, alpha = .3, run_step=2, lib = 21,Post_Analysis = True, exper_shot = None, gfilen = None):
     space = []
-    if Post_Analysis == False:
-        params = Loss_Analysis(params, exper_shot, gfilen)
     learn = .1
     for i in params:
         l =[]
@@ -309,6 +291,7 @@ def Further_Steps(func, params, alpha = .3, run_step=2, lib = 21,Post_Analysis =
         os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}_mk{run_step}/batch')
         batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}_mk{run_step}/batch'
         os.system(batch_run)
+    print(space)
 
    #check errors if they are going down/flat space for convergence check initial run
 def Single_Guess(func, guess, alpha = .2, run_step=1, lib=11, Post_Analysis = False, exper_shot = None, gfilen = None):
@@ -363,9 +346,9 @@ if __name__ == '__main__':
     if blep != 1:
         MAST_params = MAST_params_it
     if data_analysis == 'y':
-        Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
-    elif data_analysis == 'n':
-        Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val)        
+        params, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
+        blep += 1
+    Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val)        
 
 '''
 data = [[1,	0.8555],
