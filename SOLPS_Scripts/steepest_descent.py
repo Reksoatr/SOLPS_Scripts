@@ -199,7 +199,8 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 21, alpha =.3, run_step =
         l.append(step_0)
         l.append(step_1)
         space.append(l)
-    space = np.array(space).T   
+    space = np.array(space).T
+    print(space)
     STARTING = .75
     ENDING = 1.03
     exp_data = np.loadtxt(exper_shot, usecols = (0,1))
@@ -213,7 +214,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 21, alpha =.3, run_step =
     #print(exp_data)
     tick = 0
     for i_ct, i in enumerate(space):
-        enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}'
+        enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}_mk{run_step}'
         try:
             os.chdir(enter)
         except:
