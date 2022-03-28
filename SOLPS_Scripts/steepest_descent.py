@@ -350,11 +350,17 @@ if __name__ == '__main__':
     blep =int(blep)
     data_analysis = input('Is this data analysis after a run? (y or n)')
     if blep != 1:
-        MAST_params = MAST_params_it
+        losm = np.loadtxt('params.txt')
+        guess_init = losm[0]
+        loss_val = losm[1]
     if data_analysis == 'y':
         guess_init, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
+        f = open('params.txt', 'w')
+        f.writeline(f'{guess_init}')
+        f.writeline([loss_val])
+        f.close()
         blep += 1
-    #Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val)        
+    Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val)        
 
 '''
 data = [[1, 1.018],
