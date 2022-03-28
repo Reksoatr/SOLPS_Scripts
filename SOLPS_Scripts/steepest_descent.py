@@ -15,15 +15,15 @@ import os
 from equilibrium import equilibrium
 import csv
 #The beginning functions for optimization
-def Trainer(x, a=1.6, b=2.5, c=.002,d=2.4,e=1,f=1):
-    y = -a*(np.exp(-x**2/c)+1)-b*(x)+d
+def Trainer(x, a=1.5, b=3, c=.004,d=.3):
+    y = -a*(np.exp(-(x-.005)**2/c))-b*(x)*np.exp(-x**2/.01)+a+d
     return y
 
 def T_Lit(x, a=0, b=1, c=3,d=0,e=.1,f=0):
     y= .5*(a+b*x**c)*(1-np.tanh((x-d)/e))+f
     return y
 
-def DoubleGauss(x, a=.6, b=0.006, c=0.3,d=0.5,e=0.0007):
+def DoubleGauss(x, a=1.6, b=0.006, c=0.3,d=0.5,e=0.0007):
     '''
     Double-Gaussian Function
     a = Maximum (base) value of transport coefficient (typically 1.0)
@@ -32,7 +32,7 @@ def DoubleGauss(x, a=.6, b=0.006, c=0.3,d=0.5,e=0.0007):
     d = Fraction of max coefficient value where minor gaussian begins (c/a)<d<1
     e = Width parameter of minor gaussian e<b
     '''
-    y = -(a-d*a)*(np.exp(-(x+.01)**2/b))-(d*a-c)*(np.exp(-(x+.01)**2/e))+a
+    y = -(a-d*a)*(np.exp(-(x-.01)**2/b))-(d*a-c)*(np.exp(-(x-.01)**2/e))+a
     return y
 
 #joint methods in SOLPS
@@ -91,7 +91,7 @@ def Setup(func, params, run_step= 1, steps = 4, lib =11):
                 os.system(mkdir)
                 WriteInputfile(file='/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}_mk{}/b2.transport.inputfile'.format(lib,i_ct,j_ct,k_ct,run_step),points=Full_Points)
                 path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}' #finish adding mk0
-                batch_writer(path_name, i_ct, j_ct, k_ct)
+                batch_writer(path_name, i_ct, j_ct, k_ct, run_step)
                 os.system('cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}_mk{}/batch'.format(lib,i_ct,j_ct,k_ct,run_step))
                 batch_run = 'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{}/Attempt_{}{}{}_mk{}/batch'.format(lib,i_ct,j_ct,k_ct,run_step)
                 os.system(batch_run)
@@ -191,7 +191,7 @@ def Loss_Graph(csv):
     axs.set_ylabel('Loss from Error')
     
 
-def Further_Steps(func, params, alpha = .3, run_step=2, lib = 11,Post_Analysis = True, exper_shot = None, gfilen = None):
+def Further_Steps(func, params, alpha = .3, run_step=2, lib = 21,Post_Analysis = True, exper_shot = None, gfilen = None):
     space = []
     if Post_Analysis == False:
         params = Loss_Analysis(params, exper_shot, gfilen)
@@ -199,33 +199,29 @@ def Further_Steps(func, params, alpha = .3, run_step=2, lib = 11,Post_Analysis =
     for i in params:
         l =[]
         step_0 = learn*alpha*i+i
-        step_1 = 2*learn*alpha*i+i
-        step_2 = -1*learn*alpha*i+i
+        step_1 = -1*learn*alpha*i+i
         l.append(i)
         l.append(step_0)
         l.append(step_1)
-        l.append(step_2)
         space.append(l)
-    print(space)
+    space = np.array(space).T
     x_1 = np.linspace(-.12, -.03, 5)
     x_2 = np.linspace(-.02, .02, 10)
     x = np.append(x_1, x_2)
     #os.system('cp base/b2fstate base/b2fstati')
-    for i_ct, i in enumerate(space[0]):
-        for j_ct, j in enumerate(space[1]):
-            for k_ct, k in enumerate(space[2]):
-                diff = func(x, a = i, b= j, e=k)
-                Points0 = InputfileParser(file='b2.transport.inputfile.vi')
-                D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
-                Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
-                mkdir = f'cp -r base Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}'         
-                os.system(mkdir)
-                WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/b2.transport.inputfile',points=Full_Points)
-                path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}'
-                batch_writer(path_name, i_ct, j_ct, k_ct)
-                os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch')
-                batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}{j_ct}{k_ct}_mk{run_step}/batch'
-                os.system(batch_run)
+    for i_ct, i in enumerate(space):
+        diff = func(x, a = i[0], b= i[1], c = i[2],d = i[3])
+        Points0 = InputfileParser(file='b2.transport.inputfile.vi')
+        D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
+        Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
+        mkdir = f'cp -r base Attempt_{i_ct}_mk{run_step}'         
+        os.system(mkdir)
+        WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}_mk{run_step}/b2.transport.inputfile',points=Full_Points)
+        path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}_mk{run_step}'
+        batch_writer(path_name, i_ct, 0, 0, run_step)
+        os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}_mk{run_step}/batch')
+        batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}_mk{run_step}/batch'
+        os.system(batch_run)
 
    #check errors if they are going down/flat space for convergence check initial run
 def Single_Guess(func, guess, alpha = .2, run_step=1, lib=11, Post_Analysis = False, exper_shot = None, gfilen = None):
@@ -264,8 +260,8 @@ MAST_params_it = [[2.125000e+00, 2.375000e+00],
                   [2.759375e-03, 2.959375e-03],
                   [3.000e-04, 3.25000e-04]]
 
-loss_val = -.76
-guess_init=[2.25, 0.002759375, 0.0003]
+loss_val = .76
+guess_init=[1.5,3,.004,.3]#[2.25, 0.002759375, 0.0003]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
@@ -283,8 +279,8 @@ if __name__ == '__main__':
         Loss_Analysis(MAST_params, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep)
     elif data_analysis == 'n':
         Further_Steps(DoubleGauss, guess_init, run_step=blep, alpha = loss_val)        
-'''
 
+'''
 data = [[1,	0.8555],
 [2,	0.337],
 [3,	0.713],
@@ -293,9 +289,10 @@ data = np.array(data).T
 plt.plot(data[0], data[1], '-')
 
 
-x = np.linspace(-.08,.08)
-y = DoubleGauss(x, a=1.6,c=.3, b=.0005)
+x = np.linspace(-.14,.1)
+y = Trainer(x,)
 Points = InputfileParser('b2.transport.inputfile.dblgausstest')
+
 
 test = Points['1'][0]
 test_y = Points['1'][1]
