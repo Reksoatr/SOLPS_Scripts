@@ -251,6 +251,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 21, alpha =.3, run_step =
         wri.writerow(bint)
     new_loss = b[0]
     print(params_news)
+    os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/')
     return params_news, new_loss
 
 #ls -al
