@@ -53,7 +53,7 @@ def point_finder(x, func, y_only = False):
 def error(y_true, y_predicted):
      
     # Calculating the loss or cost
-    cost = -(np.sum((y_true-y_predicted)/y_true))/100000#/len(y_true)
+    cost = -(np.sum(np.abs(y_true-y_predicted)/y_true))/100000#/len(y_true)
     return cost
 
 
@@ -63,7 +63,7 @@ def Loss(exper_shot, sol_run):
     loss = error(sol_run[1], sol_pts)
     return loss
 
-def Setup(func, params, run_step= 1, steps = 4, lib =11):
+def Setup(func, params, run_step= 1, steps = 4, lib =22):
     '''Sets up and runs many runs over the given parameter space, with steps
     determining how many grid points in each direction.'''
 #    n = len(params)
@@ -183,7 +183,7 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
         writer.writerows([b])
         
         
-def Further_Analysis(params, exper_shot, gfilen, lib = 21, alpha =.3, run_step = 1, steps = 4):
+def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step = 1, steps = 4):
     '''Post Step Analysis using a comparison of a given experimental shot
     to analyize loss and provided desired run for further optimization.'''
 #    n = len(params)
@@ -262,9 +262,12 @@ def Loss_Graph(csv):
     axs.plot(x,y)
     axs.set_xlabel('Iterations')
     axs.set_ylabel('Loss from Error')
-    
+#plot relative error per point to check weight then add weight   
+#talk to eric about script being job not solps bash script
+#write by saturday
+#stochastic last step
 
-def Further_Steps(func, params, alpha = .3, run_step=2, lib = 21,Post_Analysis = True, exper_shot = None, gfilen = None):
+def Further_Steps(func, params, alpha = .3, run_step=2, lib = 22,Post_Analysis = True, exper_shot = None, gfilen = None):
     space = []
     learn = .1
     for i in params:
@@ -334,7 +337,7 @@ MAST_params_it = [[2.125000e+00, 2.375000e+00],
                   [3.000e-04, 3.25000e-04]]
 
 loss_val = .76
-guess_init=[1.5,3,.004,.3]#[2.25, 0.002759375, 0.0003]
+guess_init=[1.77352473, 3.54704946, 0.0047294,  0.35470495]#[2.25, 0.002759375, 0.0003]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
@@ -351,16 +354,21 @@ if __name__ == '__main__':
     if data_analysis == 'y':
         guess_init, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
         blep += 1
-    Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val)        
+    #Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val)        
 
 '''
-data = [[1,	0.8555],
-[2,	0.337],
-[3,	0.713],
-[4,	0.7605]]
+data = [[1, 1.018],
+        [2,	1.0182801375187802-0.029898925908849794],
+        [3, 0.8555],
+[3,	0.337],
+[4,	0.7605],
+[5,	0.713]]
 data = np.array(data).T
+plt.figure()
 plt.plot(data[0], data[1], '-')
-
+plt.title('Error Graph')
+plt.x_label('iterations')
+plt.y_label('error (normalized)')
 
 x = np.linspace(-.14,.1)
 y = Trainer(x,)
