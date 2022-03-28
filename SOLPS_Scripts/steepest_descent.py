@@ -349,7 +349,7 @@ if __name__ == '__main__':
     if blep != 1:
         MAST_params = MAST_params_it
     if data_analysis == 'y':
-        params, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
+        guess_init, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
         blep += 1
     Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val)        
 
