@@ -247,7 +247,8 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 21, alpha =.3, run_step =
         print('go left')
     with open('error.csv', mode = 'a') as f:
         wri = csv.writer(f)
-        wri.writerow(run_step, b[0])
+        bint = [run_step, b[0]]
+        wri.writerow(bint)
     new_loss = b[0]
     print(params_news)
     return params_news, new_loss
