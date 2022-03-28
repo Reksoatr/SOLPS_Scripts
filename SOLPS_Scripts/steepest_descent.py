@@ -246,9 +246,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
         params_news = [loss_pts[2][1], loss_pts[2][2], loss_pts[2][3], loss_pts[2][4]]
         print('go left')
     with open('error.csv', mode = 'a') as f:
-        wri = csv.writer(f)
-        bint = [run_step, b[0]]
-        wri.writerow(bint)
+        f.writelines(f'{run_step}   {b}')
     new_loss = b[0]
     print(params_news)
     os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/')
