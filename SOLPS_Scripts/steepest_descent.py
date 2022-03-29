@@ -332,8 +332,8 @@ MAST_params_it = [[2.125000e+00, 2.375000e+00],
                   [2.759375e-03, 2.959375e-03],
                   [3.000e-04, 3.25000e-04]]
 
-loss_val = .76
-guess_init=[1.77352473, 3.54704946, 0.0047294,  0.35470495]#[2.25, 0.002759375, 0.0003]
+loss_val = .93
+guess_init=[1.90831261, 3.81662522, 0.00508883, 0.38166253]#[2.25, 0.002759375, 0.0003]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
@@ -346,13 +346,13 @@ if __name__ == '__main__':
     blep =int(blep)
     data_analysis = input('Is this data analysis after a run? (y or n)')
     if blep != 1:
-        losm = np.loadtxt('params.txt')
-        guess_init = losm[0]
-        loss_val = losm[1]
+        #losm = np.loadtxt('params.txt')
+        #guess_init = losm[0]
+        #loss_val = losm[1]
     if data_analysis == 'y':
         guess_init, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
         f = open('params.txt', 'w')
-        f.writelines(f'{guess_init}')
+        f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]} ')
         f.writelines(f'{loss_val}')
         f.close()
         blep += 1
