@@ -178,9 +178,6 @@ def Loss_Analysis(params, exper_shot, gfilen, run_step = 1, steps = 4):
 #add last10 notes to look at different last10 file, check if last10 files need deleted
 #use mv command rm b2mn.prt  
 #ls -al
-    with open('loss_over_iteration.csv', 'a', encoding='UTF8') as f:
-        writer = csv.writer(f)
-        writer.writerows([b])
         
         
 def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step = 1, steps = 4):
@@ -245,8 +242,9 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
     elif b[0] == loss_pts[2][0]:
         params_news = [loss_pts[2][1], loss_pts[2][2], loss_pts[2][3], loss_pts[2][4]]
         print('go left')
-    with open('error.csv', mode = 'a') as f:
-        f.writelines(f'{run_step}   {b}')
+    f = open('error.csv', 'a')
+    f.writelines(f'{run_step}   {b}')
+    f.close()
     new_loss = b[0]
     print(params_news)
     os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/')
