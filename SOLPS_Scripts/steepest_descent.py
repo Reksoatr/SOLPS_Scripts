@@ -349,6 +349,7 @@ if __name__ == '__main__':
         #losm = np.loadtxt('params.txt')
         #guess_init = losm[0]
         #loss_val = losm[1]
+        h=1
     if data_analysis == 'y':
         guess_init, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
         f = open('params.txt', 'w')
