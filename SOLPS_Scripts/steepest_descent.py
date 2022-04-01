@@ -75,7 +75,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
 #    n = len(params)
     eq = equilibrium(gfile=gfilen)
     space = []
-    learn = .2
+    learn = .3
     loss_pts = []
     for i in params:
         l =[]
@@ -154,7 +154,7 @@ def Loss_Graph(csv):
 
 def Further_Steps(func, params, alpha = .3, run_step=2, lib = 22,Post_Analysis = True, exper_shot = None, gfilen = None):
     space = []
-    learn = .2
+    learn = .3
     for i in params:
         l =[]
         step_0 = learn*alpha*i+i
@@ -253,8 +253,8 @@ data = [[1, 1.018],
         [2,	1.0182801375187802-0.029898925908849794],
         [3, .931],
         [4, 0.9054375472903425],
-        [5,],
-        [,],
+        [5,0.8608029514399158],
+        [6,0],
         [,]
 data = np.array(data).T
 plt.figure()
