@@ -124,6 +124,8 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
     print('initial guess is:', loss_pts[0])
     print('Difference in loss is:', loss_pts[0][0]-b[0])
     if b[0] == loss_pts[0][0]:
+        params_news = [loss_pts[0][1], loss_pts[0][2], loss_pts[0][3], loss_pts[0][4]]
+        b[0] = b[0]/2
         print('guess too far')
     elif b[0] == loss_pts[1][0]:
         params_news = [loss_pts[1][1], loss_pts[1][2], loss_pts[1][3], loss_pts[1][4]]
@@ -254,8 +256,10 @@ data = [[1, 1.018],
         [3, .931],
         [4, 0.9054375472903425],
         [5,0.8608029514399158],
-        [6,0],
-        [,]
+        [6,0.],
+        [7,0.7912938107323133],
+        [8,0.7640928445496504],
+        [9, 0.7420399341877436]
 data = np.array(data).T
 plt.figure()
 plt.plot(data[0], data[1], '-')
