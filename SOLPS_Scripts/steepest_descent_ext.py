@@ -69,13 +69,12 @@ def Loss(exper_shot, sol_run):
 #ls -al
         
         
-def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step = 1, steps = 4):
+def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step = 1, steps = 4, learn = .3):
     '''Post Step Analysis using a comparison of a given experimental shot
     to analyize loss and provided desired run for further optimization.'''
 #    n = len(params)
     eq = equilibrium(gfile=gfilen)
     space = []
-    learn = .3
     loss_pts = []
     for i in params:
         l =[]
@@ -123,9 +122,10 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
     b = np.amin(loss_pts, axis = 0)
     print('initial guess is:', loss_pts[0])
     print('Difference in loss is:', loss_pts[0][0]-b[0])
+    new_step = learn
     if b[0] == loss_pts[0][0]:
         params_news = [loss_pts[0][1], loss_pts[0][2], loss_pts[0][3], loss_pts[0][4]]
-        b[0] = b[0]/2
+        new_step = learn/2
         print('guess too far')
     elif b[0] == loss_pts[1][0]:
         params_news = [loss_pts[1][1], loss_pts[1][2], loss_pts[1][3], loss_pts[1][4]]
@@ -133,13 +133,13 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
     elif b[0] == loss_pts[2][0]:
         params_news = [loss_pts[2][1], loss_pts[2][2], loss_pts[2][3], loss_pts[2][4]]
         print('go left')
-    f = open('error.csv', 'a')
+    f = open(f'error{run_step}.csv', 'w')
     f.writelines(f'{run_step}   {b}')
     f.close()
     new_loss = b[0]
     print(params_news)
     os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/')
-    return params_news, new_loss
+    return params_news, new_loss, new_step
 
 #ls -al
 def Loss_Graph(csv):
@@ -154,9 +154,8 @@ def Loss_Graph(csv):
 #write by saturday
 #stochastic last step
 
-def Further_Steps(func, params, alpha = .3, run_step=2, lib = 22,Post_Analysis = True, exper_shot = None, gfilen = None):
+def Further_Steps(func, params, alpha = .3, run_step=2, lib = 22,Post_Analysis = True, exper_shot = None, gfilen = None, learn = .3):
     space = []
-    learn = .3
     for i in params:
         l =[]
         step_0 = learn*alpha*i+i
@@ -240,15 +239,16 @@ if __name__ == '__main__':
         losm = np.loadtxt('params.txt')
         guess_init = [losm[0], losm[1],losm[2],losm[3]]
         loss_val = losm[4]
+        learning_rate = losm[5]
         h=1
     if data_analysis == 'y':
-        guess_init, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
+        guess_init, loss_val, learning_rate = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val, learn=learning_rate)
         f = open('params.txt', 'w')
         f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]} ')
-        f.writelines(f'{loss_val}')
+        f.writelines(f'{loss_val} {learning_rate}')
         f.close()
         blep += 1
-    Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val)        
+    Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val, learn = learning_rate)        
 
 '''
 data = [[1, 1.018],
