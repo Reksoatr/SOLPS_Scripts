@@ -251,8 +251,8 @@ if __name__ == '__main__':
         f.close()
         blep += 1
     Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val, learn = learning_rate)        
-
 '''
+
 data = [[1, 1.018],
         [2,	1.0182801375187802-0.029898925908849794],
         [3, .931],
@@ -264,7 +264,9 @@ data = [[1, 1.018],
         [9, 0.7420399341877436],
         [10, 0.7124840953627268],
         [11, 0.7122870767295693],
-        [12, 0.7122870767295693-0.01340096684815062]]
+        [12, 0.7122870767295693-0.01340096684815062],
+        [13, 0.6876076047711264],
+        [14,0.6876076047711264-0.012392907245474483]]
 data = np.array(data).T
 plt.figure()
 plt.plot(data[0], data[1], '-')
@@ -273,7 +275,7 @@ plt.x_label('iterations')
 plt.y_label('error (normalized)')
 
 x = np.linspace(-.14,.1)
-y = Trainer(x,)
+y = Trainer(x,a = 7.431,b= 14.862, c= .0198, d= 1.48)
 Points = InputfileParser('b2.transport.inputfile.dblgausstest')
 
 
