@@ -65,7 +65,7 @@ def Loss(exper_shot, sol_run, plot =False, ice=0):
         plt.figure()
         plt.plot(sol_run[0], np.abs(exp_pts-sol_run[0])/exp_pts )
         plt.savefig(f'error_graph{ice}')
-        plt.show()
+        #plt.show()
     return loss
 
 
@@ -90,7 +90,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
         l.append(step_1)
         space.append(l)
     space = np.array(space).T
-    print(space)
+    #print(space)
     STARTING = .75
     ENDING = 1.03
     exp_data = np.loadtxt(exper_shot, usecols = (0,1))
@@ -154,10 +154,6 @@ def Loss_Graph(cst):
     axs.plot(x,y)
     axs.set_xlabel('Iterations')
     axs.set_ylabel('Loss from Error')
-#plot relative error per point to check weight then add weight   
-#talk to eric about script being job not solps bash script
-#write by saturday
-#stochastic last step
 
 def Further_Steps(func, params, alpha = .3, run_step=2, lib = 22,Post_Analysis = True, exper_shot = None, gfilen = None, learn = .3):
     space = []
