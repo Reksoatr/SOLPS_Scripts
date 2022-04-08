@@ -57,10 +57,15 @@ def error(y_true, y_predicted):
     return cost
 
 
-def Loss(exper_shot, sol_run):
+def Loss(exper_shot, sol_run, plot =False, ice=0):
     ius = InterpolatedUnivariateSpline(exper_shot[0], exper_shot[1])
-    sol_pts = point_finder(sol_run[0],ius, y_only = True)
-    loss = error(sol_run[1], sol_pts)
+    exp_pts = point_finder(sol_run[0],ius, y_only = True)
+    loss = error(sol_run[1], exp_pts)
+    if plot == True:
+        plt.figure()
+        plt.plot(sol_run[0], np.abs(exp_pts-sol_run[0])/exp_pts )
+        plt.savefig(f'error_graph{ice}')
+        plt.show()
     return loss
 
 
@@ -69,13 +74,12 @@ def Loss(exper_shot, sol_run):
 #ls -al
         
         
-def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step = 1, steps = 4):
+def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step = 1, steps = 4, learn = .3):
     '''Post Step Analysis using a comparison of a given experimental shot
     to analyize loss and provided desired run for further optimization.'''
 #    n = len(params)
     eq = equilibrium(gfile=gfilen)
     space = []
-    learn = .3
     loss_pts = []
     for i in params:
         l =[]
@@ -118,14 +122,15 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
             R_sep = PsiN2R(eq, 1.0)
             for R in Attempt[0]:
                 R = R2PsiN(eq,R+R_sep)
-            l = Loss(exp_data, Attempt)
+            l = Loss(exp_data, Attempt, plot=True,ice=i_ct)
             loss_pts.append([l,i[0],i[1], i[2], i[3], i_ct])
     b = np.amin(loss_pts, axis = 0)
     print('initial guess is:', loss_pts[0])
     print('Difference in loss is:', loss_pts[0][0]-b[0])
+    new_step = learn
     if b[0] == loss_pts[0][0]:
         params_news = [loss_pts[0][1], loss_pts[0][2], loss_pts[0][3], loss_pts[0][4]]
-        b[0] = b[0]/2
+        new_step = learn/2
         print('guess too far')
     elif b[0] == loss_pts[1][0]:
         params_news = [loss_pts[1][1], loss_pts[1][2], loss_pts[1][3], loss_pts[1][4]]
@@ -133,17 +138,17 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
     elif b[0] == loss_pts[2][0]:
         params_news = [loss_pts[2][1], loss_pts[2][2], loss_pts[2][3], loss_pts[2][4]]
         print('go left')
-    f = open('error.csv', 'a')
+    f = open(f'error{run_step}.csv', 'w')
     f.writelines(f'{run_step}   {b}')
     f.close()
     new_loss = b[0]
     print(params_news)
     os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/')
-    return params_news, new_loss
+    return params_news, new_loss, new_step
 
 #ls -al
-def Loss_Graph(csv):
-    y = np.loadtxt(csv, usecols = 0)
+def Loss_Graph(cst):
+    y = np.loadtxt(cst, usecols = 0)
     x= range(0, len(y))
     fig, axs = plt.subplots(1,1,dpi = 200)
     axs.plot(x,y)
@@ -154,9 +159,8 @@ def Loss_Graph(csv):
 #write by saturday
 #stochastic last step
 
-def Further_Steps(func, params, alpha = .3, run_step=2, lib = 22,Post_Analysis = True, exper_shot = None, gfilen = None):
+def Further_Steps(func, params, alpha = .3, run_step=2, lib = 22,Post_Analysis = True, exper_shot = None, gfilen = None, learn = .3):
     space = []
-    learn = .3
     for i in params:
         l =[]
         step_0 = learn*alpha*i+i
@@ -224,7 +228,8 @@ MAST_params_it = [[2.125000e+00, 2.375000e+00],
                   [3.000e-04, 3.25000e-04]]
 
 loss_val = .93
-guess_init=[1.90831261, 3.81662522, 0.00508883, 0.38166253]#[2.25, 0.002759375, 0.0003]
+guess_init=[1.90831261, 3.81662522, 0.00508883, 0.38166253]
+learning_rate=.3#[2.25, 0.002759375, 0.0003]
 #Initial Case, for optimization algorithm, plus verification plots
 
 # Gradient Descent Function
@@ -240,15 +245,16 @@ if __name__ == '__main__':
         losm = np.loadtxt('params.txt')
         guess_init = [losm[0], losm[1],losm[2],losm[3]]
         loss_val = losm[4]
+        learning_rate = losm[5]
         h=1
     if data_analysis == 'y':
-        guess_init, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
+        guess_init, loss_val, learning_rate = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val, learn=learning_rate)
         f = open('params.txt', 'w')
         f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]} ')
-        f.writelines(f'{loss_val}')
+        f.writelines(f'{loss_val} {learning_rate}')
         f.close()
         blep += 1
-    Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val)        
+    Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val, learn = learning_rate)        
 
 '''
 data = [[1, 1.018],
@@ -260,8 +266,9 @@ data = [[1, 1.018],
         [7,0.7912938107323133],
         [8,0.7640928445496504],
         [9, 0.7420399341877436],
-        [10, 0.7124840953627268]
-        ]
+        [10, 0.7124840953627268],
+        [11, 0.7122870767295693],
+        [12, 0.7122870767295693-0.01340096684815062]]
 data = np.array(data).T
 plt.figure()
 plt.plot(data[0], data[1], '-')

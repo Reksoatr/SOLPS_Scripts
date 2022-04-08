@@ -57,10 +57,15 @@ def error(y_true, y_predicted):
     return cost
 
 
-def Loss(exper_shot, sol_run):
+def Loss(exper_shot, sol_run, plot =False, ice=0):
     ius = InterpolatedUnivariateSpline(exper_shot[0], exper_shot[1])
-    sol_pts = point_finder(sol_run[0],ius, y_only = True)
-    loss = error(sol_run[1], sol_pts)
+    exp_pts = point_finder(sol_run[0],ius, y_only = True)
+    loss = error(sol_run[1], exp_pts)
+    if plot == True:
+        plt.figure()
+        plt.plot(sol_run[0], np.abs(exp_pts-sol_run[0])/exp_pts )
+        plt.savefig(f'error_graph{ice}')
+        plt.show()
     return loss
 
 
@@ -117,7 +122,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
             R_sep = PsiN2R(eq, 1.0)
             for R in Attempt[0]:
                 R = R2PsiN(eq,R+R_sep)
-            l = Loss(exp_data, Attempt)
+            l = Loss(exp_data, Attempt, plot=True,ice=i_ct)
             loss_pts.append([l,i[0],i[1], i[2], i[3], i_ct])
     b = np.amin(loss_pts, axis = 0)
     print('initial guess is:', loss_pts[0])
@@ -142,8 +147,8 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
     return params_news, new_loss, new_step
 
 #ls -al
-def Loss_Graph(csv):
-    y = np.loadtxt(csv, usecols = 0)
+def Loss_Graph(cst):
+    y = np.loadtxt(cst, usecols = 0)
     x= range(0, len(y))
     fig, axs = plt.subplots(1,1,dpi = 200)
     axs.plot(x,y)
@@ -261,8 +266,9 @@ data = [[1, 1.018],
         [7,0.7912938107323133],
         [8,0.7640928445496504],
         [9, 0.7420399341877436],
-        [10, 0.7124840953627268]
-        ]
+        [10, 0.7124840953627268],
+        [11, 0.7122870767295693],
+        [12, 0.7122870767295693-0.01340096684815062]]
 data = np.array(data).T
 plt.figure()
 plt.plot(data[0], data[1], '-')
