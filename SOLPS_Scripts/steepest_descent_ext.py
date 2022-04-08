@@ -69,7 +69,7 @@ def Loss(exper_shot, sol_run):
 #ls -al
         
         
-def Further_Analysis(params, exper_shot, gfilen, lib = 23, alpha =.3, run_step = 1, steps = 4, learn = .3):
+def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step = 1, steps = 4, learn = .3):
     '''Post Step Analysis using a comparison of a given experimental shot
     to analyize loss and provided desired run for further optimization.'''
 #    n = len(params)
@@ -154,7 +154,7 @@ def Loss_Graph(csv):
 #write by saturday
 #stochastic last step
 
-def Further_Steps(func, params, alpha = .3, run_step=2, lib = 23,Post_Analysis = True, exper_shot = None, gfilen = None, learn = .3):
+def Further_Steps(func, params, alpha = .3, run_step=2, lib = 22,Post_Analysis = True, exper_shot = None, gfilen = None, learn = .3):
     space = []
     for i in params:
         l =[]
