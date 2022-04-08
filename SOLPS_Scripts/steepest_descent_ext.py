@@ -127,7 +127,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
     b = np.amin(loss_pts, axis = 0)
     print('initial guess is:', loss_pts[0])
     print('Difference in loss is:', loss_pts[0][0]-b[0])
-    new_step = learn
+    new_step = 10*loss_pts[0][0]-b[0]
     if b[0] == loss_pts[0][0]:
         params_news = [loss_pts[0][1], loss_pts[0][2], loss_pts[0][3], loss_pts[0][4]]
         new_step = learn/2
@@ -154,10 +154,7 @@ def Loss_Graph(cst):
     axs.plot(x,y)
     axs.set_xlabel('Iterations')
     axs.set_ylabel('Loss from Error')
-#plot relative error per point to check weight then add weight   
-#talk to eric about script being job not solps bash script
-#write by saturday
-#stochastic last step
+
 
 def Further_Steps(func, params, alpha = .3, run_step=2, lib = 22,Post_Analysis = True, exper_shot = None, gfilen = None, learn = .3):
     space = []
@@ -183,40 +180,10 @@ def Further_Steps(func, params, alpha = .3, run_step=2, lib = 22,Post_Analysis =
         mkdir = f'cp -r base Attempt_{i_ct}_mk{run_step}'         
         os.system(mkdir)
         WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}_mk{run_step}/b2.transport.inputfile',points=Full_Points)
-        path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}_mk{run_step}'
-        batch_writer(path_name, i_ct, 0, 0, run_step)
-        os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}_mk{run_step}/batch')
-        batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i_ct}_mk{run_step}/batch'
-        os.system(batch_run)
     print(space)
 
-   #check errors if they are going down/flat space for convergence check initial run
-def Single_Guess(func, guess, alpha = .2, run_step=1, lib=11, Post_Analysis = False, exper_shot = None, gfilen = None):
-    if Post_Analysis ==False:
-        x = np.linspace(-.05, .05, 10)
-        x_beginning = np.array([-.12])
-        x = np.append(x_beginning, x)
-        y = np.linspace(.0001, .001, 10)
-        for i_ct, i in enumerate(y):
-            diff = func(x, a = guess[0], b= i, c=guess[2], d = guess[3], e = guess[4])
-            Points0 = InputfileParser(file='b2.transport.inputfile.vi')
-            D_Points={'3' : np.array([x,diff]), '4' : np.array([x,diff])} #This is where the optimization method comes in
-            Full_Points={'1':Points0['1'],'3':D_Points['3'],'4':D_Points['4']}
-            mkdir = f'cp -r base Attempt_mk{run_step}{i_ct}'         
-            os.system(mkdir)
-            WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_mk{run_step}{i_ct}/b2.transport.inputfile',points=Full_Points)
-            path_name = f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_mk{run_step}{i_ct}'
-            batch_writer(path_name, run_step, i_ct, 0)
-            os.system(f'cp batch_use  /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_mk{run_step}{i_ct}/batch')
-            batch_run = f'qsub /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_mk{run_step}{i_ct}/batch'
-            os.system(batch_run)
 
 
-#Minimum loss is at:
-#[85558.53276897759, 2.0, 0.002, 0.0005, 100] 1
-#[33795.46190967331, 2.0, 0.00303125, 0.0003125, 16] 2
-#[71323.66532682443, 2.25, 0.002959375, 0.0003125, 72] 4
-#[0.7605491455132665, 2.25, 0.002759375, 0.0003, 18] 5
 
     
 MAST_params = [[1,2],
@@ -240,20 +207,18 @@ if __name__ == '__main__':
     #Single_Guess(DoubleGauss, guess_init, run_step =1)
     blep = input('What Iteration is this?')
     blep =int(blep)
-    data_analysis = input('Is this data analysis after a run? (y or n)')
-    if blep != 1:
-        losm = np.loadtxt('params.txt')
-        guess_init = [losm[0], losm[1],losm[2],losm[3]]
-        loss_val = losm[4]
-        learning_rate = losm[5]
-        h=1
-    if data_analysis == 'y':
-        guess_init, loss_val, learning_rate = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val, learn=learning_rate)
-        f = open('params.txt', 'w')
-        f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]} ')
-        f.writelines(f'{loss_val} {learning_rate}')
-        f.close()
-        blep += 1
+    losm = np.loadtxt('params.txt')
+    guess_init = [losm[0], losm[1],losm[2],losm[3]]
+    loss_val = losm[4]
+    learning_rate = losm[5]
+    h=1
+
+    guess_init, loss_val, learning_rate = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val, learn=learning_rate)
+    f = open('params.txt', 'w')
+    f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]} ')
+    f.writelines(f'{loss_val} {learning_rate}')
+    f.close()
+    blep += 1
     Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val, learn = learning_rate)        
 
 '''

@@ -275,7 +275,7 @@ plt.x_label('iterations')
 plt.y_label('error (normalized)')
 
 x = np.linspace(-.14,.1)
-y = Trainer(x,a = 7.431,b= 14.862, c= .0198, d= 1.48)
+y = DoubleGauss(x, a=1.6, b=0.006, c=0.3,d=0.5,e=0.0007)#Trainer(x,a = 7.431,b= 14.862, c= .0198, d= 1.48)
 Points = InputfileParser('b2.transport.inputfile.dblgausstest')
 
 
