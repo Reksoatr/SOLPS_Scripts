@@ -45,7 +45,7 @@ def point_finder(x, func, y_only = False):
 def error(y_true, y_predicted):
      
     # Calculating the loss or cost
-    cost = (np.sum(np.abs(y_true-y_predicted)/y_true))/100000#/len(y_true)
+    cost = (np.sum(np.abs(y_true-y_predicted)/y_true))/100#/len(y_true)
     return cost
 
 
