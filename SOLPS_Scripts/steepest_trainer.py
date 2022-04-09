@@ -14,17 +14,8 @@ import os
 from equilibrium import equilibrium
 import csv
 
-
-def DoubleGauss(x, a=1.6, b=0.006, c=0.3,d=0.5,e=0.0007):
-    '''
-    Double-Gaussian Function
-    a = Maximum (base) value of transport coefficient (typically 1.0)
-    b = Width parameter of major gaussian b>e
-    c = Minimum (trough) value of transport coefficient 0<c<a
-    d = Fraction of max coefficient value where minor gaussian begins (c/a)<d<1
-    e = Width parameter of minor gaussian e<b
-    '''
-    y = -(a-d*a)*(np.exp(-(x-.01)**2/b))-(d*a-c)*(np.exp(-(x-.01)**2/e))+a
+def Trainer(x, a=1.5, b=3, c=.004,d=.3):
+    y = -a*(np.exp(-(x-.005)**2/c))-b*(x)*np.exp(-x**2/.01)+a+d
     return y
 
 #joint methods in SOLPS
@@ -142,7 +133,7 @@ def Further_Steps(func, params, run_step=2, lib = 3,Post_Analysis = True, exper_
     x_2 = np.linspace(-.02, .02, 10)
     x = np.append(x_1, x_2)
     #os.system('cp base/b2fstate base/b2fstati')
-    diff = func(x, a = params[0], b= params[1], c = params[2],d = params[3], e = params[4])
+    diff = func(x, a = params[0], b= params[1], c = params[2],d = params[3])
     Points0 = InputfileParser(file='b2.transport.inputfile.vi')
     D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
     Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
@@ -155,14 +146,14 @@ if __name__ == '__main__':
     blep = input('What Iteration is this?')
     trip = input('Is This Data Analysis?')
     blep =int(blep)
-    losm = np.loadtxt('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_4/params.txt')
-    guess_init = [losm[0], losm[1],losm[2],losm[3], losm[4]]
-    loss_val = losm[5]
+    losm = np.loadtxt('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_5/params.txt')
+    guess_init = [losm[0], losm[1],losm[2],losm[3]]
+    loss_val = losm[4]
     if  trip == 'y':
         guess_init, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
         f = open('params.txt', 'w')
-        f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]} {guess_init[4]}')
+        f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]}')
         f.writelines(f' {loss_val}')
         f.close()
     elif trip == 'n':
-        Further_Steps(DoubleGauss, guess_init, run_step=blep)  
+        Further_Steps(Trainer, guess_init, run_step=blep)  
