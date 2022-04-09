@@ -49,7 +49,7 @@ def error(y_true, y_predicted):
     return cost
 
 
-def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 3, run_step =1):
+def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 4, run_step =1):
     ius = InterpolatedUnivariateSpline(exper_shot[0], exper_shot[1])
     exp_pts = point_finder(sol_run[0],ius, y_only = True)
     loss = error(exp_pts, sol_run[1])
@@ -75,7 +75,7 @@ def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 3, run_step =1):
 
 
 
-def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 1, steps = 4):
+def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 1, steps = 4):
     '''Post Step Analysis using a comparison of a given experimental shot
     to analyize loss and provided desired run for further optimization.'''
 #    n = len(params)
@@ -136,7 +136,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
     os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}')
     return params_news, new_loss
 
-def Further_Steps(func, params, run_step=2, lib = 3,Post_Analysis = True, exper_shot = None, gfilen = None):
+def Further_Steps(func, params, run_step=1, lib = 4,Post_Analysis = True, exper_shot = None, gfilen = None):
     print(params)
     x_1 = np.linspace(-.12, -.03, 5)
     x_2 = np.linspace(-.02, .02, 10)
