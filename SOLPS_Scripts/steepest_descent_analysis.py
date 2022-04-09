@@ -81,7 +81,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
 #    n = len(params)
     eq = equilibrium(gfile=gfilen)
     STARTING = .75
-    ENDING = 1.03
+    ENDING = 1.06
     exp_data = np.loadtxt(exper_shot, usecols = (0,1))
     exp_new = []
     for R in exp_data:
@@ -112,6 +112,20 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
             B= R2PsiN(eq,A)
             new_R.append(float(B))
         Attempt[0]=new_R
+        new_R = []
+        for R in Attempt[0]:
+            A = R + R_sep
+            B= R2PsiN(eq,A)
+            new_R.append(float(B))
+        Attempt[0]=new_R
+        Attempt = Attempt.T
+        Att_new = []
+        for R in Attempt:
+            if R[0] > STARTING:
+                if R[0] < ENDING:
+                    Att_new.append(R)
+        attempt = np.array(Att_new)
+        Attempt = attempt.T
         l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
         print(l)
         b = alpha-l

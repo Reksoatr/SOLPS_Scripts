@@ -91,8 +91,8 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
         space.append(l)
     space = np.array(space).T
     print(space)
-    STARTING = .75
-    ENDING = 1.03
+    STARTING = .62
+    ENDING = 1.06
     exp_data = np.loadtxt(exper_shot, usecols = (0,1))
     exp_new = []
     for R in exp_data:
