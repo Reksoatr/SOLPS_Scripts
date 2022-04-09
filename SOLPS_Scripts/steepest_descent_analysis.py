@@ -114,7 +114,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
         Attempt[0]=new_R
         l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
         print(l)
-        b = (l-alpha)*10
+        b = (l-alpha)
         if run_step == 1:
             b= l
 
