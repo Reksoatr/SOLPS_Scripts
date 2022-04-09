@@ -81,12 +81,12 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
 #    n = len(params)
     eq = equilibrium(gfile=gfilen)
     STARTING = .75
-    ENDING = 1.06
+    ENDING = 1.04
     exp_data = np.loadtxt(exper_shot, usecols = (0,1))
     exp_new = []
     for R in exp_data:
-        if R[0] > STARTING:
-            if R[0] < ENDING:
+        if R[0] > STARTING-.1:
+            if R[0] < ENDING+.02:
                 exp_new.append(R)
     exp_Data = np.array(exp_new)
     exp_data = exp_Data.T
