@@ -108,7 +108,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
         R_sep = PsiN2R(eq, 1.0)
         for R in Attempt[0]:
             R = R2PsiN(eq,R+R_sep)
-        l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
+        l = Loss(exp_data, R, plot=True, ice = run_step, lib = lib, run_step=run_step)
         print(l)
         b = alpha-l
         if run_step == 1:
