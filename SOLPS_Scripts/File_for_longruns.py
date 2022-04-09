@@ -16,9 +16,9 @@ if __name__ == '__main__':
     blip = int(input('Which Directory Number?'))
     functtt = input('T (Trainer) or D (DoubleGauss)')
     if functtt == 'T':
-        batch_extended(blip, 2,18,alg='steepest_trainer')        
+        batch_extended(blip, 2,25,alg='steepest_trainer')        
     elif functtt == 'D':
-        batch_extended(blip, 2,18,alg='steepest_descent_analysis')
+        batch_extended(blip, 2,25,alg='steepest_descent_analysis')
     else:
         print('Invalid input')
     os.system('qsub batch_use_extended')
