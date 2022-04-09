@@ -106,20 +106,20 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
     else:
         params_news = params + params*b
     f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/error.csv', 'a')
-    f.writelines(f'{run_step}   {b}')
+    f.writelines(f'{run_step}   {l}')
     f.close()
     new_loss = l
     print(params_news)
-    os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/')
+    os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}')
     return params_news, new_loss, new_step
 
-def Further_Steps(func, params, alpha = .3, run_step=2, lib = 22,Post_Analysis = True, exper_shot = None, gfilen = None, learn = .3):
+def Further_Steps(func, params, run_step=2, lib = 3,Post_Analysis = True, exper_shot = None, gfilen = None, learn = .3):
     print(params)
     x_1 = np.linspace(-.12, -.03, 5)
     x_2 = np.linspace(-.02, .02, 10)
     x = np.append(x_1, x_2)
     #os.system('cp base/b2fstate base/b2fstati')
-    diff = func(x, a = params[0], b= params[1], c = params[2],d = params[3])
+    diff = func(x, a = params[0], b= params[1], c = params[2],d = params[3], e = params[4])
     Points0 = InputfileParser(file='b2.transport.inputfile.vi')
     D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
     Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
@@ -133,15 +133,15 @@ if __name__ == '__main__':
     trip = input('Is This Data Analysis?')
     blep =int(blep)
     losm = np.loadtxt('params.txt')
-    guess_init = [losm[0], losm[1],losm[2],losm[3]]
-    loss_val = losm[4]
-    learning_rate = losm[5]
+    guess_init = [losm[0], losm[1],losm[2],losm[3], losm[4]]
+    loss_val = losm[5]
+    learning_rate = losm[6]
     if  trip == 'y':
         guess_init, loss_val, learning_rate = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val, learn=learning_rate)
         f = open('params.txt', 'w')
-        f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]} ')
+        f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]} {guess_init[4]}')
         f.writelines(f'{loss_val} {learning_rate}')
         f.close()
     elif trip == 'n':
         blep += 1
-        Further_Steps(Trainer, guess_init, run_step=blep, alpha = loss_val, learn = learning_rate)  
+        Further_Steps(DoubleGauss, guess_init, run_step=blep, alpha = loss_val, learn = learning_rate)  
