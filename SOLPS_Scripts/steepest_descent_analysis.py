@@ -106,8 +106,12 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
     if len(Attempt) != 0:
         Attempt = Attempt.T
         R_sep = PsiN2R(eq, 1.0)
+        new_R = []
         for R in Attempt[0]:
-            R = R2PsiN(eq,R+R_sep)
+            A = R + R_sep
+            B= R2PsiN(eq,A)
+            new_R.append(float(B))
+        Attempt[0]=new_R
         l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
         print(l)
         b = alpha-l
