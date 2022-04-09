@@ -103,10 +103,15 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
     if len(Attempt) != 0:
         Attempt = Attempt.T
         print('length of R is: ', len(Attempt[0]))
+        print(Attempt[0])
         R_sep = PsiN2R(eq, 1.0)
         print(R_sep)
+        new_R = []
         for R in Attempt[0]:
-            R += R_sep
+            print('step')
+            A = R + R_sep
+            new_R.append(A)
+        print('New')
         print(Attempt[0])
         f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/sol_pts', 'w')
         for i in Attempt:    
