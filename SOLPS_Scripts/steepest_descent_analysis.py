@@ -96,6 +96,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
         for R in Attempt[0]:
             R = R2PsiN(eq,R+R_sep)
         l = Loss(exp_data, Attempt, plot=True)
+        print(l)
         b = l-alpha
     print('Difference in loss is:', b)
     new_step = 10*b
@@ -105,7 +106,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
         print('guess too far')
     else:
         for j in params:
-            params_news.append(j+j*b)
+            params_news.append(float(j)+float(j)*b)
     f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/error.csv', 'a')
     f.writelines(f'{run_step}   {l}')
     f.close()
