@@ -78,7 +78,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
     exp_Data = np.array(exp_new)
     exp_data = exp_Data.T
     #print(exp_data)
-
+    params_news = []
     enter = f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}'
     os.chdir(enter)
     os.system('pwd')
@@ -104,7 +104,8 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
         new_step = learn/2
         print('guess too far')
     else:
-        params_news = params + params*b
+        for j in params:
+            params_news.append(j+j*b)
     f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/error.csv', 'a')
     f.writelines(f'{run_step}   {l}')
     f.close()
@@ -143,6 +144,4 @@ if __name__ == '__main__':
         f.writelines(f'{loss_val} {learning_rate}')
         f.close()
     elif trip == 'n':
-        if blep !=1:
-            blep += 1
         Further_Steps(DoubleGauss, guess_init, run_step=blep)  
