@@ -10,9 +10,9 @@ def batch_extended(lib, start, end):
         f.writelines(['\npython3 -m steepest_descent_analysis <<Inputblock',f'\n{i}','\ny', '\nInputblock'])
         f.writelines(['\npython3 -m steepest_descent_analysis <<Inputblock',f'\n{i+1}','\nn', '\nInputblock'])
         f.writelines(['\n',f'cd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{i+1}\n','\nb2run b2mn > run.log'])
-        f.writelines(['\ncd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}'])
+        f.writelines([f'\ncd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}'])
     f.close()
 if __name__ == '__main__':
     blip = 3
-    batch_extended(blip, 1,15)
+    batch_extended(blip, 2,15)
     os.system('qsub batch_use_extended')
