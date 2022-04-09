@@ -54,13 +54,21 @@ def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 3, run_step =1):
     exp_pts = point_finder(sol_run[0],ius, y_only = True)
     loss = error(exp_pts, sol_run[1])
     if plot == True:
-        y = np.abs(exp_pts-sol_run[0])/exp_pts
+        y = np.abs(exp_pts-sol_run[1])/exp_pts
         plt.figure()
         plt.plot(sol_run[0],  y)
         plt.savefig(f'error_graph{ice}')
         f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/graph.csv', 'w')
         for i in range(len(sol_run[0])):    
             f.writelines(f'{sol_run[0][i]}   {y[i]}\n')
+        f.close()
+        f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/exp_pts', 'w')
+        for i in exp_pts:    
+            f.writelines(f'{i}\n')
+        f.close()
+        f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/sol_pts', 'w')
+        for i in sol_run[1]:    
+            f.writelines(f'{i}\n')
         f.close()
         #plt.show()
     return loss
