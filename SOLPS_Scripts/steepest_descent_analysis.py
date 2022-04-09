@@ -123,7 +123,7 @@ def Further_Steps(func, params, run_step=2, lib = 3,Post_Analysis = True, exper_
     Points0 = InputfileParser(file='b2.transport.inputfile.vi')
     D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
     Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
-    mkdir = f'cp -r base Attempt_{run_step}'         
+    mkdir = f'cp -r /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/base /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}'         
     os.system(mkdir)
     WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/b2.transport.inputfile',points=Full_Points)
 
@@ -144,4 +144,4 @@ if __name__ == '__main__':
         f.close()
     elif trip == 'n':
         blep += 1
-        Further_Steps(DoubleGauss, guess_init, run_step=blep, alpha = loss_val, learn = learning_rate)  
+        Further_Steps(DoubleGauss, guess_init, run_step=blep)  
