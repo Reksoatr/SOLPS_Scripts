@@ -49,14 +49,19 @@ def error(y_true, y_predicted):
     return cost
 
 
-def Loss(exper_shot, sol_run, plot =False, ice=0):
+def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 3, run_step =1):
     ius = InterpolatedUnivariateSpline(exper_shot[0], exper_shot[1])
     exp_pts = point_finder(sol_run[0],ius, y_only = True)
     loss = error(exp_pts, sol_run[1])
     if plot == True:
+        y = np.abs(exp_pts-sol_run[0])/exp_pts
         plt.figure()
-        plt.plot(sol_run[0], np.abs(exp_pts-sol_run[0])/exp_pts )
+        plt.plot(sol_run[0],  y)
         plt.savefig(f'error_graph{ice}')
+        f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/graph.csv', 'w')
+        for i in range(len(sol_run[0])):    
+            f.writelines(f'{sol_run[0][i]}   {y[i]}\n')
+        f.close()
         #plt.show()
     return loss
 
@@ -95,7 +100,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
         R_sep = PsiN2R(eq, 1.0)
         for R in Attempt[0]:
             R = R2PsiN(eq,R+R_sep)
-        l = Loss(exp_data, Attempt, plot=True)
+        l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
         print(l)
         b = alpha-l
         if run_step == 1:
