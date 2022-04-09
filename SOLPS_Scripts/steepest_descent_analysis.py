@@ -132,7 +132,7 @@ if __name__ == '__main__':
     blep = input('What Iteration is this?')
     trip = input('Is This Data Analysis?')
     blep =int(blep)
-    losm = np.loadtxt('params.txt')
+    losm = np.loadtxt('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_3/params.txt')
     guess_init = [losm[0], losm[1],losm[2],losm[3], losm[4]]
     loss_val = losm[5]
     learning_rate = losm[6]
