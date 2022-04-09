@@ -114,7 +114,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
         Attempt[0]=new_R
         l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
         print(l)
-        b = (l-alpha)
+        b = alpha-l
         if run_step == 1:
             b= l
 
@@ -154,15 +154,16 @@ if __name__ == '__main__':
     #Single_Guess(DoubleGauss, guess_init, run_step =1)
     blep = input('What Iteration is this?')
     trip = input('Is This Data Analysis?')
+    libr = int(input('What Directory?'))
     blep =int(blep)
-    losm = np.loadtxt('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_4/params.txt')
+    losm = np.loadtxt(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{libr}/params.txt')
     guess_init = [losm[0], losm[1],losm[2],losm[3], losm[4]]
     loss_val = losm[5]
     if  trip == 'y':
-        guess_init, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
+        guess_init, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val,lib=libr)
         f = open('params.txt', 'w')
         f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]} {guess_init[4]}')
         f.writelines(f' {loss_val}')
         f.close()
     elif trip == 'n':
-        Further_Steps(DoubleGauss, guess_init, run_step=blep)  
+        Further_Steps(DoubleGauss, guess_init, run_step=blep, lib = libr)  
