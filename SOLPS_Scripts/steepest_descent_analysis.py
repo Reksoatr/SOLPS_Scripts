@@ -142,7 +142,7 @@ if __name__ == '__main__':
         guess_init, loss_val, learning_rate = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val, learn=learning_rate)
         f = open('params.txt', 'w')
         f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]} {guess_init[4]}')
-        f.writelines(f'{loss_val} {learning_rate}')
+        f.writelines(f' {loss_val} {learning_rate}')
         f.close()
     elif trip == 'n':
         Further_Steps(DoubleGauss, guess_init, run_step=blep)  
