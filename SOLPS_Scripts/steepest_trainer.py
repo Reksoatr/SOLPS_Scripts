@@ -147,7 +147,7 @@ if __name__ == '__main__':
     trip = input('Is This Data Analysis?')
     libr = int(input('What Directory?'))
     blep =int(blep)
-    losm = np.loadtxt('/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{libr}/params.txt')
+    losm = np.loadtxt(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{libr}/params.txt')
     guess_init = [losm[0], losm[1],losm[2],losm[3]]
     loss_val = losm[4]
     if  trip == 'y':
