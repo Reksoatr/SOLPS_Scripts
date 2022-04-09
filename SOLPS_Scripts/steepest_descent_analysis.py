@@ -66,10 +66,6 @@ def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 3, run_step =1):
         for i in exp_pts:    
             f.writelines(f'{i}\n')
         f.close()
-        f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/sol_pts', 'w')
-        for i in sol_run[1]:    
-            f.writelines(f'{i}\n')
-        f.close()
         #plt.show()
     return loss
 
@@ -107,8 +103,11 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
         Attempt = Attempt.T
         R_sep = PsiN2R(eq, 1.0)
         for R in Attempt[0]:
-            R = R2PsiN(eq,R+R_sep)
-        
+            R = R2PsiN(eq,R)
+        f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/sol_pts', 'w')
+        for i in R:    
+            f.writelines(f'{i}\n')
+        f.close()
         l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
         print(l)
         b = alpha-l
