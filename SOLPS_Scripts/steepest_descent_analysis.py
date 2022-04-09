@@ -98,7 +98,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
         l = Loss(exp_data, Attempt, plot=True)
         print(l)
         b = l-alpha
-        if run_step = 1:
+        if run_step == 1:
             b= l
 
     print('Difference in loss is:', b)
