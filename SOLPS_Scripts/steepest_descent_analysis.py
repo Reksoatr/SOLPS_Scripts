@@ -112,12 +112,12 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
         print('guess too far')
     elif b<0:
         for j in params:
-            params_news.append(float(j)-float(j)*l)
+            params_news.append(float(j)+float(j)*b)
     elif b>0:
         for j in params:
-            params_news.append(float(j)+float(j)*l)
+            params_news.append(float(j)+float(j)*b)
     f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/error.csv', 'a')
-    f.writelines(f'{run_step}   {l}')
+    f.writelines(f'\n{run_step}   {l}')
     f.close()
     new_loss = l
     print(params_news)
