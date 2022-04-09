@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Apr  8 18:30:32 2022
+Created on Sat Apr  9 01:39:22 2022
 
-@author: Jameson Crouse
+@author: james
 """
+
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -66,10 +67,6 @@ def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 3, run_step =1):
         for i in exp_pts:    
             f.writelines(f'{i}\n')
         f.close()
-        f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/sol_pts', 'w')
-        for i in sol_run[1]:    
-            f.writelines(f'{i}\n')
-        f.close()
         #plt.show()
     return loss
 
@@ -106,46 +103,14 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
     if len(Attempt) != 0:
         Attempt = Attempt.T
         R_sep = PsiN2R(eq, 1.0)
+        print(R_sep)
         for R in Attempt[0]:
             R = R2PsiN(eq,R+R_sep)
-        
-        l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
-        print(l)
-        b = alpha-l
-        if run_step == 1:
-            b= l
+        f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/sol_pts', 'w')
+        for i in R:    
+            f.writelines(f'{i}\n')
+        f.close()
 
-    print('Difference in loss is:', b)
-    if b==0:
-        params_news = params
-        print('guess too far')
-    elif b<0:
-        for j in params:
-            params_news.append(float(j)+float(j)*b)
-    elif b>0:
-        for j in params:
-            params_news.append(float(j)+float(j)*b)
-    f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/error.csv', 'a')
-    f.writelines(f'\n{run_step}   {l}')
-    f.close()
-    new_loss = l
-    print(params_news)
-    os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}')
-    return params_news, new_loss
-
-def Further_Steps(func, params, run_step=2, lib = 3,Post_Analysis = True, exper_shot = None, gfilen = None):
-    print(params)
-    x_1 = np.linspace(-.12, -.03, 5)
-    x_2 = np.linspace(-.02, .02, 10)
-    x = np.append(x_1, x_2)
-    #os.system('cp base/b2fstate base/b2fstati')
-    diff = func(x, a = params[0], b= params[1], c = params[2],d = params[3], e = params[4])
-    Points0 = InputfileParser(file='b2.transport.inputfile.vi')
-    D_Points={'1' : np.array([x,diff])} #This is where the optimization method comes in
-    Full_Points={'1':D_Points['1'],'3':Points0['3'],'4':Points0['4']}
-    mkdir = f'cp -r /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/base /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}'         
-    os.system(mkdir)
-    WriteInputfile(file=f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/b2.transport.inputfile',points=Full_Points)
 
 if __name__ == '__main__':
     #Single_Guess(DoubleGauss, guess_init, run_step =1)
@@ -161,5 +126,3 @@ if __name__ == '__main__':
         f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]} {guess_init[4]}')
         f.writelines(f' {loss_val}')
         f.close()
-    elif trip == 'n':
-        Further_Steps(DoubleGauss, guess_init, run_step=blep)  
