@@ -143,5 +143,6 @@ if __name__ == '__main__':
         f.writelines(f'{loss_val} {learning_rate}')
         f.close()
     elif trip == 'n':
-        blep += 1
+        if blep !=1:
+            blep += 1
         Further_Steps(DoubleGauss, guess_init, run_step=blep)  
