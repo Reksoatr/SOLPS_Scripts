@@ -114,6 +114,8 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
             new_R.append(float(B))
         print('New')
         print(new_R)
+        Attempt[0]=new_R
+        print(Attempt[0])
         f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/sol_pts', 'w')
         for i in Attempt:    
             f.writelines(f'{i}\n')
