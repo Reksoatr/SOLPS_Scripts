@@ -121,4 +121,4 @@ if __name__ == '__main__':
     guess_init = [losm[0], losm[1],losm[2],losm[3], losm[4]]
     loss_val = losm[5]
     if  trip == 'y':
-        Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val)
+        Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/g027205.00275_efitpp', run_step = blep,alpha=loss_val)
