@@ -130,7 +130,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
         print(l)
         b = (alpha-l)*4
         if run_step == 1:
-            b= l/3
+            b= .4
 
     print('Difference in loss is:', b)
     if b==0:

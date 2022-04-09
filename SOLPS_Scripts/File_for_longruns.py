@@ -2,7 +2,7 @@ import os
 #need to fix the script later
 def batch_extended(lib, start, end, alg):
     f = open('batch_use_extended', 'w')
-    f.writelines(['#!/bin/tcsh','\n#PBS -l nodes=1:hima:ppn=1','\n#PBS -l walltime=24:00:00','\n#PBS -N LARGE_T','\n#PBS -j oe','\n','\nenv','\n',f'\ncd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/'])
+    f.writelines(['#!/bin/tcsh','\n#PBS -l nodes=1:hima:ppn=1','\n#PBS -l walltime=24:00:00',f'\n#PBS -N LARGE_{lib}','\n#PBS -j oe','\n','\nenv','\n',f'\ncd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/'])
     f.writelines([f'\npython3 -m {alg} <<Inputblock','\n1','\nn',f'\n{lib}', '\nInputblock'])
     f.writelines([f'\ncd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_1\n','\nb2run b2mn > run.log'])
     f.writelines([f'\ncd /sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}'])
