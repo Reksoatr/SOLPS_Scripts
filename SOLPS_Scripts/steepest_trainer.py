@@ -13,7 +13,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 import os
 from equilibrium import equilibrium
 import csv
-
+#a=1.4 b=2.5
 def Trainer(x, a=1.5, b=3, c=.004,d=.3):
     y = -a*(np.exp(-(x-.005)**2/c))-b*(x)*np.exp(-x**2/.01)+a+d
     return y
