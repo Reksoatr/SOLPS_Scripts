@@ -110,6 +110,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
         for R in Attempt[0]:
             print('step')
             A = R + R_sep
+            B= R2PsiN(eq,A)
             new_R.append(A)
         print('New')
         print(new_R)
