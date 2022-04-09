@@ -14,5 +14,5 @@ def batch_extended(lib, start, end):
     f.close()
 if __name__ == '__main__':
     blip = 3
-    batch_extended(blip, 2,15)
+    batch_extended(blip, 2,18)
     os.system('qsub batch_use_extended')
