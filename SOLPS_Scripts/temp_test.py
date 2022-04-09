@@ -111,7 +111,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 3, alpha =.3, run_step = 
             print('step')
             A = R + R_sep
             B= R2PsiN(eq,A)
-            new_R.append(B)
+            new_R.append(float(B))
         print('New')
         print(new_R)
         f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/sol_pts', 'w')
