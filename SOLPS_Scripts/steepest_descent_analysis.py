@@ -112,14 +112,14 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
             B= R2PsiN(eq,A)
             new_R.append(float(B))
         Attempt[0]=new_R
-        new_R = []
-        for R in Attempt[0]:
-            A = R + R_sep
-            B= R2PsiN(eq,A)
-            new_R.append(float(B))
-        Attempt[0]=new_R
         Attempt = Attempt.T
         Att_new = []
+        for R in Attempt:
+            if R[0] > STARTING:
+                if R[0] < ENDING:
+                    Att_new.append(R)
+        attempt = np.array(Att_new)
+        Attempt = attempt.T
         for R in Attempt:
             if R[0] > STARTING:
                 if R[0] < ENDING:
@@ -130,7 +130,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
         print(l)
         b = (alpha-l)*10
         if run_step == 1:
-            b= -.4
+            b= .4
 
     print('Difference in loss is:', b)
     if b==0:
