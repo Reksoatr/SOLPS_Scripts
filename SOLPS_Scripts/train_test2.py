@@ -122,6 +122,8 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 
     print('Difference in loss is:', b)
     if b==0:
         params_news = params
+        b = .1
+        new_dire = 1
         print('guess too far')
     elif b<0:
         if dire == 1 or 1.0:
