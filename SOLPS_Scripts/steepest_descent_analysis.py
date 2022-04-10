@@ -129,6 +129,8 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
         l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
         print(l)
         b = (alpha-l)*10
+        while np.abs(b) > 1:
+            b = b/10
         while np.abs(b) < .1:
             b = b*10
         if np.abs(b) > .7:
