@@ -131,7 +131,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
         b = (alpha-l)*10
         while np.abs(b) < .1:
             b = b*10
-        if np.abs(b) > .5:
+        if np.abs(b) > .7:
             b = b/2
         if run_step == 1:
             b= .4
