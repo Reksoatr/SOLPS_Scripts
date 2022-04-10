@@ -138,18 +138,18 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
         print('guess too far')
     elif b<0:
         new_dire = -1*dire
-        if dire == 1:
+        if dire == 1 or 1.0:
             for j in params:
                 params_news.append(float(j)+float(j)*b)
-        elif dire == -1:
+        elif dire == -1 or -1.0:
             for j in params:
                 params_news.append(float(j)-float(j)*b)
     elif b>0:
         new_dire = dire
-        if dire == 1:
+        if dire == 1 or 1.0:
             for j in params:
                 params_news.append(float(j)+float(j)*b)
-        elif dire == -1:
+        elif dire == -1 or -1.0:
             for j in params:
                 params_news.append(float(j)-float(j)*b)
     f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/error.csv', 'a')
