@@ -113,13 +113,13 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 
         Attempt = attempt.T
         l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
         print(l)
-        b = (alpha-l)*40
-        #while np.abs(b) < .1:
-        #    b = b*10
-        #if np.abs(b) > .7:
-        #    b = b/2
-        #if run_step == 1:
-        #    b= .4
+        b = (alpha-l)
+        while np.abs(b) < .1:
+            b = b*10
+        if np.abs(b) > .7:
+            b = b/2
+        if run_step == 1:
+            b= .4
 
     print('Difference in loss is:', b)
     if b==0:
