@@ -14,11 +14,13 @@ def batch_extended(lib, start, end, alg):
     f.close()
 if __name__ == '__main__':
     blip = int(input('Which Directory Number?'))
-    functtt = input('T (Trainer) or D (DoubleGauss)')
+    functtt = input('T (Trainer) or D (DoubleGauss) T2')
     if functtt == 'T':
         batch_extended(blip, 1,25,alg='steepest_trainer')        
     elif functtt == 'D':
         batch_extended(blip, 1,25,alg='steepest_descent_analysis')
+    elif functtt == 'T2':
+        batch_extended(blip, 1,25,alg='train_test2')        
     else:
         print('Invalid input')
     os.system('qsub batch_use_extended')
