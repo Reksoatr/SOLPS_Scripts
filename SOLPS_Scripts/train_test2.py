@@ -116,6 +116,9 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 
         b = (alpha-l)*5
         while np.abs(b) > 1:
             b = b/10
+    if run_step==1:
+        b = .4
+        dire = np.sign(b)
     print('Difference in loss is:', b)
     if b==0:
         params_news = params
@@ -139,7 +142,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 
     if run_step == 1:
         new_dire = np.sign(b)
     f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/error.csv', 'a')
-    f.writelines(f'\n{run_step}   {l}')
+    f.writelines(f'\n{run_step}   {l} {b}')
     f.close()
     new_loss = l
     print(params_news)
