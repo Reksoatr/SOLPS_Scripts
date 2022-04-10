@@ -66,7 +66,7 @@ def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 5, run_step =1):
 
 
 
-def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 1, steps = 4):
+def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 1, steps = 4, dire = 1):
     '''Post Step Analysis using a comparison of a given experimental shot
     to analyize loss and provided desired run for further optimization.'''
 #    n = len(params)
@@ -115,25 +115,35 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 
         print(l)
         b = (alpha-l)*5
         if run_step == 1:
-            b= .5
+            b= .4
 
     print('Difference in loss is:', b)
     if b==0:
         params_news = params
         print('guess too far')
     elif b<0:
-        for j in params:
-            params_news.append(float(j)+float(j)*b)
+        new_dire = -1*dire
+        if dire == 1:
+            for j in params:
+                params_news.append(float(j)+float(j)*b)
+        elif dire == -1:
+            for j in params:
+                params_news.append(float(j)-float(j)*b)
     elif b>0:
-        for j in params:
-            params_news.append(float(j)+float(j)*b)
+        new_dire = dire
+        if dire == 1:
+            for j in params:
+                params_news.append(float(j)+float(j)*b)
+        elif dire == -1:
+            for j in params:
+                params_news.append(float(j)-float(j)*b)
     f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/error.csv', 'a')
     f.writelines(f'\n{run_step}   {l}')
     f.close()
     new_loss = l
     print(params_news)
     os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}')
-    return params_news, new_loss
+    return params_news, new_loss, new_dire
 
 def Further_Steps(func, params, run_step=2, lib = 5,Post_Analysis = True, exper_shot = None, gfilen = None):
     print(params)
@@ -158,11 +168,12 @@ if __name__ == '__main__':
     losm = np.loadtxt(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{libr}/params.txt')
     guess_init = [losm[0], losm[1],losm[2],losm[3]]
     loss_val = losm[4]
+    direction = losm[5]
     if  trip == 'y':
-        guess_init, loss_val = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val, lib=libr)
+        guess_init, loss_val, direction = Further_Analysis(guess_init, '/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_03/yag.txt', 'g027205.00275_efitpp', run_step = blep,alpha=loss_val, lib=libr, dire = direction)
         f = open('params.txt', 'w')
         f.writelines(f'{guess_init[0]} {guess_init[1]} {guess_init[2]} {guess_init[3]}')
-        f.writelines(f' {loss_val}')
+        f.writelines(f' {loss_val} {direction}')
         f.close()
     elif trip == 'n':
         Further_Steps(Trainer, guess_init, run_step=blep, lib=libr)  
