@@ -45,7 +45,7 @@ def point_finder(x, func, y_only = False):
 def error(y_true, y_predicted):
      
     # Calculating the loss or cost
-    cost = (np.sum(np.abs(y_true-y_predicted)/y_true))/100#/len(y_true)
+    cost = np.sum((np.abs(y_true-y_predicted)/y_true))/len(y_true)
     return cost
 
 
@@ -54,7 +54,7 @@ def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 4, run_step =1):
     exp_pts = point_finder(sol_run[0],ius, y_only = True)
     loss = error(exp_pts, sol_run[1])
     if plot == True:
-        y = np.abs(exp_pts-sol_run[1])/exp_pts
+        y = (exp_pts-sol_run[1])/exp_pts
         plt.figure()
         plt.plot(sol_run[0],  y)
         plt.savefig(f'error_graph{ice}')
@@ -81,12 +81,12 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
 #    n = len(params)
     eq = equilibrium(gfile=gfilen)
     STARTING = .75
-    ENDING = 1.04
+    ENDING = 1.02
     exp_data = np.loadtxt(exper_shot, usecols = (0,1))
     exp_new = []
     for R in exp_data:
         if R[0] > STARTING-.1:
-            if R[0] < ENDING+.02:
+            if R[0] < ENDING+.04:
                 exp_new.append(R)
     exp_Data = np.array(exp_new)
     exp_data = exp_Data.T
@@ -128,9 +128,9 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
         Attempt = attempt.T
         l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
         print(l)
-        b = (alpha-l)*7
+        b = (alpha-l)
         if run_step == 1:
-            b= .4
+            b= -.4
 
     print('Difference in loss is:', b)
     if b==0:
@@ -152,6 +152,8 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
         elif dire == -1 or -1.0:
             for j in params:
                 params_news.append(float(j)-float(j)*b)
+    if run_step == 1:
+        new_dire = np.sign(b)
     f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/error.csv', 'a')
     f.writelines(f'\n{run_step}   {l}')
     f.close()
