@@ -141,13 +141,13 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 4, alpha =.3, run_step = 
         params_news = params
         print('guess too far')
     elif b<0:
-        new_dire = -1*dire
         if dire == 1 or 1.0:
             for j in params:
                 params_news.append(float(j)+float(j)*b)
         elif dire == -1 or -1.0:
             for j in params:
                 params_news.append(float(j)-float(j)*b)
+        new_dire = -1*dire
     elif b>0:
         new_dire = dire
         if dire == 1 or 1.0:
