@@ -120,8 +120,26 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
         if len(Attempt) != 0:
             Attempt = Attempt.T
             R_sep = PsiN2R(eq, 1.0)
+            new_R = []
             for R in Attempt[0]:
-                R = R2PsiN(eq,R+R_sep)
+                A = R + R_sep
+                B= R2PsiN(eq,A)
+                new_R.append(float(B))
+            Attempt[0]=new_R
+            Attempt = Attempt.T
+            Att_new = []
+            for R in Attempt:
+                if R[0] > STARTING:
+                    if R[0] < ENDING:
+                        Att_new.append(R)
+            attempt = np.array(Att_new)
+            Attempt = attempt.T
+            for R in Attempt:
+                if R[0] > STARTING:
+                    if R[0] < ENDING:
+                        Att_new.append(R)
+            attempt = np.array(Att_new)
+            Attempt = attempt.T
             l = Loss(exp_data, Attempt, plot=True,ice=i_ct)
             loss_pts.append([l,i[0],i[1], i[2], i[3], i_ct])
     b = np.amin(loss_pts, axis = 0)
@@ -138,10 +156,9 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 22, alpha =.3, run_step =
     elif b[0] == loss_pts[2][0]:
         params_news = [loss_pts[2][1], loss_pts[2][2], loss_pts[2][3], loss_pts[2][4]]
         print('go left')
-    f = open(f'error{run_step}.csv', 'w')
+    f = open(f'error.csv', 'w')
     f.writelines(f'{run_step}   {b}')
     f.close()
-    new_loss = b[0]
     print(params_news)
     os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/')
     return params_news, new_loss, new_step
