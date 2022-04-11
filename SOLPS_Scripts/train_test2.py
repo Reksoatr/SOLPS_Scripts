@@ -9,7 +9,7 @@ import scipy as sp
 import matplotlib.pyplot as plt
 import re
 from B2TransportParser import InputfileParser, Generate, WriteInputfile, batch_writer, R2PsiN, PsiN2R
-from scipy.interpolate import InterpolatedUnivariateSpline
+from scipy.interpolate import interp1d
 import os
 from equilibrium import equilibrium
 import csv
@@ -41,7 +41,7 @@ def error(y_true, y_predicted):
 
 
 def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 5, run_step =1):
-    ius = InterpolatedUnivariateSpline(exper_shot[0], exper_shot[1])
+    ius = interp1d(exper_shot[0], exper_shot[1])
     exp_pts = point_finder(sol_run[0],ius, y_only = True)
     loss = error(exp_pts, sol_run[1])
     if plot == True:
@@ -72,12 +72,12 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 
 #    n = len(params)
     eq = equilibrium(gfile=gfilen)
     STARTING = .75
-    ENDING = 1.02
+    ENDING = 1.05
     exp_data = np.loadtxt(exper_shot, usecols = (0,1))
     exp_new = []
     for R in exp_data:
         if R[0] > STARTING-.1:
-            if R[0] < ENDING+.04:
+            if R[0] < ENDING+.01:
                 exp_new.append(R)
     exp_Data = np.array(exp_new)
     exp_data = exp_Data.T
@@ -113,7 +113,7 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 
         Attempt = attempt.T
         l = Loss(exp_data, Attempt, plot=True, ice = run_step, lib = lib, run_step=run_step)
         print(l)
-        b = (alpha-l)*5
+        b = (alpha-l)*40/np.sqrt(run_step)
         while np.abs(b) > 1:
             b = b/10
     if run_step==1:
