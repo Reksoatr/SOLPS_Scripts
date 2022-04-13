@@ -8,7 +8,7 @@ Created on Mon Oct 28 12:59:44 2019
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import loadmat
-from VesselPlotterNew import SOLPSPLOT
+from SOLPS_Plotter import SOLPSPLOT
 from TOOLS import SET_WDIR
 
 Shot012=1
