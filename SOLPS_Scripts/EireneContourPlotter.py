@@ -15,7 +15,7 @@ from matplotlib.path import Path
 import matplotlib.gridspec as gridspec
 from matplotlib.widgets import TextBox, Button, Slider
 from scipy.interpolate import griddata
-#from VesselPlotterNew import SOLPSPLOT
+#from SOLPS_Plotter import SOLPSPLOT
 from PARAMDICT import EireneDict
 
 Shot='1100305023'

@@ -13,7 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import equilibrium as eq
 from TOOLS import SET_WDIR, gaussian_shading
-from VesselPlotterNew import SOLPSPLOT
+from SOLPS_Plotter import SOLPSPLOT
 from B2TransportParser import R2PsiN, PsiN2R
 
 BASE,TOP = SET_WDIR('','')

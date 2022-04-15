@@ -12,7 +12,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-from VesselPlotterNew import SOLPSPLOT
+from SOLPS_Plotter import SOLPSPLOT
 from textwrap import wrap
 
 def SOLPSDataSpread(Shot, Attempt):

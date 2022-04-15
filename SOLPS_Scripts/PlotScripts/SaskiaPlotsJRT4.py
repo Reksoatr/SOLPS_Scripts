@@ -6,7 +6,7 @@ Created on Thu Sep 12 14:33:38 2019
 
 Saskia's plots, JRT 4
 """
-from VesselPlotterNew import SOLPSPLOT
+from SOLPS_Plotter import SOLPSPLOT
 import matplotlib.pyplot as plt
 import numpy as np
 

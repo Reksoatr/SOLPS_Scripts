@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from scipy.io import loadmat
-from VesselPlotterNew import SOLPSPLOT
+from SOLPS_Plotter import SOLPSPLOT
 from TOOLS import SET_WDIR
 
 DEV = 'cmod'

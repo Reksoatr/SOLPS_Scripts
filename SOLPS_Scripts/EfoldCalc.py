@@ -9,7 +9,7 @@ import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
 from matplotlib import colors, cm
-from VesselPlotterNew import SOLPSPLOT
+from SOLPS_Plotter import SOLPSPLOT
 
 plt.rc('font',size=25)
 plt.rc('lines',linewidth=5,markersize=15)

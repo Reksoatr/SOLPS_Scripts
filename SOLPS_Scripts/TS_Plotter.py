@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.widgets import Slider,TextBox,Button
 from TOOLS import SET_WDIR
-from VesselPlotterNew import SOLPSPLOT
+from SOLPS_Plotter import SOLPSPLOT
 import numpy as np
 import pickle as pkl
 import sys

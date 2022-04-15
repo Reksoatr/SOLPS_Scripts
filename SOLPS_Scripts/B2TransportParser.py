@@ -2,7 +2,7 @@
 """
 Created on Fri Jan 28 14:34:44 2022
 
-@author: 18313
+@author: Richard Reksoatmodjo and Jameson Crouse
 """
 
 import re

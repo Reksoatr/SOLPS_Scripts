@@ -4,7 +4,7 @@ Created on Tue Feb 11 13:14:05 2020
 
 @author: Rmreksoatmodjo
 """
-from VesselPlotterNew import SOLPSPLOT
+from SOLPS_Plotter import SOLPSPLOT
 import numpy as np
 import matplotlib.pyplot as plt
 

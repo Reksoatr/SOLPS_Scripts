@@ -12,7 +12,7 @@ from matplotlib.legend_handler import HandlerLine2D, HandlerTuple
 import json
 from TOOLS import SET_WDIR
 import numpy as np
-#from VesselPlotterNew import SOLPSPLOT
+#from SOLPS_Plotter import SOLPSPLOT
 
 BASEDRT, TOPDRT = SET_WDIR('','')
 

@@ -5,7 +5,7 @@ Created on Wed Nov 13 16:15:42 2019
 @author: rmreksoatmodjo
 """
 
-from VesselPlotterNew import SOLPSPLOT
+from SOLPS_Plotter import SOLPSPLOT
 from TOOLS import TANH
 from TOOLS import EXPFIT
 import numpy as np
