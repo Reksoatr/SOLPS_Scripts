@@ -45,7 +45,7 @@ def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 5, run_step =1):
     exp_pts = point_finder(sol_run[0],ius, y_only = True)
     loss = error(exp_pts, sol_run[1])
     if plot == True:
-        y = (exp_pts-sol_run[1])/exp_pts
+        y = np.abs(exp_pts-sol_run[1])/exp_pts
         plt.figure()
         plt.plot(sol_run[0],  y)
         plt.savefig(f'error_graph{ice}')
