@@ -351,6 +351,16 @@ class SOLPSPLOT(object):
                 self.ExpDict['TemidAvg'] = TemidAvg
                 self.ExpDict['ErrTe'] = ErrTe        
         
+        else:
+            
+            BASEDRT = '{}/{}/{}'.format(BASEDRT,DEV,Shot)
+            GFILE = glob.glob('{}/{}/g{}*'.format(TOPDRT,DEV,Shot))
+            print(GFILE)
+            GF = eq.equilibrium(gfile=GFILE[-1])
+            if EXP:
+                ExpFile = Shot
+                ExpData = loadmat('{}/{}.mat'.format(TOPDRT,DEV,ExpFile))
+            
         #Get dimensions of simulation grid 
         
         if AVG is True and 'AVG' not in Attempts:
@@ -507,12 +517,17 @@ class SOLPSPLOT(object):
         self.RadCoords['XMin'] = XMin
         self.RadCoords['YYLoc'] = YYLoc        
         self.RadCoords['PsinLoc'] = PsinLoc
-        self.RadCoords['PsinAvg'] = PsinAvg
         self.RadCoords['RadLoc'] = RadLoc
         self.RadCoords['VertLoc'] = VertLoc
         self.PolVec = PolVec
-        if 'd3d' not in Shot:
-                self.RadCoords['RmidAvg'] = RmidAvg
+        if EXP:
+            self.RadCoords['PsinAvg'] = PsinAvg
+            if 'd3d' not in Shot:
+                    self.RadCoords['RmidAvg'] = RmidAvg
+        else:
+            self.RadCoords['PsinAvg'] = []
+            self.RadCoords['RmidAvg'] = []
+        
                 
     def GetRadCoords(self,RADC, Offset=[0,0]):
         #Separate method to handle radial coordinate switching

@@ -22,6 +22,9 @@ def SET_WDIR(BASEDRT,TOPDRT): #Function to set correct Working Directory Path de
         elif os.environ['USERNAME'] == 'Richard':
             BASEDRT = r"C:/Users/Richard/WMGDrive/College of William and Mary/Research/SOLPS Stuff/SOLPS_2D_prof/"
             TOPDRT = r"C:/Users/Richard/WMGDrive/College of William and Mary/Research/SOLPS Stuff/"
+        elif os.environ['USERNAME'] == 'Yi-Cheng':
+            BASEDRT = r"C:/Users/Yi-Cheng/Documents/SOLPS_Data/Simulation_Data"
+            TOPDRT = r"C:/Users/Yi-Cheng/Documents/SOLPS_Data/Experimental_Data"
     else:
         BASEDRT=BASEDRT
         TOPDRT=TOPDRT
