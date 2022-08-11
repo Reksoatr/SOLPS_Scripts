@@ -20,6 +20,7 @@ BASE,TOP = SET_WDIR('','')
 Plot= True
 RADC='psin' #'radial' #
 EMISS='tomo' #'tree'#
+AN=3
 LCFS_Te=[83,90,93]
 ATTEMPTS308=['14Rf0.35','14Rf0.7','14Rf1.05']
 ATTEMPTS108=['18Rf0.3','18Rf0.6','18Rf0.9']
@@ -149,7 +150,9 @@ if Plot:
     
     #fig308,ax308=plt.subplots(5,1,sharex=True)
     #fig108,ax108=plt.subplots(5,1,sharex=True)
-    fig305,ax305=plt.subplots(6,3,sharex=True,sharey='row')
+    fig305,ax305=plt.subplots(6,AN,sharex=True,sharey='row')
+    
+    #for p in range(AN):
     
     #L-mode plots
     solps308.RadProf('LyaEmissW',RADC=RADC,AX=ax305[1,0], Publish=['$\pm50\%$','Base',None])
