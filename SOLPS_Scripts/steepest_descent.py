@@ -14,15 +14,28 @@ import os
 from equilibrium import equilibrium
 import csv
 #a=1.4 b=2.5
+
+#Negative Gaussian used as our model for the D profile
+#a is height of the gaussian, b is a downward slope for D
+#c is width and d is bottom point of the gaussian
 def Trainer(x, a=1.5, b=3, c=.004,d=.3):
-    y = -a*(np.exp(-(x-.005)**2/c))-b*(x)*np.exp(-x**2/.01)+a+d
+    y = a*(1-np.exp(-(x-.005)**2/c))-b*(x)*np.exp(-x**2/.01)+d
     return y
 
 #joint methods in SOLPS
 #compare input D to output D
-# look at individual error plot, decide if certain areas need increased weight
-#gets points at the same location as true values
-def point_finder(x, func, y_only = False):
+#NEEDED:look at individual error plot, decide if certain areas need increased weight
+
+
+
+def point_finder(x, func=Trainer, y_only = False):
+'''
+Point_finder gets points at the same location as true values
+variables:
+x: x-intercepts for experimental files
+func: function being used for optimization
+y_only: only returns y values if true (for troubleshooting)
+'''
     func_val = []
     for i in x:
         if y_only == False:
@@ -34,19 +47,32 @@ def point_finder(x, func, y_only = False):
 
 
 def error(y_true, y_predicted):
-     
-    # Calculating the loss or cost
+    ''' 
+Calculates the loss or cost between simulated and experimental values for the purposes
+of minimization.
+    '''
     cost = (np.sum(np.abs(y_true-y_predicted)/y_true))/len(y_true)
     return cost
 
 
 def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 5, run_step =1):
+    '''
+The Loss function uses the error function to calculate loss and create an output plot
+for each SOLPS run.
+Variables:
+exper_shot: experimental shot data from file
+sol_run: SOLPS data for the run
+ice and run_step: SOLPS run attempt #
+lib: SOLPS library for all attempts
+    '''
     ius = interp1d(exper_shot[0], exper_shot[1])
     exp_pts = point_finder(sol_run[0],ius, y_only = True)
     loss = error(exp_pts, sol_run[1])
     if plot == True:
         y = np.abs(exp_pts-sol_run[1])/exp_pts
         plt.figure()
+        plt.xlabel('Normalized Coordinates $\Psi_n$')
+        plt.ylabel('Absolute Relative Error')
         plt.plot(sol_run[0],  y)
         plt.savefig(f'error_graph{ice}')
         f = open(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}/Attempt_{run_step}/graph.csv', 'w')
@@ -66,9 +92,19 @@ def Loss(exper_shot, sol_run, plot =False, ice=0, lib = 5, run_step =1):
 
 
 
-def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 1, steps = 4, dire = 1):
+def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 1, dire = 1):
     '''Post Step Analysis using a comparison of a given experimental shot
-    to analyize loss and provided desired run for further optimization.'''
+    to analyize loss and provided desired run for further optimization.
+VARIABLES:
+params: input parameters determined by comparing trainer to the base attempt, and then
+inputted through params.txt
+exper_shot: experimental shot datafile
+gfilen: gfile datafile
+lib: library number for these attempts
+alpha: training parameter
+run_step: specific attempt directory number
+dire: direction variable that lets the function know whether to guess left or right
+    '''
 #    n = len(params)
     eq = equilibrium(gfile=gfilen)
     STARTING = .75
@@ -151,8 +187,19 @@ def Further_Analysis(params, exper_shot, gfilen, lib = 5, alpha =.3, run_step = 
     os.chdir(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{lib}')
     return params_news, new_loss, new_dire
 
-def Further_Steps(func, params, run_step=2, lib = 5,Post_Analysis = True, exper_shot = None, gfilen = None):
+def Further_Steps(func, params, run_step=2, lib = 5, exper_shot = None, gfilen = None):
+    '''
+    Further_Steps creates attempt folders with new transportfiles.
+    VARIABLES:
+    func: trainer function
+    params: parameters from params.txt file
+    run_step: attempt #
+    lib: library #
+    exper_shot: included in-case of further implementation with weights
+    gfilen: included in-case of further implementation
+    '''
     print(params)
+    #x_1 and x_2 setup 
     x_1 = np.linspace(-.12, -.03, 5)
     x_2 = np.linspace(-.02, .04, 10)
     x = np.append(x_1, x_2)
@@ -172,6 +219,7 @@ if __name__ == '__main__':
     libr = int(input('What Directory?'))
     blep =int(blep)
     losm = np.loadtxt(f'/sciclone/scr20/gjcrouse/SOLPS/runs/OPT_TEST_{libr}/params.txt')
+    #below is the initial guess that should be used from params.txt. If an initial
     guess_init = [losm[0], losm[1],losm[2],losm[3]]
     loss_val = losm[4]
     direction = losm[5]
