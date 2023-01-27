@@ -58,6 +58,8 @@ class SOLPSPLOT(object):
     XDIM = 98 > Dimension of computational grid in the x (poloidal) direction
     YDIM = 38 > Dimension of computational grid in the y (radial) direction
     CoreBound = [24,71] > X-coordinate grid cell numbers that define the [left, right] bounds of Core Region
+    CMAP = cm.viridis > Colormap used for 2D Contour Maps
+    Colors = None > Specific colors to color each contour level of a contour map
     Publish = [] > List of strings to use in legends of publication-quality plots; if not [], changes plotting rc.params 
     Markers = True > Plot separatrix, outer midplane, and/or inner midplane marker line
     PlotScheme = [] > List of matplotlib plot style flags for line plots; must either be empty or a list of strings as long as the number of Attempts    
@@ -69,7 +71,7 @@ class SOLPSPLOT(object):
     PolSlc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
     SURF = 20 > Same purpose as PolSlc
     GEO = True > Map Contour to Vessel Geometry; if False, plots on rectangular grid     
-    LVN = 100 > Number of colorbar levels for contour plots
+    LVN = 100 > Number of colorbar levels for contour plots or List [] of specific contour levels
     DIVREG = True > Include Divertor Region Data (May cause loss of logarithmic resolution)   
     SAVE = False > Save plot to a .png file 
     SUBTRACT = False > For a series of Attempts, subtract the matrix data of each Attempt from the first declared Attempt, to compare difference 
@@ -127,6 +129,8 @@ class SOLPSPLOT(object):
                      'XDIM' : 98,
                      'YDIM' : 38,
                      'CoreBound' : [24,71],
+                     'CMAP' : cm.viridis,
+                     'Colors' : None,
                      'Publish' : [],
                      'Markers' : True,
                      'PlotScheme' : [],
@@ -326,7 +330,7 @@ class SOLPSPLOT(object):
                 NeThresh = (ErrNe*2)/NemidAvg
     
                 for NT in range(len(NeThresh)):
-                    if np.abs(NeThresh[NT]) > 2.0:
+                    if np.abs(NeThresh[NT]) > 3.0:
                         NemidAvg[NT] = np.nan
                         ErrNe[NT] = np.nan
                 
@@ -341,7 +345,7 @@ class SOLPSPLOT(object):
                 TeThresh = (ErrTe*2)/TemidAvg
                 
                 for TT in range(len(TeThresh)):
-                    if np.abs(TeThresh[TT]) > 2.0:
+                    if np.abs(TeThresh[TT]) > 3.0:
                         TemidAvg[TT] = np.nan
                         ErrTe[TT] = np.nan
                 
@@ -610,6 +614,8 @@ class SOLPSPLOT(object):
         PolVec = self.PolVec
         Markers = kwargs['Markers']
         POLC = kwargs['POLC']
+        CMAP = kwargs['CMAP']
+        Colors = kwargs['Colors']
         Publish = kwargs['Publish']
         CoreBound = kwargs['CoreBound']
         DIVREG = kwargs['DIVREG']
@@ -652,7 +658,7 @@ class SOLPSPLOT(object):
                     pass
             
             #print('Beginning Plot Sequence')
-            if ContKW['AVG'] is True:
+            if ContKW['AVG']:
                 if 'AVG' not in Attempts:
                     print('Taking Average over Attempts')
                     Attempts.append('AVG')
@@ -662,13 +668,11 @@ class SOLPSPLOT(object):
                     VertLoc = self.RadCoords['VertLoc']
                 N=[-1]            
             
-            if ContKW['SUBTRACT'] is True:
+            if ContKW['SUBTRACT']:
                 CMAP = cm.seismic
                 for n in np.arange(1,N):
                     PARAM.values[:,:,n] = (PARAM.values[:,:,0]-PARAM[:,:,n])
                 PARAM.values[:,:,0] = PARAM.values[:,:,0]-PARAM[:,:,0]
-            else:
-                CMAP = cm.viridis
             
             # NEED TO FIX -> PREVENT PARAM FROM BEING OVERWRITTEN EVERY TIME
             
@@ -693,6 +697,8 @@ class SOLPSPLOT(object):
                 else:
                     lev_exp = np.arange(np.floor(np.log10(np.nanmin(PARAM.values)))-1, np.ceil(np.log10(np.nanmax(PARAM.values)))+1)
                 levs = np.power(10, lev_exp)   
+            elif type(ContKW['LVN'])==list:
+                levs=ContKW['LVN']
             else:
                 levs = np.linspace(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()),ContKW['LVN'])
                 if any(x<0 for x in levs):
@@ -704,22 +710,22 @@ class SOLPSPLOT(object):
                 else:
                     ax = ContKW['AX']
                 
-                if ContKW['GEO'] is True:
+                if ContKW['GEO']:
                     if ContKW['LOG10'] == 2:
-                        if DIVREG is True:
-                            IM2 = ax.contourf(RadLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],VertLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
-                            IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
+                        if DIVREG:
+                            IM2 = ax.contourf(RadLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],VertLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
+                            IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
 
-                        IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
+                        IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
                                             
                     else:
-                        if DIVREG is True:
-                            IM2 = ax.contourf(RadLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],VertLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP)
-                            IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP)
+                        if DIVREG:
+                            IM2 = ax.contourf(RadLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],VertLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,colors=Colors,cmap=CMAP)
+                            IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,colors=Colors,cmap=CMAP)
 
-                        IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,cmap=CMAP)                      
+                        IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,colors=Colors,cmap=CMAP)                      
                     
-                    if Markers is True:                 
+                    if Markers:                 
                         ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
                         ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=3)
                     
@@ -730,19 +736,19 @@ class SOLPSPLOT(object):
                     ax.set_aspect('equal')
                 else:
                     if ContKW['LOG10'] == 2:
-                        if DIVREG is True and POLC != 'theta':
-                            IM2 = ax.contourf(PP.loc[:,1:CoreBound[0]-1,Attempts[n]],RR.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
-                            IM3 = ax.contourf(PP.loc[:,CoreBound[1]+1:,Attempts[n]],RR.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP,norm=colors.LogNorm())
+                        if DIVREG and POLC != 'theta':
+                            IM2 = ax.contourf(PP.loc[:,1:CoreBound[0]-1,Attempts[n]],RR.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
+                            IM3 = ax.contourf(PP.loc[:,CoreBound[1]+1:,Attempts[n]],RR.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
                         
-                        IM1 = ax.contourf(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,norm=colors.LogNorm(),cmap=CMAP)
+                        IM1 = ax.contourf(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,norm=colors.LogNorm(),colors=Colors,cmap=CMAP)
                     else:
-                        if DIVREG is True and POLC != 'theta':
-                            IM2 = ax.contourf(PP.loc[:,1:CoreBound[0]-1,Attempts[n]],RR.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,cmap=CMAP)
-                            IM3 = ax.contourf(PP.loc[:,CoreBound[1]+1:,Attempts[n]],RR.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,cmap=CMAP)
+                        if DIVREG and POLC != 'theta':
+                            IM2 = ax.contourf(PP.loc[:,1:CoreBound[0]-1,Attempts[n]],RR.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,colors=Colors,cmap=CMAP)
+                            IM3 = ax.contourf(PP.loc[:,CoreBound[1]+1:,Attempts[n]],RR.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,colors=Colors,cmap=CMAP)
 
-                        IM1 = ax.contour(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,cmap=CMAP)
+                        IM1 = ax.contour(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,colors=Colors,cmap=CMAP)
                     
-                    if Markers is True:
+                    if Markers:
                         ax.plot(PP.loc[:,JXA,Attempts[n]],RR.loc[:,JXA,Attempts[n]],color='Orange',linewidth=3)                         #Outer Midplane
                         ax.plot(PP.loc[:,JXI,Attempts[n]],RR.loc[:,JXI,Attempts[n]],color='Red',linewidth=3)                            #Inner Midplane
                     
@@ -763,10 +769,10 @@ class SOLPSPLOT(object):
                 #a.set_yticklabels(['%.1f' % j for j in a.get_yticks()], fontsize='x-large')
                 #a.tick_params(labelsize=20)
                 
-                if ContKW['GRID'] is True:
+                if ContKW['GRID']:
                     plt.grid()
                 
-                if ContKW['SAVE'] is True:
+                if ContKW['SAVE']:
                     ImgName = 'Profiles/{}{}Contour.png'.format(Parameter, str(Attempts[n]))
                     plt.savefig(ImgName, bbox_inches='tight')
 

@@ -20,13 +20,13 @@ from PARAMDICT import EireneDict
 
 Shot='1100305023'
 Device='cmod'
-Attempt='24' # 15 for 1100308004, 18N for 1080416025, 24 for 1100305023 
+Attempt='24Rf2.0' # 15 for 1100308004, 18N for 1080416025, 24 for 1100305023 
 
 MeshID='024'  # 026 used for Shot025, 020 used for Shot012, 001 for d3d, 
               # 025 for 1100308004, 024 for 1100305023, 027 for 1080416025
 LOG=True
 Pressure=True
-Param='EDENM'
+Param='PDENA'
 B2=True
 B2_Param='Ne'
 

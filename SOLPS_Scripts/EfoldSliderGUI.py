@@ -30,8 +30,12 @@ PS=['.','.','.','.','.','x']
 
 plt.rc('lines',linewidth=5,markersize=15,markeredgewidth=2,linestyle='solid')
 
+EXPORTYPE='json' #Either 'json' or 'nc'
+
 ### Setting up Base Variables ###
+
 NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],DEV=DEV,EXP=False,AVG=False,PlotScheme='')#,ROOTSHOT='')
+
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
 SEP = 18
@@ -556,29 +560,34 @@ def export(event):
         '''
     print('Formatting data...')
     
-    efold_plot={}
-    efold_plot['gaslvl']=GasLvl
-    efold_plot['balloon']=Balloon
-    efold_plot['LFS'] = efold_adj_JXA_AVG
-    efold_plot['HFS'] = efold_adj_JXI_AVG
-    efold_plot['LFS_NeuDen'] = np.mean(NeuDen.PARAM['NeuDen'].loc[SEP,JXA-2:JXA+2,Attempt[-1]].values)
-    efold_plot['HFS_NeuDen'] = np.mean(NeuDen.PARAM['NeuDen'].loc[SEP,JXI-2:JXI+2,Attempt[-1]].values)
-    efold_plot['LFS_NePED'] = yparam_JXA_AVG[1]+yparam_JXA_AVG[3]
-    efold_plot['HFS_NePED'] = yparam_JXI_AVG[1]+yparam_JXI_AVG[3]
-    efold_plot['LFS_PedWidth'] = 2000*yparam_JXA_AVG[2]
-    efold_plot['HFS_PedWidth'] = 2000*yparam_JXI_AVG[2]
-    efold_plot['LFS Gradient_Scale_Length'] = ldparam1[JXA]
-    efold_plot['LFS_Gradient_Scale_Length_V2'] = ldparam2[JXA]
+    if EXPORTYPE=='json':
     
-    dXP_dict=dXP.to_dict()
-    
-    NeuDen_dict=NeuDen.PARAM['NeuDen'].loc[SEP,:,Attempt[-1]].to_dict()
-    
-    export_data=[efold_plot,efold,efold_adj,dXP_dict,NeuDen_dict,efold_adj_err]
-    
-    with open('{}efold_data_{}.json'.format(DRT,Attempt[0]),'w') as fp:
-        json.dump(export_data,fp,indent=2)
+        efold_plot={}
+        efold_plot['gaslvl']=GasLvl
+        efold_plot['balloon']=Balloon
+        efold_plot['LFS'] = efold_adj_JXA_AVG
+        efold_plot['HFS'] = efold_adj_JXI_AVG
+        efold_plot['LFS_NeuDen'] = np.mean(NeuDen.PARAM['NeuDen'].loc[SEP,JXA-2:JXA+2,Attempt[-1]].values)
+        efold_plot['HFS_NeuDen'] = np.mean(NeuDen.PARAM['NeuDen'].loc[SEP,JXI-2:JXI+2,Attempt[-1]].values)
+        efold_plot['LFS_NePED'] = yparam_JXA_AVG[1]+yparam_JXA_AVG[3]
+        efold_plot['HFS_NePED'] = yparam_JXI_AVG[1]+yparam_JXI_AVG[3]
+        efold_plot['LFS_PedWidth'] = 2000*yparam_JXA_AVG[2]
+        efold_plot['HFS_PedWidth'] = 2000*yparam_JXI_AVG[2]
+        efold_plot['LFS Gradient_Scale_Length'] = ldparam1[JXA]
+        efold_plot['LFS_Gradient_Scale_Length_V2'] = ldparam2[JXA]
         
+        dXP_dict=dXP.to_dict()
+        
+        NeuDen_dict=NeuDen.PARAM['NeuDen'].loc[SEP,:,Attempt[-1]].to_dict()
+        
+        export_data=[efold_plot,efold,efold_adj,dXP_dict,NeuDen_dict,efold_adj_err]
+        
+        with open('{}efold_data_{}.json'.format(DRT,Attempt[0]),'w') as fp:
+            json.dump(export_data,fp,indent=2)
+            
+    elif EXPORTYPE=='nc':
+        pass
+                
     print('Data exported succesfully!')
     
 WholeFit.on_clicked(wholefit)
