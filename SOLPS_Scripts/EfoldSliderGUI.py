@@ -20,8 +20,9 @@ import json
 
 ### Input Fields ###
 
-Shot = '1100305023'
-Attempt = ['24Rf2.0']
+Shot = '027205'
+Attempt = ['22']
+DEV='mast'
 GasLvl = 0
 Balloon = 0
 
@@ -32,7 +33,9 @@ plt.rc('lines',linewidth=5,markersize=15,markeredgewidth=2,linestyle='solid')
 EXPORTYPE='json' #Either 'json' or 'nc'
 
 ### Setting up Base Variables ###
-NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],EXP=True,AVG=False,PlotScheme='') #,ROOTSHOT='')
+
+NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],DEV=DEV,EXP=False,AVG=False,PlotScheme='')#,ROOTSHOT='')
+
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
 SEP = 18
@@ -41,7 +44,7 @@ PolLim=CoreBound
 Rmax = 0.01
 Rmin = -0.01
 Thresh=0.01
-Mag=0.165
+Mag=0.5
 RadLoc = NeuDen.RadCoords['RadLoc']
 VertLoc = NeuDen.RadCoords['VertLoc']
 RR = NeuDen.GetRadCoords('rrsep',[0,0])[0]
@@ -501,7 +504,7 @@ def wholefit(event):
         wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y,'r^:')
         wholeAx.legend(['Adjusted e-folding length','Outer Midplane', 'Inner Midplane','X-Point','Raw e-folding length'])
     else:
-        wholeAx.legend(['Adjusted e-folding length','Outer Midplane', 'Inner Midplane','X-Point'])
+        wholeAx.legend(['Adjusted e-folding length','std error','Outer Midplane', 'Inner Midplane','X-Point'])
     
     #wholeAx.xaxis.set_ticks(np.arange(20,75,5))
     starty, endy = wholeAx.get_ylim()
