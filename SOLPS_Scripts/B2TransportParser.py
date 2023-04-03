@@ -129,11 +129,11 @@ def batch_writer(dest, i, j, k, mk):
 
 
 
-def R2PsiN(GF,R):
+def R2PsiN(GF,R,Z=0):
     '''Uses equilibrium to convert from R to PsiN
         Must provide gfile (GF) loaded as an equilibrium object
-        Assumes Z=0'''
-    PP=GF.psiN(R,0)[0]
+        Default assumes Z=0'''
+    PP=GF.psiN(R,Z)[0]
     
     return PP
 

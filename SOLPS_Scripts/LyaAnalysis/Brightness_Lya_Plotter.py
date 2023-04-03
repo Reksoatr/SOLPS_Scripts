@@ -20,7 +20,7 @@ from B2TransportParser import R2PsiN, PsiN2R
 plt.rc('font',size=30)
 plt.rc('lines',linewidth=5,markersize=15)
 
-Plot= True
+Plot= False
 Error_Analysis=True
 RADC='psin' #'radial' #
 EMISS='tomo' #'tree'#
@@ -69,9 +69,10 @@ solps=[SOLPSPLOT(SHOTS[i], ATTEMPTS[i], Markers=False, JXA=JXA[i], JXI=JXI[i],
                  PlotScheme=['b--','b-','b--'], PsinOffset=PsinOffset[i], RadOffset=RadOffset[i]) 
                  for i in range(AN)]
 
-LYMID_coords=pkl.load(open('{}lya_coords_v3.pkl'.format(GFCMOD),'rb'))
-RLYMID0=np.sqrt(LYMID_coords['tang']['X']**2 + LYMID_coords['tang']['Y']**2)
-RLYMID0=np.flip(RLYMID0)
+LYMID_coords=pkl.load(open('{}Chords/lya_coords_v3.pkl'.format(GFCMOD),'rb'))          #Load in LYMID XYZ coordinates from pickle file
+RLYMID0=np.sqrt(LYMID_coords['tang']['X']**2 + LYMID_coords['tang']['Y']**2)    #Calculate R coordinate (R^2=X^2+Y^2)
+RLYMID0=np.flip(RLYMID0)                                                        #Flip R coordinates so that they go from core->SOL
+ZLYMID0=np.flip(LYMID_coords['tang']['Z'])
 
 LYMID = np.zeros((AN,len(RLYMID0),3))
 
@@ -112,7 +113,7 @@ if Plot:
             Remiss.append(R2PsiN(GFiles[m],bright[m][Remiss_idx]))
             Rnn.append(nn[m][0])
             Sep.append(1)
-            RLYMID.append(R2PsiN(GFiles[m],RLYMID0))
+            RLYMID.append(R2PsiN(GFiles[m],RLYMID0,Z=ZLYMID0))
         
         Rlabel=r'$\Psi_n$'
     
