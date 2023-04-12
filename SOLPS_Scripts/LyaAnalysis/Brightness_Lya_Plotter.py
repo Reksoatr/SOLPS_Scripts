@@ -20,7 +20,7 @@ from B2TransportParser import R2PsiN, PsiN2R
 plt.rc('font',size=30)
 plt.rc('lines',linewidth=5,markersize=15)
 
-Plot= False
+Plot= True
 Error_Analysis=True
 RADC='psin' #'radial' #
 EMISS='tomo' #'tree'#
@@ -109,8 +109,8 @@ if Plot:
     elif RADC=='psin':
         for m in range(AN):
             
-            Rbright.append(R2PsiN(GFiles[m],bright[m][0]))
-            Remiss.append(R2PsiN(GFiles[m],bright[m][Remiss_idx]))
+            Rbright.append(R2PsiN(GFiles[m],bright[m][0],Z=ZLYMID0))
+            Remiss.append(R2PsiN(GFiles[m],bright[m][Remiss_idx],Z=ZLYMID0))
             Rnn.append(nn[m][0])
             Sep.append(1)
             RLYMID.append(R2PsiN(GFiles[m],RLYMID0,Z=ZLYMID0))

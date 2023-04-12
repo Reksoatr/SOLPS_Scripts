@@ -40,7 +40,7 @@ P1=np.empty((2))
 P1.fill(np.nan)  #[2,-1.1])
 #Thresh=0.05
 
-button1=plt.imread('Icons/rounded-rectangle-button.png')
+#button1=plt.imread('Icons/rounded-rectangle-button.png')
 
 BASEDRT, TOPDRT = SET_WDIR('solps-iter/runs/','')
 if 'd3d' in Shot:
@@ -127,10 +127,10 @@ textP0Yax = plt.axes([0.275, 0.3, 0.03, 0.05])
 P0Y_Text = TextBox(textP0Yax, r'$Z_{P0}$ (m)', hovercolor='0.9')
 
 buttonP0ax = plt.axes([0.32, 0.3, 0.05, 0.05])
-P0Button = Button(buttonP0ax, 'Set P0',image=button1)
+P0Button = Button(buttonP0ax, 'Set P0')#,image=button1)
 
 clearP0ax = plt.axes([0.38, 0.3, 0.07, 0.05])
-P0Clear = Button(clearP0ax, 'Clear P0',image=button1)
+P0Clear = Button(clearP0ax, 'Clear P0')#,image=button1)
 
 textP1Xax = plt.axes([0.2, 0.2, 0.03, 0.05])
 P1X_Text = TextBox(textP1Xax, r'$R_{P1}$ (m)', hovercolor='0.9')
@@ -139,13 +139,13 @@ textP1Yax = plt.axes([0.275, 0.2, 0.03, 0.05])
 P1Y_Text = TextBox(textP1Yax, r'$Z_{P1}$ (m)', hovercolor='0.9')
 
 buttonP1ax = plt.axes([0.32, 0.2, 0.05, 0.05])
-P1Button = Button(buttonP1ax, 'Set P1',image=button1)
+P1Button = Button(buttonP1ax, 'Set P1')#,image=button1)
 
 clearP1ax = plt.axes([0.38, 0.2, 0.07, 0.05])
-P1Clear = Button(clearP1ax, 'Clear P1',image=button1)
+P1Clear = Button(clearP1ax, 'Clear P1')#,image=button1)
 
 plotax = plt.axes([0.45, 0.25, 0.1, 0.05])
-PlotChord = Button(plotax, 'Plot Chord',image=button1)
+PlotChord = Button(plotax, 'Plot Chord')#,image=button1)
 
 axslide = plt.axes([0.15, 0.1, 0.4, 0.03])
 sslide = Slider(axslide, 'Threshhold', 0.005, 0.1, valinit=0.015, valfmt='%0.3f', valstep=0.005)

@@ -798,7 +798,6 @@ class SOLPSPLOT(object):
             POLC = kwargs['POLC']
             SURF = kwargs['SURF']
             CoreBound = kwargs['CoreBound']
-            CoreBound[1] = CoreBound[1]-1
             PolKW = kwargs
             
             if Parameter is None:
