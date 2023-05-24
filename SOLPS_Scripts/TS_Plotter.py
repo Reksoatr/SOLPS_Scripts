@@ -19,12 +19,12 @@ BASEDRT, TOPDRT=SET_WDIR('','')
 
 Device='cmod'
 
-Shots=['1080416025','1101014029']#['1100308004','1101014006']#['1100305023','1101014019']#['1080416025','1101014029']#['1101014029','1080416025']#['1100308004']#['1100305023']#['1080416025']#['1120917011']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#   
+Shots=['1100308004','1080416025','1100305023']#['1080416025','1101014029']#['1100308004','1101014006']#['1100305023','1101014019']#['1120917011']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#   
 
 Rad='psin'#'rmid'#
 
-SOLPS=True
-Attempts=['15N']
+SOLPS=False
+Attempts=[]#[15N]
 KW={'JXA':40}
 '''
 KW={'JXA' : 27,
@@ -37,18 +37,20 @@ KW={'JXA' : 27,
         
 Time0=70
 AVG=0
-PsinOffset=[0.03,-0.013]#[-0.015,-0.02]
-RmidOffset=[-0.01,-0.015]
+PsinOffset=[-0.015,0.03,0]#[0.03,-0.013]#[-0.015,-0.02]
+RmidOffset=[0,0,0]#[-0.01,-0.015]
 TimeA=np.nan
 TimeB=np.nan
 
 CoreTS=True
 CoreTime=1.0
-LCFS_Te=[83,98]#[90,90]#[93,110]#
+LCFS_Te=[90,83,93]#[83,98]#[90,90]#[93,110]#
 
 XLIM=[0.60,1.05]#[0.45,1.06]
 NeLIM=[]#[0,7.5e19]
 TeLIM=[]#[0,1500]
+
+Colors=['red','green','blue']
 
 fig, ax = plt.subplots()
 ax.set_frame_on(False)
@@ -64,24 +66,14 @@ if SOLPS:
     Sim.RadProf('Ne',AX=ne_profile)
     Sim.RadProf('Te',AX=te_profile)
 
-textTimeAax = plt.axes([0.15, 0.05, 0.03, 0.05])
-TimeA_Text = TextBox(textTimeAax, 'Initial\nTime', hovercolor='0.9')
-
-textTimeBax = plt.axes([0.2, 0.05, 0.03, 0.05])
-TimeB_Text = TextBox(textTimeBax, 'End\nTime', hovercolor='0.9')
-
-buttonTimeAVGax = plt.axes([0.25, 0.05, 0.11, 0.05])
-TimeAVGButton = Button(buttonTimeAVGax, 'Plot Time Averaged Profiles')
-
-slideTimeax = plt.axes([0.45, 0.05, 0.45, 0.05])
-
 N = len(Shots)
 Data={}
 NeLine={}
 TeLine={}
-Coords={'rmid':'(m)','psin':''}
+Coords={'rmid':'R (m)','psin':'$\psi_n$'}
 
 if CoreTS:
+    
     for n, i in enumerate(Shots):
         with open('{}gfileProcessing/cmod_files/{}_CORE.pkl'.format(TOPDRT,i),'rb') as f:
             u = pkl._Unpickler(f)
@@ -89,17 +81,38 @@ if CoreTS:
             CTS = u.load()
             #CTS=pkl.load(f)
         
+        Data[i]={}
+        Data[i]['ne']=np.array([CTS[0],CTS[1]*1e20,CTS[2]*1e20])
+        Data[i]['te']=np.array([CTS[3],CTS[4]*1e3,CTS[5]*1e3])
+        
+        Data[i]['ne']=Data[i]['ne'][:,Data[i]['ne'][0,:].argsort()]
+        Data[i]['te']=Data[i]['te'][:,Data[i]['te'][0,:].argsort()]
+        
         if LCFS_Te!=0:
-            index=(np.abs(CTS[4]*1000-LCFS_Te[n])).argmin()
-            PsinOffset[n]=1-CTS[3][index]
+            index=(np.abs(Data[i]['te'][1]-LCFS_Te[n])).argmin()
+            PsinOffset[n]=1-Data[i]['te'][0][index]
             print('Psin offset for shot {} is {}'.format(i,PsinOffset[n]))
         
         Time0=0
-        Data[i]={'time':[CoreTime]}
-        CoreNe = ne_profile.errorbar(CTS[0]+PsinOffset[n],CTS[1]*1e20,yerr=CTS[2]*1e20,linestyle='',capsize=5,marker='.')
-        CoreTe = te_profile.errorbar(CTS[3]+PsinOffset[n],CTS[4]*1000,yerr=CTS[5]*1000,linestyle='',capsize=5,marker='.')
-        
+        Data[i]['time']=[CoreTime]
+        CoreNe = ne_profile.errorbar(Data[i]['ne'][0]+PsinOffset[n],Data[i]['ne'][1],yerr=Data[i]['ne'][2],linestyle=':',capsize=5,marker='.',color=Colors[n])
+        CoreTe = te_profile.errorbar(Data[i]['te'][0]+PsinOffset[n],Data[i]['te'][1],yerr=Data[i]['te'][2],linestyle=':',capsize=5,marker='.',color=Colors[n])
+    
+    textTimeAax = plt.axes([0, 0, 0, 0])
+    TimeA_Text = TextBox(textTimeAax,'')
+
+    textTimeBax = plt.axes([0, 0, 0, 0])
+    TimeB_Text = TextBox(textTimeBax,'')
+
+    buttonTimeAVGax = plt.axes([0, 0, 0, 0])
+    TimeAVGButton = Button(buttonTimeAVGax,'')
+
+    slideTimeax = plt.axes([0, 0, 0, 0])
+    TimeSlider = Slider(slideTimeax,'',0,1)
+    TimeSlider.valtext.set_text('') 
+    
 else:
+    
     for n,i in enumerate(Shots):
         Data[i]=loadmat('{}gfileProcessing/{}_files/{}.mat'.format(TOPDRT,Device,i))
         if Rad not in Data[i].keys():
@@ -110,9 +123,22 @@ else:
             Data[i]['rmid']=Data[i]['rmid']+RmidOffset[n]
         
         Data[i]['time']=Data[i]['time'].flatten()
-        NeLine[i] = ne_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['ne'][:,Time0],yerr=Data[i]['nerr'][:,Time0],marker='.',linestyle=':')
-        TeLine[i] = te_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['te'][:,Time0],yerr=Data[i]['terr'][:,Time0],marker='.',linestyle=':')
-       
+        NeLine[i] = ne_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['ne'][:,Time0],yerr=Data[i]['nerr'][:,Time0],marker='.',linestyle=':',color=Colors[n])
+        TeLine[i] = te_profile.errorbar(Data[i][Rad][:,Time0],Data[i]['te'][:,Time0],yerr=Data[i]['terr'][:,Time0],marker='.',linestyle=':',color=Colors[n]) 
+    
+    textTimeAax = plt.axes([0.15, 0.05, 0.03, 0.05])
+    TimeA_Text = TextBox(textTimeAax, 'Initial\nTime', hovercolor='0.9')
+
+    textTimeBax = plt.axes([0.2, 0.05, 0.03, 0.05])
+    TimeB_Text = TextBox(textTimeBax, 'End\nTime', hovercolor='0.9')
+
+    buttonTimeAVGax = plt.axes([0.25, 0.05, 0.11, 0.05])
+    TimeAVGButton = Button(buttonTimeAVGax, 'Plot Time Averaged Profiles')
+
+    slideTimeax = plt.axes([0.45, 0.05, 0.45, 0.05])
+    TimeSlider = Slider(slideTimeax, 'Time', 0, len(Data[i]['time']), valinit=Time0, valfmt="%i", valstep=1)
+    TimeSlider.valtext.set_text('{:0.3f}\nseconds'.format(Data[i]['time'][Time0]))
+    
 ne_profile.set_title('Thompson Scattering Profiles at {:0.3f} sec'.format(Data[i]['time'][Time0]))
 ne_profile.set_ylabel(r'Electron Density $n_e\;(m^{-3})$')
 ne_profile.legend([*Attempts,*Shots])
@@ -120,7 +146,7 @@ ne_profile.axhline(0.0,color='k')
 ne_profile.grid()
 
 te_profile.set_ylabel(r'Electron Temperature $T_e\;(eV)$')
-te_profile.set_xlabel('{} {}'.format(Rad,Coords[Rad]))
+te_profile.set_xlabel(Coords[Rad])
 te_profile.legend([*Attempts,*Shots])
 te_profile.axhline(0.0,color='k')
 te_profile.grid()
@@ -188,14 +214,12 @@ def update(event):
    
    ne_profile.relim()
    ne_profile.autoscale_view()
-   ne_profile.set_title('Thompson Scattering Profiles at {} seconds'.format(TitleText))    
+   ne_profile.set_title('Edge Thompson Scattering Profiles at {} seconds'.format(TitleText))    
    te_profile.relim()
    te_profile.autoscale_view()
    
    fig.canvas.draw_idle()
-
-TimeSlider = Slider(slideTimeax, 'Time', 0, len(Data[i]['time']), valinit=Time0, valfmt="%i", valstep=1)
-TimeSlider.valtext.set_text('{:0.3f}\nseconds'.format(Data[i]['time'][Time0]))
+   
 TimeSlider.on_changed(update)
 
 def submitTimeA(text):

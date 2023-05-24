@@ -287,6 +287,8 @@ if Plot:
             SOLPS_nn.append(solps[p].PARAM['NeuDen'].loc[:,JXA[p],:].values)
             SOLPS_emiss.append(solps[p].PARAM['LyaEmissW'].loc[:,JXA[p],:].values)
             
+            Interp_ne=interp1d()
+            Interp_te=interp1d()
             Interp_nn=interp1d(Rnn[p],nn[p][1])
             Interp_emiss=interp1d(Remiss[p],bright[p][emiss_idx]) 
             Interp_bright=interp1d(Rbright[p],bright[p][1])

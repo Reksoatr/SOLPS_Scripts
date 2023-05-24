@@ -117,7 +117,7 @@ if Plot_Wall:
 
 '''
 ## Old Wall Plotting Routine (now built into aurora.solps as of 3/2/21) ##
-
+'''
 if Plot_Wall:
     Wall_Seg=[]
     
@@ -198,7 +198,7 @@ if Plot_Wall:
                       'Particle Flux reflected from Inner Target',
                       'Outer Midplane'])
 '''    
-    
+''' 
     
 
 

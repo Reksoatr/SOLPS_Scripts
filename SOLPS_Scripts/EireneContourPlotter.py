@@ -18,15 +18,15 @@ from scipy.interpolate import griddata
 #from SOLPS_Plotter import SOLPSPLOT
 from PARAMDICT import EireneDict
 
-Shot='1100305023'
+Shot='025'
 Device='cmod'
-Attempt='24Rf2.0' # 15 for 1100308004, 18N for 1080416025, 24 for 1100305023 
+Attempt='21N' # 15 for 1100308004, 18N for 1080416025, 24 for 1100305023 
 
-MeshID='024'  # 026 used for Shot025, 020 used for Shot012, 001 for d3d, 
+MeshID='026'  # 026 used for Shot025, 020 used for Shot012, 001 for d3d, 
               # 025 for 1100308004, 024 for 1100305023, 027 for 1080416025
 LOG=True
 Pressure=True
-Param='PDENA'
+Param='EDENA'
 B2=True
 B2_Param='Ne'
 
