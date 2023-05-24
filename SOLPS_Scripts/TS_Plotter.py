@@ -23,6 +23,8 @@ Shots=['1100308004','1080416025','1100305023']#['1080416025','1101014029']#['110
 
 Rad='psin'#'rmid'#
 
+Filter = True
+
 SOLPS=False
 Attempts=[]#[15N]
 KW={'JXA':40}
@@ -86,18 +88,26 @@ if CoreTS:
         Data[i]['te']=np.array([CTS[3],CTS[4]*1e3,CTS[5]*1e3])
         
         Data[i]['ne']=Data[i]['ne'][:,Data[i]['ne'][0,:].argsort()]
-        Data[i]['te']=Data[i]['te'][:,Data[i]['te'][0,:].argsort()]
+        Data[i]['te']=Data[i]['te'][:,Data[i]['te'][0,:].argsort()]            
         
         if LCFS_Te!=0:
             index=(np.abs(Data[i]['te'][1]-LCFS_Te[n])).argmin()
             PsinOffset[n]=1-Data[i]['te'][0][index]
             print('Psin offset for shot {} is {}'.format(i,PsinOffset[n]))
         
+        if Filter:
+            for v in ['ne','te']:
+                for t in range(1,len(Data[i][v][1])):
+                    if (Data[i][v][1][t]-Data[i][v][2][t]) > 2*(Data[i][v][1][t-1]):
+                        Data[i][v][0][t]=Data[i][v][1][t]=Data[i][v][2][t]=np.nan
+                        
         Time0=0
         Data[i]['time']=[CoreTime]
         CoreNe = ne_profile.errorbar(Data[i]['ne'][0]+PsinOffset[n],Data[i]['ne'][1],yerr=Data[i]['ne'][2],linestyle=':',capsize=5,marker='.',color=Colors[n])
         CoreTe = te_profile.errorbar(Data[i]['te'][0]+PsinOffset[n],Data[i]['te'][1],yerr=Data[i]['te'][2],linestyle=':',capsize=5,marker='.',color=Colors[n])
-    
+        ne_profile.fill_between(Data[i]['ne'][0]+PsinOffset[n],Data[i]['ne'][1]+Data[i]['ne'][2],Data[i]['ne'][1]-Data[i]['ne'][2],color=Colors[n],alpha=0.25)
+        te_profile.fill_between(Data[i]['te'][0]+PsinOffset[n],Data[i]['te'][1]+Data[i]['te'][2],Data[i]['te'][1]-Data[i]['te'][2],color=Colors[n],alpha=0.25)
+
     textTimeAax = plt.axes([0, 0, 0, 0])
     TimeA_Text = TextBox(textTimeAax,'')
 
