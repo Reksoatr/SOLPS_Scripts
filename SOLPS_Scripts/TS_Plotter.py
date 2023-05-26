@@ -72,6 +72,7 @@ N = len(Shots)
 Data={}
 NeLine={}
 TeLine={}
+Mask={}
 Coords={'rmid':'R (m)','psin':'$\psi_n$'}
 
 if CoreTS:
@@ -96,17 +97,27 @@ if CoreTS:
             print('Psin offset for shot {} is {}'.format(i,PsinOffset[n]))
         
         if Filter:
+            Mask[i]={}
             for v in ['ne','te']:
                 for t in range(1,len(Data[i][v][1])):
                     if (Data[i][v][1][t]-Data[i][v][2][t]) > 2*(Data[i][v][1][t-1]):
                         Data[i][v][0][t]=Data[i][v][1][t]=Data[i][v][2][t]=np.nan
+                Mask[i][v]=np.isfinite(Data[i][v][0])
                         
         Time0=0
         Data[i]['time']=[CoreTime]
-        CoreNe = ne_profile.errorbar(Data[i]['ne'][0]+PsinOffset[n],Data[i]['ne'][1],yerr=Data[i]['ne'][2],linestyle=':',capsize=5,marker='.',color=Colors[n])
-        CoreTe = te_profile.errorbar(Data[i]['te'][0]+PsinOffset[n],Data[i]['te'][1],yerr=Data[i]['te'][2],linestyle=':',capsize=5,marker='.',color=Colors[n])
-        ne_profile.fill_between(Data[i]['ne'][0]+PsinOffset[n],Data[i]['ne'][1]+Data[i]['ne'][2],Data[i]['ne'][1]-Data[i]['ne'][2],color=Colors[n],alpha=0.25)
-        te_profile.fill_between(Data[i]['te'][0]+PsinOffset[n],Data[i]['te'][1]+Data[i]['te'][2],Data[i]['te'][1]-Data[i]['te'][2],color=Colors[n],alpha=0.25)
+        CoreNe = ne_profile.errorbar(Data[i]['ne'][0][Mask[i]['ne']]+PsinOffset[n],Data[i]['ne'][1][Mask[i]['ne']],
+                                     yerr=Data[i]['ne'][2][Mask[i]['ne']],linestyle=':',capsize=5,marker='.',color=Colors[n])
+        CoreTe = te_profile.errorbar(Data[i]['te'][0][Mask[i]['te']]+PsinOffset[n],Data[i]['te'][1][Mask[i]['te']],
+                                     yerr=Data[i]['te'][2][Mask[i]['te']],linestyle=':',capsize=5,marker='.',color=Colors[n])
+        ne_profile.fill_between(Data[i]['ne'][0][Mask[i]['ne']]+PsinOffset[n],
+                                Data[i]['ne'][1][Mask[i]['ne']]+Data[i]['ne'][2][Mask[i]['ne']],
+                                Data[i]['ne'][1][Mask[i]['ne']]-Data[i]['ne'][2][Mask[i]['ne']],
+                                color=Colors[n],alpha=0.25)
+        te_profile.fill_between(Data[i]['te'][0][Mask[i]['te']]+PsinOffset[n],
+                                Data[i]['te'][1][Mask[i]['te']]+Data[i]['te'][2][Mask[i]['te']],
+                                Data[i]['te'][1][Mask[i]['te']]-Data[i]['te'][2][Mask[i]['te']],
+                                color=Colors[n],alpha=0.25)
 
     textTimeAax = plt.axes([0, 0, 0, 0])
     TimeA_Text = TextBox(textTimeAax,'')
@@ -153,12 +164,14 @@ ne_profile.set_title('Thompson Scattering Profiles at {:0.3f} sec'.format(Data[i
 ne_profile.set_ylabel(r'Electron Density $n_e\;(m^{-3})$')
 ne_profile.legend([*Attempts,*Shots])
 ne_profile.axhline(0.0,color='k')
+ne_profile.axvline(1.0,color='k',linestyle='dashed',linewidth=3)
 ne_profile.grid()
 
 te_profile.set_ylabel(r'Electron Temperature $T_e\;(eV)$')
 te_profile.set_xlabel(Coords[Rad])
 te_profile.legend([*Attempts,*Shots])
 te_profile.axhline(0.0,color='k')
+te_profile.axvline(1.0,color='k',linestyle='dashed',linewidth=3)
 te_profile.grid()
 
 def update(event):

@@ -20,7 +20,7 @@ from B2TransportParser import R2PsiN, PsiN2R
 plt.rc('font',size=30)
 plt.rc('lines',linewidth=5,markersize=15)
 
-Plot= True
+Plot= False
 Error_Analysis=True
 RADC='psin' #'radial' #
 EMISS='tomo' #'tree'#
@@ -46,7 +46,7 @@ elif EMISS=='tomo':
 
 BASE,TOP = SET_WDIR('','')
 
-GFCMOD='{}gfileProcessing/cmod_files/'.format(TOP)
+GFCMOD='{}gfileProcessing/cmod_files/'.format(TOP) #gfile directory under TOP directory
 
 GFiles=[]
 
