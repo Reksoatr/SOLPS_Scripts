@@ -12,10 +12,11 @@ import pickle as pkl
 import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptchs
+from matplotlib import colormaps
 from TOOLS import WALL_INTERSECT, OpenRemoteFile, SSH_config, JumpConnect
 
 def SOLPSDiagnostiChorder(filepath, 
-                          device='CMOD', plot=True,
+                          device='CMOD', plot=True, ax=None,
                           RemoteSave=False, RemotePath=None,
                           Output=None, EndKey='tang', 
                           Extend2wall=False, Reverse=False):
@@ -25,9 +26,10 @@ def SOLPSDiagnostiChorder(filepath,
     ReadType={'.pkl':'rb','.chords':'r'}
     
     if device == 'CMOD':
-        r1=0.46
-        r2=0.93
-        sep=0.91
+        r1=0.44020 #Inner wall at Z=-0.0382
+        lim=0.90778 #Wall limiter at Z=-0.0382
+        r2=1.06160 #Outer wall at Z=-0.0382 (Max R)
+        sep=(0.88496+0.88398+0.89410)/3 #Average separatrix position at Z=-0.0382
     
     if RemotePath:
         RR=SSH_config()
@@ -56,6 +58,9 @@ def SOLPSDiagnostiChorder(filepath,
         C1={'X':np.array(HH[3]),'Y':np.array(HH[4]),'Z':np.array(HH[5])}
     
     if Extend2wall:
+        Ctang={}
+        Ctang['X']=C1['X']
+        Ctang['Y']=C1['Y']
         P1,P2=WALL_INTERSECT(C0,C1,r2)
         C1['X']=P1['X']
         C1['Y']=P1['Y']
@@ -92,27 +97,37 @@ def SOLPSDiagnostiChorder(filepath,
             JJ.open_sftp().put(Output,'{}{}'.format(RemotePath,savename))            
     
     if plot==True:
-        fig1,ax1=plt.subplots()
+        if ax:
+            ax1=ax
+        else:
+            fig1,ax1=plt.subplots()
         ax1.set_xlim(-(r2+0.1),r2+0.1)
         ax1.set_ylim(-(r2+0.1),r2+0.1)
-        ax1.add_patch(ptchs.Circle((0,0),r1,fill=False,edgecolor='k',linewidth=3))
-        ax1.add_patch(ptchs.Circle((0,0),r2,fill=False,edgecolor='k',linewidth=3))
-        ax1.add_patch(ptchs.Circle((0,0),sep,fill=False,edgecolor='k',linewidth=3,linestyle=':'))  
+        ax1.add_patch(ptchs.Circle((0,0),r1,fill=False,edgecolor='k',linewidth=2))
+        ax1.add_patch(ptchs.Circle((0,0),lim,fill=False,edgecolor='k',linewidth=2,linestyle='--', label='RF Limiter'))
+        ax1.add_patch(ptchs.Circle((0,0),r2,fill=False,edgecolor='k',linewidth=2, label='Outer Wall'))
+        ax1.add_patch(ptchs.Circle((0,0),sep,fill=False,edgecolor='r',linewidth=2,linestyle=':', label='Separatrix'))  
+        
+        ax1.set_prop_cycle(color=colormaps['tab20b'].colors)
         
         for i in range(n):
-            ax1.plot([C0['X'][i],C1['X'][i]],[C0['Y'][i],C1['Y'][i]])
+            ax1.plot([C0['X'][i],C1['X'][i]],[C0['Y'][i],C1['Y'][i]], linewidth=1)
+            
+        if EndKey=='tang':
+            ax1.plot(Ctang['X'],Ctang['Y'], 'gx', markersize=7, label='Tangency Point')
             
         ax1.set_aspect('equal')
+        ax1.set_xlabel('X (m)')
+        ax1.set_ylabel('Y (m)')
         
-    return C0,C1
+    return HH,C0,C1
 
 if __name__=='__main__':
     
-    
-    A=SOLPSDiagnostiChorder('LYA_MID_WALL_Zero.chords', 
-                              device='CMOD', plot=True, RemoteSave=False, 
-                              RemotePath=None, EndKey='end',
-                              Output=None)
+    figc,axc=plt.subplots()
+    A=SOLPSDiagnostiChorder('LyaAnalysis/Chords/lya_coords_v3.pkl', 
+                              device='CMOD', plot=True, Extend2wall=True,
+                              Reverse=True, ax=axc)
     
 '''       
 Etendue=np.array([4.8e-9,5.5e-9,5.9e-9,6.3e-9,6.7e-9,6.9e-9,7.3e-9,

@@ -20,8 +20,8 @@ from B2TransportParser import R2PsiN, PsiN2R
 plt.rc('font',size=30)
 plt.rc('lines',linewidth=5,markersize=15)
 
-Plot= True
-Error_Analysis=True
+Plot=True
+Error_Analysis=False
 RADC='psin' #'radial' #
 EMISS='tomo' #'tree'#
 
