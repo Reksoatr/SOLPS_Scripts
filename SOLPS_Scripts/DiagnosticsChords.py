@@ -18,7 +18,7 @@ from TOOLS import WALL_INTERSECT, OpenRemoteFile, SSH_config, JumpConnect
 def SOLPSDiagnostiChorder(filepath, 
                           device='CMOD', plot=True, ax=None,
                           RemoteSave=False, RemotePath=None,
-                          Output=None, EndKey='tang', 
+                          Output=None, EndKey='tang', ViewAngle=False,
                           Extend2wall=False, Reverse=False):
     
     filename,fmt=os.path.splitext(filepath)
@@ -120,6 +120,20 @@ def SOLPSDiagnostiChorder(filepath,
         ax1.set_xlabel('X (m)')
         ax1.set_ylabel('Y (m)')
         
+    if ViewAngle:
+        v1=np.array([(C1['X'][0]-C0['X'][0]),(C1['Y'][0]-C0['Y'][0]),(C1['Z'][0]-C0['Z'][0])])
+        v2=np.array([(C1['X'][-1]-C0['X'][-1]),(C1['Y'][-1]-C0['Y'][-1]),(C1['Z'][-1]-C0['Z'][-1])])
+        
+        v1=v1/np.linalg.norm(v1)
+        v2=v2/np.linalg.norm(v2)
+        
+        view_angle=np.arccos(np.clip(np.dot(v1,v2),-1.0,1.0))
+        view_angle=round(np.degrees(view_angle),3)
+        
+        HH['view angle']=view_angle
+        
+        print('Angle of View is {} degrees'.format(round(view_angle,1)))
+        
     return HH,C0,C1
 
 if __name__=='__main__':
@@ -127,7 +141,7 @@ if __name__=='__main__':
     figc,axc=plt.subplots()
     A=SOLPSDiagnostiChorder('LyaAnalysis/Chords/lya_coords_v3.pkl', 
                               device='CMOD', plot=True, Extend2wall=True,
-                              Reverse=True, ax=axc)
+                              Reverse=True, ax=axc, ViewAngle=True)
     
 '''       
 Etendue=np.array([4.8e-9,5.5e-9,5.9e-9,6.3e-9,6.7e-9,6.9e-9,7.3e-9,
