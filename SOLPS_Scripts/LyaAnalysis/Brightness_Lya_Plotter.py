@@ -21,13 +21,13 @@ plt.rc('font',size=30)
 plt.rc('lines',linewidth=5,markersize=15)
 
 Plot=True
-Error_Analysis=False
+Error_Analysis=True
 
 RADC='psin' #'radial' #
 EMISS='tomo' #'tree'#
 
 SHOTS = ['1100308004','1080416025','1100305023'] #,
-ATTEMPTS = [['14Rf0.35','14Rf0.7','14Rf1.05'],['18Rf0.3','18Rf0.6','18Rf0.9'],['24Rf1.0','24Rf2.0','24Rf3.0']] # ,
+ATTEMPTS = [['14Rf0.35_split2','14Rf0.7_split2','14Rf1.05_split2'],['18Rf0.3_split2','18Rf0.6_split2','18Rf0.9_split2'],['24Rf1.0_split2','24Rf2.0_split2','24Rf3.0_split2']] # ,
 AN=len(SHOTS)
 
 LCFS_Te=[83,90,93]
@@ -288,8 +288,8 @@ if Plot:
             SOLPS_nn.append(solps[p].PARAM['NeuDen'].loc[:,JXA[p],:].values)
             SOLPS_emiss.append(solps[p].PARAM['LyaEmissW'].loc[:,JXA[p],:].values)
             
-            Interp_ne=interp1d()
-            Interp_te=interp1d()
+            #Interp_ne=interp1d()
+            #Interp_te=interp1d()
             Interp_nn=interp1d(Rnn[p],nn[p][1])
             Interp_emiss=interp1d(Remiss[p],bright[p][emiss_idx]) 
             Interp_bright=interp1d(Rbright[p],bright[p][1])

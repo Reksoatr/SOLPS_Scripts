@@ -18,15 +18,15 @@ from scipy.interpolate import griddata
 #from SOLPS_Plotter import SOLPSPLOT
 from PARAMDICT import EireneDict
 
-Shot='025'
+Shot='1080416025'
 Device='cmod'
-Attempt='21N' # 15 for 1100308004, 18N for 1080416025, 24 for 1100305023 
+Attempt='18Rf0.6_split2' # 15 for 1100308004, 18N for 1080416025, 24 for 1100305023 
 
-MeshID='026'  # 026 used for Shot025, 020 used for Shot012, 001 for d3d, 
-              # 025 for 1100308004, 024 for 1100305023, 027 for 1080416025
+MeshID='011'  # 026 used for Shot025, 020 used for Shot012, 001 for d3d, 
+              # 025/010 for 1100308004, 024/009 for 1100305023, 027/011 for 1080416025
 LOG=True
 Pressure=True
-Param='EDENA'
+Param='PDENA'
 B2=True
 B2_Param='Ne'
 
@@ -54,7 +54,13 @@ tz=np.loadtxt('{}/TriangVertLoc{}'.format(DRT,Attempt),usecols = (2))
 
 tr=np.loadtxt('{}/TriangRadLoc{}'.format(DRT,Attempt),usecols = (2))
 
-VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
+try:
+    WallFile=np.loadtxt('{}/mesh.extra'.format(BASEDRT))
+    WF=True
+except:
+    print('mesh.extra file not found! Using vvfile.ogr instead') 
+    WF=False
+    VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
 
 Parameter=EireneDict[Param]
 Data=np.loadtxt('{}/{}{}'.format(DRT,Parameter['FileName'],Attempt),usecols = (2))
@@ -150,7 +156,12 @@ PlotChord = Button(plotax, 'Plot Chord')#,image=button1)
 axslide = plt.axes([0.15, 0.1, 0.4, 0.03])
 sslide = Slider(axslide, 'Threshhold', 0.005, 0.1, valinit=0.015, valfmt='%0.3f', valstep=0.005)
 
-Contour.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000,'k-')
+if WF:
+    for i in range(len(WallFile[:,0])):
+        Contour.plot((WallFile[i,0],WallFile[i,2]),(WallFile[i,1],WallFile[i,3]),'k-')
+else:
+    Contour.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000,'k-')
+
 IM=Contour.tripcolor(TP,Data)
 Contour.set_aspect('equal')
 Contour.grid()

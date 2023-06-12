@@ -41,7 +41,7 @@ def SOLPSDiagnostiChorder(filepath,
     if fmt == '.pkl':
         HH=pkl.load(file)           
         C0=HH['start']
-        C1=HH[EndKey] #Keyword might be 'end' or 'tang'
+        C1=HH[EndKey] #Keyword might be 'end' (for wall end), 'tang' (for tangent), or 'ph' (for pinhole)
         n=len(C0['Z'])
         
         if 'R' and 'phi' in C0.keys(): #Convert R,phi to X,Y coords
@@ -58,12 +58,17 @@ def SOLPSDiagnostiChorder(filepath,
         C1={'X':np.array(HH[3]),'Y':np.array(HH[4]),'Z':np.array(HH[5])}
     
     if Extend2wall:
-        Ctang={}
-        Ctang['X']=C1['X']
-        Ctang['Y']=C1['Y']
+        
         P1,P2=WALL_INTERSECT(C0,C1,r2)
+        
+        Ctang={}
+        Ctang['X']=(P1['X']+P2['X'])/2
+        Ctang['Y']=(P1['Y']+P2['Y'])/2
+        
         C1['X']=P1['X']
         C1['Y']=P1['Y']
+        
+        HH['Ctang']=Ctang
         
     if Output:
         outpath,savename=os.path.split(Output)
@@ -113,16 +118,19 @@ def SOLPSDiagnostiChorder(filepath,
         for i in range(n):
             ax1.plot([C0['X'][i],C1['X'][i]],[C0['Y'][i],C1['Y'][i]], linewidth=1)
             
-        if EndKey=='tang':
+        try:
             ax1.plot(Ctang['X'],Ctang['Y'], 'gx', markersize=7, label='Tangency Point')
-            
+        except:
+            print('No Tangent Radii Found!')
+        
         ax1.set_aspect('equal')
         ax1.set_xlabel('X (m)')
         ax1.set_ylabel('Y (m)')
         
     if ViewAngle:
-        v1=np.array([(C1['X'][0]-C0['X'][0]),(C1['Y'][0]-C0['Y'][0]),(C1['Z'][0]-C0['Z'][0])])
-        v2=np.array([(C1['X'][-1]-C0['X'][-1]),(C1['Y'][-1]-C0['Y'][-1]),(C1['Z'][-1]-C0['Z'][-1])])
+        vv=np.array([(C1['X']-C0['X']),(C1['Y']-C0['Y']),(C1['Z']-C0['Z'])])
+        v1=vv[:,0]
+        v2=vv[:,-1]
         
         v1=v1/np.linalg.norm(v1)
         v2=v2/np.linalg.norm(v2)
@@ -140,8 +148,8 @@ if __name__=='__main__':
     
     figc,axc=plt.subplots()
     A=SOLPSDiagnostiChorder('LyaAnalysis/Chords/lya_coords_v3.pkl', 
-                              device='CMOD', plot=True, Extend2wall=True,
-                              Reverse=True, ax=axc, ViewAngle=True)
+                              device='CMOD', plot=True, EndKey='ph', 
+                              Extend2wall=True, Reverse=True, ax=axc, ViewAngle=True)
     
 '''       
 Etendue=np.array([4.8e-9,5.5e-9,5.9e-9,6.3e-9,6.7e-9,6.9e-9,7.3e-9,
