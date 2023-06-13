@@ -54,9 +54,9 @@ GFiles=[]
 for A in SHOTS:
     GFiles.append(eq.equilibrium(gfile='{}g{}.01000'.format(GFCMOD,A)))
 
-bright = [pkl.load(open('lya_brightness_{}.pkl'.format(A),'rb')) for A in SHOTS]
+bright = [pkl.load(open('{}Brightness_Profiles/lya_brightness_{}.pkl'.format(GFCMOD,A),'rb')) for A in SHOTS]    #Experimental Ly-a brightness and emissivity data
 
-nn = [pkl.load(open('{}Brightness_Profiles/lyman_data_{}.pkl'.format(GFCMOD,A),'rb')) 
+nn = [pkl.load(open('{}Brightness_Profiles/lyman_data_{}.pkl'.format(GFCMOD,A),'rb'))   #Experimental neutral density profile data
       for A in SHOTS]
 
 nnlogerr=[]
@@ -70,10 +70,9 @@ solps=[SOLPSPLOT(SHOTS[i], ATTEMPTS[i], Markers=False, JXA=JXA[i], JXI=JXI[i],
                  PlotScheme=['b--','b-','b--'], PsinOffset=PsinOffset[i], RadOffset=RadOffset[i]) 
                  for i in range(AN)]
 
-LYMID_coords=pkl.load(open('{}Chords/lya_coords_v3.pkl'.format(GFCMOD),'rb'))          #Load in LYMID XYZ coordinates from pickle file
-RLYMID0=np.sqrt(LYMID_coords['tang']['X']**2 + LYMID_coords['tang']['Y']**2)    #Calculate R coordinate (R^2=X^2+Y^2)
-RLYMID0=np.flip(RLYMID0)                                                        #Flip R coordinates so that they go from core->SOL
-ZLYMID0=np.flip(LYMID_coords['tang']['Z'])
+LYMID_coords=pkl.load(open('{}/Chords/lya_coords_new.pkl'.format(GFCMOD),'rb'))   #Load in LYMID XYZ coordinates from pickle file
+RLYMID0=np.flip(np.sqrt(LYMID_coords['tangent']['X']**2 + LYMID_coords['tangent']['Y']**2))    #Calculate R coordinate (R^2=X^2+Y^2)
+ZLYMID0=np.flip(LYMID_coords['start']['Z'])
 
 LYMID = np.zeros((AN,len(RLYMID0),3))
 

@@ -95,7 +95,12 @@ def SOLPSDiagnostiChorder(filepath,
                        header="'{}' 100".format(oname))
         elif ofmt == '.pkl':
             MAT={'start':C0,'end':C1}
-            pkl.dump(MAT,open(Output,'xb'))
+            try:
+                MAT['tangent']=Ctang
+            except:
+                print('No tangent points found!')    
+            with open(Output,'xb') as f:
+                pkl.dump(MAT,f)
         if RemoteSave:
             RR=SSH_config()
             JJ=JumpConnect(**RR)
@@ -149,6 +154,7 @@ if __name__=='__main__':
     figc,axc=plt.subplots()
     A=SOLPSDiagnostiChorder('LyaAnalysis/Chords/lya_coords_v3.pkl', 
                               device='CMOD', plot=True, EndKey='ph', 
+                              Output='LyaAnalysis/Chords/lya_coords_new.pkl',
                               Extend2wall=True, Reverse=True, ax=axc, ViewAngle=True)
     
 '''       
