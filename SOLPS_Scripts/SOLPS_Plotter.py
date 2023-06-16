@@ -187,7 +187,8 @@ class SOLPSPLOT(object):
                      'NTI' : r'Test Ion (D2+) Density $n_{ti}\;(m^{-3})$',
                      'TestIonTemp' : r'Test Ion (D2+) Temperature $T_{testion}\;(eV)$',
                      'LyaEmiss' : r'Lyman-alpha Emissivity $(photons*m^{-3}s^{-1}sr^{-1})$',
-                     'LyaEmissW' : r'Converted Lyman-alpha Emissivity $(W*m^{-3})$'}
+                     'LyaEmissW' : r'Converted Lyman-alpha Emissivity $(W*m^{-3})$',
+                     'LyaEmissW_IE' : r'Ion-Electron Reaction Lyman-alpha Emissivity $(W*m^{-3})$'}
         
         self._LoadSOLPSData()
         
@@ -300,28 +301,29 @@ class SOLPSPLOT(object):
                 ExpData = loadmat(ExpFile[0])    
                 
             if EXP:
-                ti = 0
-                while TimeRange[0] > ExpData['time'].flatten()[ti]:
-                    ti = ti+1           
-                tf = 0
-                while TimeRange[1] > ExpData['time'].flatten()[tf]:
-                    tf = tf+1
+                TR=[ii for ii, tt in enumerate(ExpData['time'][0,:]) if tt > TimeRange[0] and tt < TimeRange[1]]
                 
-                Rmid = ExpData['rmid'][:,ti:tf]
+                Rmid = ExpData['rmid'][:,TR]
                 RmidAvg = np.mean(Rmid, axis=1)
     
                 try:
-                    Psin = ExpData['psin'][:,ti:tf]
+                    Psin = ExpData['psin'][:,TR]
                     PsinAvg = np.mean(Psin, axis=1)
                 except:
                     print('Psin coordinates not found. Attempting to approximate experimental psin from gfile')
                     PsinAvg = GF.psiN(RmidAvg,np.zeros(RmidAvg.shape))[0]
                 
-                #Robust Statistics -> Use MEDIAN, not MEAN, of TS Data
+                #Robust Statistics -> Use MEDIAN, not MEAN, of TS Data -> Need to filter out zeros before taking Median!
                 
-                Nemid = ExpData['ne'][:,ti:tf]
-                NemidAvg=np.median(Nemid, axis=1)
-                ErrNe=np.median(ExpData['nerr'][:,ti:tf], axis=1)
+                Nemid = ExpData['ne'][:,TR]
+                NemidAvg=np.zeros(Nemid.shape[0])
+                for ii in range(Nemid.shape[0]):
+                    if np.sum(Nemid[ii,:]) == 0:
+                        continue
+                    else:
+                        NemidAvg[ii]=np.median(Nemid[ii][np.nonzero(Nemid[ii])])
+                        
+                ErrNe=np.median(ExpData['nerr'][:,TR], axis=1)
                 '''
                 Nemid[Nemid == 0] = np.nan
                 NemidAvg = np.nanmean(Nemid, axis=1)
@@ -330,13 +332,18 @@ class SOLPSPLOT(object):
                 NeThresh = (ErrNe*2)/NemidAvg
     
                 for NT in range(len(NeThresh)):
-                    if np.abs(NeThresh[NT]) > 3.0:
+                    if np.abs(NeThresh[NT]) > 5.0:
                         NemidAvg[NT] = np.nan
                         ErrNe[NT] = np.nan
                 
-                Temid = ExpData['te'][:,ti:tf]
-                TemidAvg=np.median(Temid, axis=1)
-                ErrTe=np.median(ExpData['terr'][:,ti:tf], axis=1)
+                Temid = ExpData['te'][:,TR]
+                TemidAvg=np.zeros(Temid.shape[0])
+                for ii in range(Temid.shape[0]):
+                    if np.sum(Temid[ii,:]) == 0:
+                        continue
+                    else:
+                        TemidAvg[ii]=np.median(Temid[ii][np.nonzero(Temid[ii])])
+                ErrTe=np.median(ExpData['terr'][:,TR], axis=1)
                 '''
                 Temid[Temid == 0] = np.nan
                 TemidAvg = np.nanmean(Temid, axis=1)
@@ -345,7 +352,7 @@ class SOLPSPLOT(object):
                 TeThresh = (ErrTe*2)/TemidAvg
                 
                 for TT in range(len(TeThresh)):
-                    if np.abs(TeThresh[TT]) > 3.0:
+                    if np.abs(TeThresh[TT]) > 5.0:
                         TemidAvg[TT] = np.nan
                         ErrTe[TT] = np.nan
                 
@@ -932,7 +939,7 @@ class SOLPSPLOT(object):
                     PARAM = self.PARAM[pn].copy()
                 except:
                     print('Plot Parameter Does Not Exist Or Could Not Be Loaded! Skipping Plot...')
-                    pass
+                    quit()
             
             if RadProfKW['AVG'] is True:
                 if 'AVG' not in Attempts:

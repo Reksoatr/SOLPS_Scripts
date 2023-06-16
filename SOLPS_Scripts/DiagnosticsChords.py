@@ -153,9 +153,9 @@ if __name__=='__main__':
     
     figc,axc=plt.subplots()
     A=SOLPSDiagnostiChorder('LyaAnalysis/Chords/lya_coords_v3.pkl', 
-                              device='CMOD', plot=True, EndKey='ph', 
-                              Output='LyaAnalysis/Chords/lya_coords_new.pkl',
-                              Extend2wall=True, Reverse=True, ax=axc, ViewAngle=True)
+                              plot=True, ax=axc, Output=False, 
+                              device='CMOD', EndKey='ph', 
+                              Extend2wall=True, Reverse=True, ViewAngle=True)
     
 '''       
 Etendue=np.array([4.8e-9,5.5e-9,5.9e-9,6.3e-9,6.7e-9,6.9e-9,7.3e-9,

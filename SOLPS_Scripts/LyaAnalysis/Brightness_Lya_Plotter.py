@@ -23,11 +23,14 @@ plt.rc('lines',linewidth=5,markersize=15)
 Plot=True
 Error_Analysis=True
 
-RADC='psin' #'radial' #
+RADC='radial' #'psin' #
 EMISS='tomo' #'tree'#
 
 SHOTS = ['1100308004','1080416025','1100305023'] #,
-ATTEMPTS = [['14Rf0.35_split2','14Rf0.7_split2','14Rf1.05_split2'],['18Rf0.3_split2','18Rf0.6_split2','18Rf0.9_split2'],['24Rf1.0_split2','24Rf2.0_split2','24Rf3.0_split2']] # ,
+ATTEMPTS = [['14Rf0.35_split2','14Rf0.7_split2','14Rf1.05_split2'],
+            ['18Rf0.3_split2','18Rf0.6_split2','18Rf0.9_split2'],
+            ['24Rf1.0_split2','24Rf2.0_split2','24Rf3.0_split2']]
+
 AN=len(SHOTS)
 
 LCFS_Te=[83,90,93]
@@ -66,13 +69,13 @@ for N in nn:
     N[2]=1e6*N[2]
     nnlogerr.append(0.434*N[2]/N[1])
 
-solps=[SOLPSPLOT(SHOTS[i], ATTEMPTS[i], Markers=False, JXA=JXA[i], JXI=JXI[i], 
+solps=[SOLPSPLOT(SHOTS[i], ATTEMPTS[i], Markers=False, JXA=JXA[i], JXI=JXI[i], TimeRange=[0.95,1.05],
                  PlotScheme=['b--','b-','b--'], PsinOffset=PsinOffset[i], RadOffset=RadOffset[i]) 
                  for i in range(AN)]
 
 LYMID_coords=pkl.load(open('{}/Chords/lya_coords_new.pkl'.format(GFCMOD),'rb'))   #Load in LYMID XYZ coordinates from pickle file
-RLYMID0=np.flip(np.sqrt(LYMID_coords['tangent']['X']**2 + LYMID_coords['tangent']['Y']**2))    #Calculate R coordinate (R^2=X^2+Y^2)
-ZLYMID0=np.flip(LYMID_coords['start']['Z'])
+RLYMID0=np.flip(np.sqrt(LYMID_coords['tangent']['X']**2 + LYMID_coords['tangent']['Y']**2))    #Calculate R coordinates of tangent points (R^2=X^2+Y^2)
+ZLYMID0=np.flip(LYMID_coords['start']['Z'])                                                    #Pull Z coordinates of tangent points from start coordinates     
 
 LYMID = np.zeros((AN,len(RLYMID0),3))
 
@@ -125,15 +128,17 @@ if Plot:
     
     for p in range(AN):
         
-        solps[p].RadProf('DN',RADC=RADC,AX=axA[0,p],PlotScheme=['g--','g-','g--'],Publish=['$\pm 50\%\;D_n$','$D_n$',None])
-        solps[p].RadProf('KYE',RADC=RADC,AX=axA[0,p],PlotScheme=['m--','m-','m--'],Publish=['$\pm 50\%\;\chi_e$','$\chi_e$',None])
+        solps[p].RadProf('DN',RADC='psin',AX=axA[0,p],PlotScheme=['g--','g-','g--'],Publish=['$\pm 50\%\;D_n$','$D_n$',None])
+        solps[p].RadProf('KYE',RADC='psin',AX=axA[0,p],PlotScheme=['m--','m-','m--'],Publish=['$\pm 50\%\;\chi_e$','$\chi_e$',None])
         axA[0,p].legend()
         
-        solps[p].RadProf('Te',RADC=RADC,AX=axA[1,p],PlotScheme=['r--','b-','b--'],Publish=['$\pm50\%$','Base',None])
-        axA[1,p].axhline(LCFS_Te[0],linestyle=':',color='orange',label='2PM Te')
+        solps[p].RadProf('Te',RADC='psin',AX=axA[1,p],PlotScheme=['r--','b-','b--'],Publish=[None,'Base','$\pm50\%$'])
+        axA[1,p].get_lines()[0].set_color('blue')
+        #axA[1,p].axhline(LCFS_Te[0],linestyle=':',color='orange',label='2PM Te')
         axA[1,p].legend()
         
-        solps[p].RadProf('Ne',RADC=RADC,AX=axA[2,p],PlotScheme=['r--','b-','b--'],Publish=['$\pm50\%$','Base',None])
+        solps[p].RadProf('Ne',RADC=RADC,AX=axA[2,p],PlotScheme=['r--','b-','b--'],Publish=[None,'Base','$\pm50\%$'])
+        axA[2,p].get_lines()[0].set_color('blue')
         axA[2,p].legend()
         
         axA[0,p].axvline(Sep[p],linestyle=':')
@@ -159,9 +164,9 @@ if Plot:
         axB[1,p].legend()
         
         axB[2,p].plot(RLYMID[p],LYMID[p][:,0],'b--',linewidth='2.0',label='+/-50%')
-        axB[2,p].plot(RLYMID[p],LYMID[p][:,1],'b-',linewidth='2.0',label='Base')
+        axB[2,p].plot(RLYMID[p],LYMID[p][:,1],'bx-',linewidth='2.0',label='Base')
         axB[2,p].plot(RLYMID[p],LYMID[p][:,2],'b--',linewidth='2.0',label=None)
-        axB[2,p].plot(Rbright[p],bright[p][1],'--*',color='red',label='LYMID')
+        axB[2,p].plot(Rbright[p],bright[p][1],'+--',color='red',label='LYMID')
         axB[2,p].legend()
         
         axB[0,p].axvline(Sep[p],linestyle=':')
