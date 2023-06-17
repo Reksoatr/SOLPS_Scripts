@@ -82,7 +82,7 @@ if 'EDEN' in Param and Pressure:
 if LOG:
     Data=np.ma.log10(Data)
     Data=Data.filled(np.floor(Data.min()))
-    LogTxt='Log_10 of '
+    LogTxt=r'$Log_{10}$ of '
 else:
     LogTxt=''
 
@@ -126,10 +126,10 @@ Prof2, =Profile.plot(np.nan,np.nan,'r-')
 #resetax = plt.axes([0.125, 0.025, 0.05, 0.05])
 #Reset = Button(resetax, 'Reset', hovercolor='0.975') 
 
-textP0Xax = plt.axes([0.2, 0.3, 0.03, 0.05])
+textP0Xax = plt.axes([0.15, 0.3, 0.05, 0.05])
 P0X_Text = TextBox(textP0Xax, r'$R_{P0}$ (m)', hovercolor='0.9')
 
-textP0Yax = plt.axes([0.275, 0.3, 0.03, 0.05])
+textP0Yax = plt.axes([0.26, 0.3, 0.05, 0.05])
 P0Y_Text = TextBox(textP0Yax, r'$Z_{P0}$ (m)', hovercolor='0.9')
 
 buttonP0ax = plt.axes([0.32, 0.3, 0.05, 0.05])
@@ -138,10 +138,10 @@ P0Button = Button(buttonP0ax, 'Set P0')#,image=button1)
 clearP0ax = plt.axes([0.38, 0.3, 0.07, 0.05])
 P0Clear = Button(clearP0ax, 'Clear P0')#,image=button1)
 
-textP1Xax = plt.axes([0.2, 0.2, 0.03, 0.05])
+textP1Xax = plt.axes([0.15, 0.2, 0.05, 0.05])
 P1X_Text = TextBox(textP1Xax, r'$R_{P1}$ (m)', hovercolor='0.9')
 
-textP1Yax = plt.axes([0.275, 0.2, 0.03, 0.05])
+textP1Yax = plt.axes([0.26, 0.2, 0.05, 0.05])
 P1Y_Text = TextBox(textP1Yax, r'$Z_{P1}$ (m)', hovercolor='0.9')
 
 buttonP1ax = plt.axes([0.32, 0.2, 0.05, 0.05])
@@ -150,17 +150,20 @@ P1Button = Button(buttonP1ax, 'Set P1')#,image=button1)
 clearP1ax = plt.axes([0.38, 0.2, 0.07, 0.05])
 P1Clear = Button(clearP1ax, 'Clear P1')#,image=button1)
 
-plotax = plt.axes([0.45, 0.25, 0.1, 0.05])
+plotax = plt.axes([0.46, 0.3, 0.1, 0.05])
 PlotChord = Button(plotax, 'Plot Chord')#,image=button1)
 
+exportax = plt.axes([0.46, 0.2, 0.1, 0.05])
+ExportData = Button(exportax, 'Export Data')
+
 axslide = plt.axes([0.15, 0.1, 0.4, 0.03])
-sslide = Slider(axslide, 'Threshhold', 0.005, 0.1, valinit=0.015, valfmt='%0.3f', valstep=0.005)
+sslide = Slider(axslide, 'Threshhold', 0.001, 0.025, valinit=0.010, valfmt='%0.3f', valstep=0.001)
 
 if WF:
     for i in range(len(WallFile[:,0])):
-        Contour.plot((WallFile[i,0],WallFile[i,2]),(WallFile[i,1],WallFile[i,3]),'k-')
+        Contour.plot((WallFile[i,0],WallFile[i,2]),(WallFile[i,1],WallFile[i,3]),'k-',linewidth=3.0)
 else:
-    Contour.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000,'k-')
+    Contour.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000,'k-',linewidth=3.0)
 
 IM=Contour.tripcolor(TP,Data)
 Contour.set_aspect('equal')
@@ -269,6 +272,7 @@ P1Button.on_clicked(setP1)
 
 def chordplot(event):
     global Prof1
+    
     Thresh=round(sslide.val,3)
     print('Threshhold={}m'.format(Thresh))
     PP=P1-P0
@@ -291,7 +295,6 @@ def chordplot(event):
     ChordXY.set_data(ChordX,ChordY)
     
     Chord=np.sqrt((ChordX-P0[0])**2 + (ChordY-P0[1])**2)
-    Chord=Chord-Chord.min()
     Band=np.ma.array(Data,mask=~Mask).compressed()
 
     #print('Distance along Chord:{}'.format(Chord))
@@ -309,12 +312,11 @@ def chordplot(event):
     else:
         Prof1.set_data(Chord,Band)
 
-    Xline=np.linspace(P0[0],P1[0])
-    Yline=np.linspace(P0[1],P1[1])
+    Xline=np.linspace(P0[0],P1[0],num=100)
+    Yline=np.linspace(P0[1],P1[1],num=100)
 
     Vals=griddata((tr,tz),Data,(Xline,Yline),method='linear')
     Dist=np.sqrt((Xline-P0[0])**2 + (Yline-P0[1])**2)
-    Dist=Dist-Dist.min()
     
     if LOG and Pressure:
         Prof2.set_data(Dist,10**Vals)
@@ -327,13 +329,19 @@ def chordplot(event):
     
     EirFig.canvas.draw()
     
+    Output={'Chord':Chord,'Data':Band,'InterpChord':Dist,'InterpData':Vals}
+    
+    return Output
+    
 PlotChord.on_clicked(chordplot)
 
+#def exportdata(event):
+
 def arrowclick(event):
-    if event.key == 'right' and round(sslide.val,3)<0.1:
-        sslide.set_val(sslide.val+0.005)
-    elif event.key == 'left' and round(sslide.val,3)>0.005:
-        sslide.set_val(sslide.val-0.005)
+    if event.key == 'right' and round(sslide.val,3)<0.025:
+        sslide.set_val(sslide.val+0.001)
+    elif event.key == 'left' and round(sslide.val,3)>0.001:
+        sslide.set_val(sslide.val-0.001)
     else:
         pass        
 

@@ -53,27 +53,34 @@ BASE,TOP = SET_WDIR('','')
 GFCMOD='{}gfileProcessing/cmod_files/'.format(TOP) #gfile directory under TOP directory
 
 GFiles=[]
+bright=[]
+nn=[]
 
 for A in SHOTS:
-    GFiles.append(eq.equilibrium(gfile='{}g{}.01000'.format(GFCMOD,A)))
+    GFiles.append(eq.equilibrium(gfile='{}g{}.01000'.format(GFCMOD,A))) #Load gfiles into list
+    
+    with open('{}Brightness_Profiles/lya_brightness_{}.pkl'.format(GFCMOD,A),'rb') as file1:
+        bright.append(pkl.load(file1))    #Experimental Ly-a brightness and emissivity data
 
-bright = [pkl.load(open('{}Brightness_Profiles/lya_brightness_{}.pkl'.format(GFCMOD,A),'rb')) for A in SHOTS]    #Experimental Ly-a brightness and emissivity data
-
-nn = [pkl.load(open('{}Brightness_Profiles/lyman_data_{}.pkl'.format(GFCMOD,A),'rb'))   #Experimental neutral density profile data
-      for A in SHOTS]
+    with open('{}Brightness_Profiles/lyman_data_{}.pkl'.format(GFCMOD,A),'rb') as file2:
+        nn.append(pkl.load(file2))   #Experimental neutral density profile data
 
 nnlogerr=[]
 
 for N in nn:
-    N[1]=1e6*N[1]
+    N[1]=1e6*N[1]                       #Convert neutral density data from units of cm^-3 to m^-3
     N[2]=1e6*N[2]
-    nnlogerr.append(0.434*N[2]/N[1])
+    nnlogerr.append(0.434*N[2]/N[1])    #Process neutral density error for semilogy plotting
+
+# Load SOLPS simulation data
 
 solps=[SOLPSPLOT(SHOTS[i], ATTEMPTS[i], Markers=False, JXA=JXA[i], JXI=JXI[i], TimeRange=[0.95,1.05],
                  PlotScheme=['b--','b-','b--'], PsinOffset=PsinOffset[i], RadOffset=RadOffset[i]) 
-                 for i in range(AN)]
+                 for i in range(AN)]    #Load nominal SOLPS B2-matrix data
 
-LYMID_coords=pkl.load(open('{}/Chords/lya_coords_new.pkl'.format(GFCMOD),'rb'))   #Load in LYMID XYZ coordinates from pickle file
+with open('{}/Chords/lya_coords_new.pkl'.format(GFCMOD),'rb') as file3:
+    LYMID_coords=pkl.load(file3)   #Load in LYMID XYZ coordinates from pickle file
+    
 RLYMID0=np.flip(np.sqrt(LYMID_coords['tangent']['X']**2 + LYMID_coords['tangent']['Y']**2))    #Calculate R coordinates of tangent points (R^2=X^2+Y^2)
 ZLYMID0=np.flip(LYMID_coords['start']['Z'])                                                    #Pull Z coordinates of tangent points from start coordinates     
 
@@ -82,7 +89,7 @@ LYMID = np.zeros((AN,len(RLYMID0),3))
 for m,a in enumerate(SHOTS):
     for n,i in enumerate(ATTEMPTS[m]):
         LYMID[m,:,n]=np.loadtxt('{}SOLPS_2d_prof/cmod/{}home/Attempt{}/Output/LyaBrightW{}'.format(TOP,a,i,i),
-                        skiprows=2)[:,1]    
+                        skiprows=2)[:,1]    # Load special Brightness profile simulation data
 
 if Plot:
     
@@ -92,14 +99,14 @@ if Plot:
     Sep=[]
     RLYMID=[]
 
-    if RADC=='radial':
+    if RADC=='radial':                                  # Convert all data coordinates to R (meters)
         for m in range(AN):
             
-            Rbright.append(bright[m][0])
-            Remiss.append(bright[m][Remiss_idx])
-            Rnn.append(PsiN2R(GFiles[m],nn[m][0]))
-            Sep.append(PsiN2R(GFiles[m],nn[m][0]))
-            RLYMID.append(RLYMID0)
+            Rbright.append(bright[m][0])                # Brightness profile coordinates already given in R
+            Remiss.append(bright[m][Remiss_idx])        # Emissivity profile coordinates already given in R
+            Rnn.append(PsiN2R(GFiles[m],nn[m][0]))      # Convert neutral density coordinates from PsiN to R with gfile
+            Sep.append(PsiN2R(GFiles[m],nn[m][0]))      # Calculate R coordinate of Separatrix from gfile
+            RLYMID.append(RLYMID0)                      # SOLPS brightness profile coordinates already given in R
 
             '''
             Rnn[m]=np.array([[j for j,k in zip(*GFiles[m].get_fluxsurface(i)) if j > GFiles[m].axis.r and k==0] 
@@ -109,7 +116,7 @@ if Plot:
             
         Rlabel=r'Major Radius [m]'
         
-    elif RADC=='psin':
+    elif RADC=='psin':                                                          # Convert all data coordinates to PsiN
         for m in range(AN):
             
             Rbright.append(R2PsiN(GFiles[m],bright[m][0],Z=ZLYMID0))

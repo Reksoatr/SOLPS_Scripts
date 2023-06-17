@@ -39,7 +39,8 @@ def SOLPSDiagnostiChorder(filepath,
         file=open(filepath,ReadType[fmt])
     
     if fmt == '.pkl':
-        HH=pkl.load(file)           
+        HH=pkl.load(file)
+        file.close()           
         C0=HH['start']
         C1=HH[EndKey] #Keyword might be 'end' (for wall end), 'tang' (for tangent), or 'ph' (for pinhole)
         n=len(C0['Z'])
@@ -52,6 +53,7 @@ def SOLPSDiagnostiChorder(filepath,
             
     elif fmt == '.chords': #.chords format ONLY has X,Y,Z coords
         HH=np.loadtxt(file,skiprows=1)
+        file.close()
         HH=HH.T
         n=len(HH[0])
         C0={'X':np.array(HH[0]),'Y':np.array(HH[1]),'Z':np.array(HH[2])}
