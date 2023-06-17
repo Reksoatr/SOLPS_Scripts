@@ -3,6 +3,8 @@
 Created on Fri Jan 28 14:34:44 2022
 
 @author: Richard Reksoatmodjo and Jameson Crouse
+
+EDIT 6/16/2023 - Moved R2PsiN and PsiN2R methods to TOOLS.py
 """
 
 import re
@@ -125,26 +127,6 @@ def batch_writer(dest, i, j, k, mk):
     f = open('batch_use', 'w')
     f.writelines(['#!/bin/tcsh','\n#PBS -l nodes=1:hima:ppn=1','\n#PBS -l walltime=04:00:00','\n#PBS -N Attempt{}{}{}_mk{}'.format(i,j,k,mk),'\n#PBS -j oe','\n','\nenv','\n','\n',dest,'\n','\nb2run b2mn > run.log'])
     f.close()
-
-
-
-
-def R2PsiN(GF,R,Z=0):
-    '''Uses equilibrium to convert from R to PsiN
-        Must provide gfile (GF) loaded as an equilibrium object
-        Default assumes Z=0'''
-    PP=GF.psiN(R,Z)[0]
-    
-    return PP
-
-def PsiN2R(GF,psin):
-    '''uses equilibrium to convert from PsiN to R
-       Must provide gfile (GF) loaded as an equilibrium object
-       Assumes Z=0'''
-    Rlfs=[i for i in GF.R if i>GF.axis.r]
-    RR=np.interp(psin,R2PsiN(GF,Rlfs),Rlfs)
-    
-    return RR
 
 if __name__=='__main__':
     
