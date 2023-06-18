@@ -9,6 +9,7 @@ SOLPS Diagnostics Chord Plotter
 
 import numpy as np
 import pickle as pkl
+import json
 import os
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptchs
@@ -18,12 +19,12 @@ from TOOLS import WALL_INTERSECT, OpenRemoteFile, SSH_config, JumpConnect
 def SOLPSDiagnostiChorder(filepath, 
                           device='CMOD', plot=True, ax=None,
                           RemoteSave=False, RemotePath=None,
-                          Output=None, EndKey='tang', ViewAngle=False,
-                          Extend2wall=False, Reverse=False):
+                          Output=None, EndKey='tang', Coord='cartesian',
+                          ViewAngle=False, Extend2wall=False, Reverse=False):
     
     filename,fmt=os.path.splitext(filepath)
     
-    ReadType={'.pkl':'rb','.chords':'r'}
+    ReadType={'.pkl':'rb','.chords':'r','.json':'r'}
     
     if device == 'CMOD':
         r1=0.44020 #Inner wall at Z=-0.0382
@@ -35,6 +36,7 @@ def SOLPSDiagnostiChorder(filepath,
         RR=SSH_config()
         file=OpenRemoteFile('{}{}'.format(RemotePath,filepath),
                             ReadType[fmt],**RR)
+    
     else:
         file=open(filepath,ReadType[fmt])
     
@@ -44,12 +46,6 @@ def SOLPSDiagnostiChorder(filepath,
         C0=HH['start']
         C1=HH[EndKey] #Keyword might be 'end' (for wall end), 'tang' (for tangent), or 'ph' (for pinhole)
         n=len(C0['Z'])
-        
-        if 'R' and 'phi' in C0.keys(): #Convert R,phi to X,Y coords
-            C0['X']=np.array([C0['R'][i]*np.cos(np.radians(C0['phi'][i])) for i in range(n)])
-            C0['Y']=np.array([C0['R'][i]*np.sin(np.radians(C0['phi'][i])) for i in range(n)])
-            C1['X']=np.array([C1['R'][i]*np.cos(np.radians(C1['phi'][i])) for i in range(n)])
-            C1['Y']=np.array([C1['R'][i]*np.sin(np.radians(C1['phi'][i])) for i in range(n)])
             
     elif fmt == '.chords': #.chords format ONLY has X,Y,Z coords
         HH=np.loadtxt(file,skiprows=1)
@@ -59,8 +55,27 @@ def SOLPSDiagnostiChorder(filepath,
         C0={'X':np.array(HH[0]),'Y':np.array(HH[1]),'Z':np.array(HH[2])}
         C1={'X':np.array(HH[3]),'Y':np.array(HH[4]),'Z':np.array(HH[5])}
     
-    if Extend2wall:
+    elif fmt == '.json':
+        HH=json.load(file)
+        file.close()
+        C0={'X':np.array(HH['start']['X']),'Y':np.array(HH['start']['Y']),'Z':np.array(HH['start']['Z'])}
+        C1={'X':np.array(HH[EndKey]['X']),'Y':np.array(HH[EndKey]['Y']),'Z':np.array(HH[EndKey]['Z'])}
+        n=len(C0['Z'])
+    
+    
+    if Coord =='cartesian' and 'R' and 'phi' in C0.keys(): #Convert R,phi to X,Y coords
+        C0['X']=np.array([C0['R'][i]*np.cos(np.radians(C0['phi'][i])) for i in range(n)])
+        C0['Y']=np.array([C0['R'][i]*np.sin(np.radians(C0['phi'][i])) for i in range(n)])
+        C1['X']=np.array([C1['R'][i]*np.cos(np.radians(C1['phi'][i])) for i in range(n)])
+        C1['Y']=np.array([C1['R'][i]*np.sin(np.radians(C1['phi'][i])) for i in range(n)])
         
+    elif Coord == 'cylindrical' and 'X' and 'Y' in C0.keys():
+        C0['R']=np.array([np.sqrt(C0['X'][i]**2+C0['Y'][i]**2) for i in range(n)])
+        C0['phi']=np.array([np.degrees(np.arctan2(C0['Y'],C0['X']))])
+        C1['R']=np.array([np.sqrt(C1['X'][i]**2+C1['Y'][i]**2) for i in range(n)])
+        C1['phi']=np.array([np.degrees(np.arctan2(C1['Y'],C1['X']))])
+    
+    if Extend2wall:
         P1,P2=WALL_INTERSECT(C0,C1,r2)
         
         Ctang={}
@@ -154,10 +169,10 @@ def SOLPSDiagnostiChorder(filepath,
 if __name__=='__main__':
     
     figc,axc=plt.subplots()
-    A=SOLPSDiagnostiChorder('LyaAnalysis/Chords/lya_coords_v3.pkl', 
-                              plot=True, ax=axc, Output=False, 
-                              device='CMOD', EndKey='ph', 
-                              Extend2wall=True, Reverse=True, ViewAngle=True)
+    A=SOLPSDiagnostiChorder('C:/Users/Richard/WMGDrive/College of William and Mary/Research/SOLPS Stuff/gfileProcessing/cmod_files/Chords/LYMID_PINHOLE.json', 
+                              plot=False, ax=axc, Output=False, 
+                              device='CMOD', EndKey='end', Coord='cylindrical',
+                              Extend2wall=False, Reverse=True, ViewAngle=True)
     
 '''       
 Etendue=np.array([4.8e-9,5.5e-9,5.9e-9,6.3e-9,6.7e-9,6.9e-9,7.3e-9,
