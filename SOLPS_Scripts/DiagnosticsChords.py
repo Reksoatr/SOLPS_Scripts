@@ -71,9 +71,9 @@ def SOLPSDiagnostiChorder(filepath,
         
     elif Coord == 'cylindrical' and 'X' and 'Y' in C0.keys():
         C0['R']=np.array([np.sqrt(C0['X'][i]**2+C0['Y'][i]**2) for i in range(n)])
-        C0['phi']=np.array([np.degrees(np.arctan2(C0['Y'],C0['X']))])
+        C0['phi']=np.degrees(np.arctan2(C0['Y'],C0['X']))
         C1['R']=np.array([np.sqrt(C1['X'][i]**2+C1['Y'][i]**2) for i in range(n)])
-        C1['phi']=np.array([np.degrees(np.arctan2(C1['Y'],C1['X']))])
+        C1['phi']=np.degrees(np.arctan2(C1['Y'],C1['X']))
     
     if Extend2wall:
         P1,P2=WALL_INTERSECT(C0,C1,r2)
