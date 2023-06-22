@@ -14,6 +14,7 @@ import glob
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import colors, cm
+from matplotlib.collections import QuadMesh
 from scipy.io import loadmat
 import geqdsk
 import equilibrium as eq
@@ -401,8 +402,18 @@ class SOLPSPLOT(object):
         YYLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Radial Grid Point $N$')
         PsinLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Normalized Psi $\psi_N$')
         
-        #RadCor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Corner Radial Coordinate $m$')
-        #VertCor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Corner Vertical Coordinate $m$')
+        Rad0Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Bottom Left Corner Radial Coordinate $m$')
+        Vert0Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Bottom Left Corner Vertical Coordinate $m$')
+
+        Rad1Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Bottom Right Corner Radial Coordinate $m$')
+        Vert1Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Bottom Right Corner Vertical Coordinate $m$')
+
+        Rad2Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Top Left Corner Radial Coordinate $m$')
+        Vert2Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Top Left Corner Vertical Coordinate $m$')
+
+        Rad3Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Top Right Corner Radial Coordinate $m$')
+        Vert3Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Top Right Corner Vertical Coordinate $m$')
+
 
         PolLbl = ['XXLoc', 'Theta', 'dXP','dXP_norm']
         PolVec = xr.DataArray(np.zeros((YSurf,XGrid,N,4)), coords=[Y,X,Attempts,PolLbl], dims=['Radial_Location','Poloidal_Location','Attempt','Poloidal Metric'], name = 'Poloidal Coordinate Data')            
@@ -418,11 +429,23 @@ class SOLPSPLOT(object):
                 PolVec.values[:,:,n,:] = PolVec.values[:,:,0:n-1,:].mean(2) 
             else:
                 DRT = '{}/Attempt{}/Output'.format(BASEDRT, str(Attempt))     # MAINPATH DIRECTORY STRING
-                #DRT2 = 'SOLPS_2D_prof/Shot0' + Shot + '/Attempt' + str(Attempt) + '/Output2'     #Generate Mesh path
+                DRT2 = '{}/Attempt{}/Output2'.format(BASEDRT, str(Attempt))    # Mesh data directory path
                             
                 YYLoc.values[:,:,n] = Yy
                 RadLoc.values[:,:,n] = np.loadtxt('{}/RadLoc{}'.format(DRT, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
                 VertLoc.values[:,:,n] = np.loadtxt('{}/VertLoc{}'.format(DRT, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                
+                Rad0Cor.values[:,:,n] = np.loadtxt('{}/Rad0Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                Vert0Cor.values[:,:,n] = np.loadtxt('{}/Vert0Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+
+                Rad1Cor.values[:,:,n] = np.loadtxt('{}/Rad1Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                Vert1Cor.values[:,:,n] = np.loadtxt('{}/Vert1Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+
+                Rad2Cor.values[:,:,n] = np.loadtxt('{}/Rad2Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                Vert2Cor.values[:,:,n] = np.loadtxt('{}/Vert2Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+
+                Rad3Cor.values[:,:,n] = np.loadtxt('{}/Rad3Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                Vert3Cor.values[:,:,n] = np.loadtxt('{}/Vert3Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
                 
                 for j in range(len(Y)):
                     for i in range(len(X)):
@@ -586,17 +609,36 @@ class SOLPSPLOT(object):
         return RR, Rexp, Rstr
     
     def VeslMesh(self,Parameter=None,**kwargs):
-        figVesl = plt.figure(figsize=(14,10))
-        plt.plot(RadCor.loc[:,:,Attempts[0]],VertCor.loc[:,:,Attempts[0]])
-        plt.plot(np.transpose(RadCor.loc[:,:,Attempts[0]].values),np.transpose(VertCor.loc[:,:,Attempts[0]].values))
-        plt.plot(RadLoc.loc[:,JXA,Attempts[0]],VertLoc.loc[:,JXA,Attempts[0]],color='Orange')
-        plt.plot(RadLoc.loc[:,JXI,Attempts[0]],VertLoc.loc[:,JXI,Attempts[0]],color='Red')
-        plt.plot(RadLoc.loc[SEP,:,Attempts[0]],VertLoc.loc[SEP,:,Attempts[0]],color='Black')
-        plt.title('Vessel Mesh Geometry')
-        plt.xlabel('Radial Coordinate r (m)')
-        plt.ylabel('Vertical Coordinate z (m)')
-        plt.gca().set_aspect(1.0)
-        plt.grid()
+        N = self.N
+        Xx = self.Xx
+        Yy = self.Yy
+        Attempts = self.Attempts
+        Shot = self.Shot
+        VVFILE = self.VVFILE
+        Markers = kwargs['Markers']
+        Colors = kwargs['Colors']
+        Publish = kwargs['Publish']
+        CoreBound = kwargs['CoreBound']
+        DIVREG = kwargs['DIVREG']
+        JXA = kwargs['JXA']
+        JXI = kwargs['JXI']
+        SEP = kwargs['SEP']        
+        VeslKW = kwargs
+        if VeslKW['AX']:
+            ax = VeslKW['AX']
+        else:
+            fig, ax = plt.subplots(nrows=1, ncols=1,figsize=(14,10))
+        
+        ax.plot(RadCor.loc[:,:,Attempts[0]],VertCor.loc[:,:,Attempts[0]])
+        ax.plot(np.transpose(RadCor.loc[:,:,Attempts[0]].values),np.transpose(VertCor.loc[:,:,Attempts[0]].values))
+        ax.plot(RadLoc.loc[:,JXA,Attempts[0]],VertLoc.loc[:,JXA,Attempts[0]],color='Orange')
+        ax.plot(RadLoc.loc[:,JXI,Attempts[0]],VertLoc.loc[:,JXI,Attempts[0]],color='Red')
+        ax.plot(RadLoc.loc[SEP,:,Attempts[0]],VertLoc.loc[SEP,:,Attempts[0]],color='Black')
+        ax.title('Vessel Mesh Geometry')
+        ax.xlabel('Radial Coordinate r (m)')
+        ax.ylabel('Vertical Coordinate z (m)')
+        ax.gca().set_aspect(1.0)
+        ax.grid()
     
     def Contour(self,Parameter=None,**kwargs):
         if Parameter is None:
@@ -712,10 +754,10 @@ class SOLPSPLOT(object):
                     CMAP = cm.coolwarm
             
             for n in N:
-                if ContKW['AX'] is None:
-                    fig, ax = plt.subplots(nrows=1, ncols=1,figsize=(14,10))
-                else:
+                if ContKW['AX']:
                     ax = ContKW['AX']
+                else:
+                    fig, ax = plt.subplots(nrows=1, ncols=1,figsize=(14,10))
                 
                 if ContKW['GEO']:
                     if ContKW['LOG10'] == 2:
