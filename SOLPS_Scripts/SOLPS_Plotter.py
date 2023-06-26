@@ -14,7 +14,6 @@ import glob
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import colors, cm
-from matplotlib.collections import QuadMesh
 from scipy.io import loadmat
 import geqdsk
 import equilibrium as eq
@@ -414,7 +413,6 @@ class SOLPSPLOT(object):
         Rad3Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Top Right Corner Radial Coordinate $m$')
         Vert3Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Top Right Corner Vertical Coordinate $m$')
 
-
         PolLbl = ['XXLoc', 'Theta', 'dXP','dXP_norm']
         PolVec = xr.DataArray(np.zeros((YSurf,XGrid,N,4)), coords=[Y,X,Attempts,PolLbl], dims=['Radial_Location','Poloidal_Location','Attempt','Poloidal Metric'], name = 'Poloidal Coordinate Data')            
 
@@ -446,6 +444,21 @@ class SOLPSPLOT(object):
 
                 Rad3Cor.values[:,:,n] = np.loadtxt('{}/Rad3Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
                 Vert3Cor.values[:,:,n] = np.loadtxt('{}/Vert3Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                
+                X_Core=np.zeros(YSurf+1,CoreBound[1]-CoreBound[0]+2)
+                Y_Core=np.zeros(YSurf+1,CoreBound[1]-CoreBound[0]+2)
+                
+                X_Core[:-1,:-1] = Rad0Cor.loc[:,CoreBound[0]:CoreBound[1],n].values
+                X_Core[:-1,-1] = Rad1Cor.loc[:,CoreBound[1],n].values
+                X_Core[-1,:-1] = Rad2Cor.loc[YSurf,CoreBound[0]:CoreBound[1],n].values
+                X_Core[-1,-1] = Rad3Cor.loc[YSurf,CoreBound[1],n].values
+                
+                Y_Core[:-1,:-1] = Vert0Cor.loc[:,CoreBound[0]:CoreBound[1],n].values
+                Y_Core[:-1,-1] = Vert1Cor.loc[:,CoreBound[1],n].values
+                Y_Core[-1,:-1] = Vert2Cor.loc[YSurf,CoreBound[0]:CoreBound[1],n].values
+                Y_Core[-1,-1] = Vert3Cor.loc[YSurf,CoreBound[1],n].values
+                
+                
                 
                 for j in range(len(Y)):
                     for i in range(len(X)):
@@ -553,6 +566,14 @@ class SOLPSPLOT(object):
         self.RadCoords['PsinLoc'] = PsinLoc
         self.RadCoords['RadLoc'] = RadLoc
         self.RadCoords['VertLoc'] = VertLoc
+        self.RadCoords['Rad0Cor'] = Rad0Cor
+        self.RadCoords['Vert0Cor'] = Vert0Cor
+        self.RadCoords['Rad1Cor'] = Rad1Cor
+        self.RadCoords['Vert1Cor'] = Vert1Cor
+        self.RadCoords['Rad2Cor'] = Rad2Cor
+        self.RadCoords['Vert2Cor'] = Vert2Cor
+        self.RadCoords['Rad3Cor'] = Rad3Cor
+        self.RadCoords['Vert3Cor'] = Vert3Cor
         self.PolVec = PolVec
         if EXP:
             self.RadCoords['PsinAvg'] = PsinAvg
@@ -677,6 +698,14 @@ class SOLPSPLOT(object):
         
         RadLoc = self.RadCoords['RadLoc']
         VertLoc = self.RadCoords['VertLoc']
+        Rad0Cor = self.RadCoords['Rad0Cor']
+        Vert0Cor = self.RadCoords['Vert0Cor']
+        Rad1Cor = self.RadCoords['Rad1Cor']
+        Vert1Cor = self.RadCoords['Vert1Cor']
+        Rad2Cor = self.RadCoords['Rad2Cor']
+        Vert2Cor = self.RadCoords['Vert2Cor']
+        Rad3Cor = self.RadCoords['Rad3Cor']
+        Vert3Cor = self.RadCoords['Vert3Cor']
         XMin = self.RadCoords['XMin']
         
         RR, Rexp, Rstr = self.GetRadCoords(ContKW['RADC'], Offset)
@@ -766,7 +795,8 @@ class SOLPSPLOT(object):
                             IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
 
                         IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
-                                            
+                        #IM1 = ax.pcolormesh(X1,Y1,PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
+                        
                     else:
                         if DIVREG:
                             IM2 = ax.contourf(RadLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],VertLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,colors=Colors,cmap=CMAP)
