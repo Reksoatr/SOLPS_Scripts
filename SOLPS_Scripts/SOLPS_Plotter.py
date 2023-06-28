@@ -5,7 +5,7 @@ Created on Thu Jun 27 14:00:00 2019
 @author: Rmreksoatmodjo
 
 SOLPS_Plotter V1.0 - Renamed from VesselPlotterNew
-Last Revised 4/13/2022
+Last Revised 6/27/2023
 """
 import os
 import numpy as np
@@ -15,7 +15,6 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import colors, cm
 from scipy.io import loadmat
-import geqdsk
 import equilibrium as eq
 from D3DPreProcess import PsiNtoR
 from D3DPreProcess import RhotoPsiN
@@ -70,7 +69,7 @@ class SOLPSPLOT(object):
     RadSlc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
     PolSlc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
     SURF = 20 > Same purpose as PolSlc
-    GEO = True > Map Contour to Vessel Geometry; if False, plots on rectangular grid     
+    PHYS = True > Map Contour to PHYSical Geometry; if False, plots on rectangular grid     
     LVN = 100 > Number of colorbar levels for contour plots or List [] of specific contour levels
     DIVREG = True > Include Divertor Region Data (May cause loss of logarithmic resolution)   
     SAVE = False > Save plot to a .png file 
@@ -141,7 +140,7 @@ class SOLPSPLOT(object):
                      'RadSlc' : None,
                      'PolSlc' : None,
                      'SURF' : 20,
-                     'GEO' : True,
+                     'PHYS' : True,
                      'LVN' : 100,
                      'DIVREG' : True,
                      'SAVE' : False,
@@ -149,9 +148,10 @@ class SOLPSPLOT(object):
                      'AVG' : False,
                      'TC_Flux' : [], 
                      'TC_Psin' : [],
-                     'GRID': False,
+                     'GRID' : False,
+                     'MESHGRID' : None,
                      'AX' : None,
-                     'BASEDRT': 'solps-iter/runs/',
+                     'BASEDRT' : 'solps-iter/runs/',
                      'TOPDRT' : '',
                      'ROOTSHOT' : ''} #1160718
         
@@ -370,7 +370,7 @@ class SOLPSPLOT(object):
             GF = eq.equilibrium(gfile=GFILE[-1])
             if EXP:
                 ExpFile = Shot
-                ExpData = loadmat('{}/{}.mat'.format(TOPDRT,DEV,ExpFile))
+                ExpData = loadmat('{}/{}/{}.mat'.format(TOPDRT,DEV,ExpFile))
             
         #Get dimensions of simulation grid 
         
@@ -385,6 +385,7 @@ class SOLPSPLOT(object):
         XGrid=XDIM-2
         XMin=1
         XMax=XGrid
+        X_Core=CoreBound[1]-CoreBound[0]+1
         
         YSurf=YDIM-2
         
@@ -392,29 +393,49 @@ class SOLPSPLOT(object):
         Y = np.linspace(1,YSurf,YSurf)
         Xx, Yy = np.meshgrid(X,Y)   # Create X and Y mesh grid arrays
         
-        RadLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Radial Coordinate $m$')
-        VertLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Vertical Coordinate $m$')
+        RadLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), 
+                              coords=[Y,X,Attempts], 
+                              dims=['Radial_Location','Poloidal_Location','Attempt'], 
+                              name = r'Radial Coordinate $m$')
+        VertLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), 
+                               coords=[Y,X,Attempts], 
+                               dims=['Radial_Location','Poloidal_Location','Attempt'], 
+                               name = r'Vertical Coordinate $m$')
+        
+        Core_Corners = xr.DataArray(np.zeros((YSurf+1,X_Core+1,N,2)), 
+                                    coords=[np.concatenate(([0],Y)),np.linspace(CoreBound[0],CoreBound[1]+1,X_Core+1),Attempts,['X','Y']], 
+                                    dims=['Radial Index','Poloidal Index','Attempt','Point Coordinates'], 
+                                    name = r'Core Corner Coordinates $m$')
+        Div1_Corners = xr.DataArray(np.zeros((YSurf+1,CoreBound[0]+1,N,2)), 
+                                    coords=[np.concatenate(([0],Y)),np.linspace(0,CoreBound[0],CoreBound[0]+1),Attempts,['X','Y']], 
+                                    dims=['Radial Index','Poloidal Index','Attempt','Point Coordinates'], 
+                                    name = r'Inner Divertor Corner Coordinates $m$')
+        Div2_Corners = xr.DataArray(np.zeros((YSurf+1,XMax-CoreBound[1],N,2)), 
+                                    coords=[np.concatenate(([0],Y)),np.linspace(CoreBound[1]+1,XMax,XMax-CoreBound[1]),Attempts,['X','Y']], 
+                                    dims=['Radial Index','Poloidal Index','Attempt','Point Coordinates'], 
+                                    name = r'Outer Divertor Corner Coordinates $m$')
+
+        YYLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), 
+                             coords=[Y,X,Attempts], 
+                             dims=['Radial_Location','Poloidal_Location','Attempt'], 
+                             name = r'Radial Grid Point $N$')
+        PsinLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), 
+                               coords=[Y,X,Attempts], 
+                               dims=['Radial_Location','Poloidal_Location','Attempt'], 
+                               name = r'Normalized Psi $\psi_N$')
+        
+        PolLbl = ['XXLoc', 'Theta', 'dXP','dXP_norm']
+        PolVec = xr.DataArray(np.zeros((YSurf,XGrid,N,4)), 
+                              coords=[Y,X,Attempts,PolLbl], 
+                              dims=['Radial_Location','Poloidal_Location','Attempt','Poloidal Metric'], 
+                              name = 'Poloidal Coordinate Data')  
 
         #RadCo = ['YYLoc', 'RRsep', 'PsiNLoc']
-        #RadVec = xr.DataArray(np.zeros((YSurf,XGrid,N,3)), coords=[Y,X,Attempts,RadCo], dims=['Radial_Location','Poloidal_Location','Attempt','Radial Metric'], name = 'Radial Coordinate Data')
-
-        YYLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Radial Grid Point $N$')
-        PsinLoc = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Normalized Psi $\psi_N$')
-        
-        Rad0Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Bottom Left Corner Radial Coordinate $m$')
-        Vert0Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Bottom Left Corner Vertical Coordinate $m$')
-
-        Rad1Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Bottom Right Corner Radial Coordinate $m$')
-        Vert1Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Bottom Right Corner Vertical Coordinate $m$')
-
-        Rad2Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Top Left Corner Radial Coordinate $m$')
-        Vert2Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Top Left Corner Vertical Coordinate $m$')
-
-        Rad3Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Top Right Corner Radial Coordinate $m$')
-        Vert3Cor = xr.DataArray(np.zeros((YSurf,XGrid,N)), coords=[Y,X,Attempts], dims=['Radial_Location','Poloidal_Location','Attempt'], name = r'Top Right Corner Vertical Coordinate $m$')
-
-        PolLbl = ['XXLoc', 'Theta', 'dXP','dXP_norm']
-        PolVec = xr.DataArray(np.zeros((YSurf,XGrid,N,4)), coords=[Y,X,Attempts,PolLbl], dims=['Radial_Location','Poloidal_Location','Attempt','Poloidal Metric'], name = 'Poloidal Coordinate Data')            
+        #RadVec = xr.DataArray(np.zeros((YSurf,XGrid,N,3)), 
+        #                      coords=[Y,X,Attempts,RadCo], 
+        #                      dims=['Radial_Location','Poloidal_Location','Attempt','Radial Metric'], 
+        #                      name = 'Radial Coordinate Data')
+          
 
         for n in range(N):
             Attempt = Attempts[n]
@@ -430,35 +451,50 @@ class SOLPSPLOT(object):
                 DRT2 = '{}/Attempt{}/Output2'.format(BASEDRT, str(Attempt))    # Mesh data directory path
                             
                 YYLoc.values[:,:,n] = Yy
-                RadLoc.values[:,:,n] = np.loadtxt('{}/RadLoc{}'.format(DRT, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
-                VertLoc.values[:,:,n] = np.loadtxt('{}/VertLoc{}'.format(DRT, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                RadLoc.values[:,:,n] = np.loadtxt('{}/RadLoc{}'.format(DRT, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
+                VertLoc.values[:,:,n] = np.loadtxt('{}/VertLoc{}'.format(DRT, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
                 
-                Rad0Cor.values[:,:,n] = np.loadtxt('{}/Rad0Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
-                Vert0Cor.values[:,:,n] = np.loadtxt('{}/Vert0Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                Rad0Cor = np.loadtxt('{}/Rad0Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
+                Vert0Cor = np.loadtxt('{}/Vert0Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
 
-                Rad1Cor.values[:,:,n] = np.loadtxt('{}/Rad1Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
-                Vert1Cor.values[:,:,n] = np.loadtxt('{}/Vert1Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                Rad1Cor = np.loadtxt('{}/Rad1Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
+                Vert1Cor = np.loadtxt('{}/Vert1Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
 
-                Rad2Cor.values[:,:,n] = np.loadtxt('{}/Rad2Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
-                Vert2Cor.values[:,:,n] = np.loadtxt('{}/Vert2Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                Rad2Cor = np.loadtxt('{}/Rad2Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
+                Vert2Cor = np.loadtxt('{}/Vert2Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
 
-                Rad3Cor.values[:,:,n] = np.loadtxt('{}/Rad3Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
-                Vert3Cor.values[:,:,n] = np.loadtxt('{}/Vert3Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                Rad3Cor = np.loadtxt('{}/Rad3Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
+                Vert3Cor = np.loadtxt('{}/Vert3Cor{}'.format(DRT2, str(Attempt)),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
                 
-                X_Core=np.zeros(YSurf+1,CoreBound[1]-CoreBound[0]+2)
-                Y_Core=np.zeros(YSurf+1,CoreBound[1]-CoreBound[0]+2)
+                Core_Corners.values[:-1,:-1,n,0] = Rad0Cor[:,CoreBound[0]:CoreBound[1]+1]
+                Core_Corners.values[:-1,-1,n,0] = Rad1Cor[:,CoreBound[1]]
+                Core_Corners.values[-1,:-1,n,0] = Rad2Cor[-1,CoreBound[0]:CoreBound[1]+1]
+                Core_Corners.values[-1,-1,n,0] = Rad3Cor[-1,CoreBound[1]]
                 
-                X_Core[:-1,:-1] = Rad0Cor.loc[:,CoreBound[0]:CoreBound[1],n].values
-                X_Core[:-1,-1] = Rad1Cor.loc[:,CoreBound[1],n].values
-                X_Core[-1,:-1] = Rad2Cor.loc[YSurf,CoreBound[0]:CoreBound[1],n].values
-                X_Core[-1,-1] = Rad3Cor.loc[YSurf,CoreBound[1],n].values
+                Core_Corners.values[:-1,:-1,n,1] = Vert0Cor[:,CoreBound[0]:CoreBound[1]+1]
+                Core_Corners.values[:-1,-1,n,1] = Vert1Cor[:,CoreBound[1]]
+                Core_Corners.values[-1,:-1,n,1] = Vert2Cor[-1,CoreBound[0]:CoreBound[1]+1]
+                Core_Corners.values[-1,-1,n,1] = Vert3Cor[-1,CoreBound[1]]
                 
-                Y_Core[:-1,:-1] = Vert0Cor.loc[:,CoreBound[0]:CoreBound[1],n].values
-                Y_Core[:-1,-1] = Vert1Cor.loc[:,CoreBound[1],n].values
-                Y_Core[-1,:-1] = Vert2Cor.loc[YSurf,CoreBound[0]:CoreBound[1],n].values
-                Y_Core[-1,-1] = Vert3Cor.loc[YSurf,CoreBound[1],n].values
+                Div1_Corners.values[:-1,:-1,n,0] = Rad0Cor[:,XMin-1:CoreBound[0]]
+                Div1_Corners.values[:-1,-1,n,0] = Rad1Cor[:,CoreBound[0]-1]
+                Div1_Corners.values[-1,:-1,n,0] = Rad2Cor[-1,XMin-1:CoreBound[0]]
+                Div1_Corners.values[-1,-1,n,0] = Rad3Cor[-1,CoreBound[0]-1]
                 
+                Div1_Corners.values[:-1,:-1,n,1] = Vert0Cor[:,XMin-1:CoreBound[0]]
+                Div1_Corners.values[:-1,-1,n,1] = Vert1Cor[:,CoreBound[0]-1]
+                Div1_Corners.values[-1,:-1,n,1] = Vert2Cor[-1,XMin-1:CoreBound[0]]
+                Div1_Corners.values[-1,-1,n,1] = Vert3Cor[-1,CoreBound[0]-1]
                 
+                Div2_Corners.values[:-1,:-1,n,0] = Rad0Cor[:,CoreBound[1]+1:]
+                Div2_Corners.values[:-1,-1,n,0] = Rad1Cor[:,-1]
+                Div2_Corners.values[-1,:-1,n,0] = Rad2Cor[-1,CoreBound[1]+1:]
+                Div2_Corners.values[-1,-1,n,0] = Rad3Cor[-1,-1]
+                
+                Div2_Corners.values[:-1,:-1,n,1] = Vert0Cor[:,CoreBound[1]+1:]
+                Div2_Corners.values[:-1,-1,n,1] = Vert1Cor[:,-1]
+                Div2_Corners.values[-1,:-1,n,1] = Vert2Cor[-1,CoreBound[1]+1:]
+                Div2_Corners.values[-1,-1,n,1] = Vert3Cor[-1,-1]
                 
                 for j in range(len(Y)):
                     for i in range(len(X)):
@@ -490,8 +526,8 @@ class SOLPSPLOT(object):
             PolVec.loc[:,:,Attempt,'dXP_norm'] = PolVec.loc[:,:,Attempt,'dXP'].values/np.max(PolVec.loc[:,:,Attempt,'dXP'].values)
 
             #try:
-            #    RadCor.values[:,:,n] = np.loadtxt(DRT2 + '/Rad0Cor' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
-            #    VertCor.values[:,:,n] = np.loadtxt(DRT2 + '/Vert0Cor' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+            #    RadCor.values[:,:,n] = np.loadtxt(DRT2 + '/Rad0Cor' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
+            #    VertCor.values[:,:,n] = np.loadtxt(DRT2 + '/Vert0Cor' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
             #except:
             #    print("Warning, Grid Corner Coordinates Not Found for Attempt" + str(Attempt))
         
@@ -525,9 +561,9 @@ class SOLPSPLOT(object):
                         
                         if len(RawData) > 0:        
                             if RawData.size == XDIM*YDIM:
-                                self.PARAM[p].values[:,:,n] = RawData.reshape((YDIM,XDIM))[1:YDIM-1,XMin+1:XMax+2]
+                                self.PARAM[p].values[:,:,n] = RawData.reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
                             elif RawData.size == XDIM*YDIM*2:
-                                self.PARAM[p].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin+1:XMax+2]
+                                self.PARAM[p].values[:,:,n] = RawData.reshape((2*YDIM,XDIM))[1+YDIM:2*YDIM-1,XMin:XMax+1]
                             
         if RadSlc == 'all':
             RadSlc = self.PARAM.coords['Radial_Location'].values
@@ -545,6 +581,15 @@ class SOLPSPLOT(object):
         else:
             plt.rc('font',size=14)
         
+        
+        try:
+            WallFile=np.loadtxt('{}/mesh.extra'.format(BASEDRT))
+        except:
+            print('mesh.extra file not found! Using vvfile.ogr instead')
+            WallFile=None
+            
+        VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
+        
         #Save all values into self dictionaries
         
         self.KW['BASEDRT'] = BASEDRT
@@ -553,7 +598,8 @@ class SOLPSPLOT(object):
         self.KW['JXI'] = JXI
         self.KW['SEP'] = SEP
         self.Attempts = Attempts
-        self.VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
+        self.VVFILE = VVFILE
+        self.WallFile = WallFile
         self.GF = GF
         self.Xx = Xx
         self.Yy = Yy
@@ -566,14 +612,9 @@ class SOLPSPLOT(object):
         self.RadCoords['PsinLoc'] = PsinLoc
         self.RadCoords['RadLoc'] = RadLoc
         self.RadCoords['VertLoc'] = VertLoc
-        self.RadCoords['Rad0Cor'] = Rad0Cor
-        self.RadCoords['Vert0Cor'] = Vert0Cor
-        self.RadCoords['Rad1Cor'] = Rad1Cor
-        self.RadCoords['Vert1Cor'] = Vert1Cor
-        self.RadCoords['Rad2Cor'] = Rad2Cor
-        self.RadCoords['Vert2Cor'] = Vert2Cor
-        self.RadCoords['Rad3Cor'] = Rad3Cor
-        self.RadCoords['Vert3Cor'] = Vert3Cor
+        self.RadCoords['Core_Corners'] = Core_Corners
+        self.RadCoords['Div1_Corners'] = Div1_Corners
+        self.RadCoords['Div2_Corners'] = Div2_Corners
         self.PolVec = PolVec
         if EXP:
             self.RadCoords['PsinAvg'] = PsinAvg
@@ -629,36 +670,81 @@ class SOLPSPLOT(object):
             
         return RR, Rexp, Rstr
     
-    def VeslMesh(self,Parameter=None,**kwargs):
-        N = self.N
-        Xx = self.Xx
-        Yy = self.Yy
+    def B2Mesh(self,Parameter=None,**kwargs):
+        #Plot B2 Meshgrid
+        
+        for key, value in self.KW.items():
+            if key not in kwargs.keys():
+                kwargs[key] = value
+        
         Attempts = self.Attempts
         Shot = self.Shot
         VVFILE = self.VVFILE
+        WallFile = self.WallFile
+        
+        RadLoc = self.RadCoords['RadLoc']
+        VertLoc = self.RadCoords['VertLoc']
+        Core_Corners = self.RadCoords['Core_Corners']
+        Div1_Corners = self.RadCoords['Div1_Corners']
+        Div2_Corners = self.RadCoords['Div2_Corners']
+        
         Markers = kwargs['Markers']
-        Colors = kwargs['Colors']
         Publish = kwargs['Publish']
-        CoreBound = kwargs['CoreBound']
         DIVREG = kwargs['DIVREG']
         JXA = kwargs['JXA']
         JXI = kwargs['JXI']
-        SEP = kwargs['SEP']        
-        VeslKW = kwargs
-        if VeslKW['AX']:
-            ax = VeslKW['AX']
+        SEP = kwargs['SEP']   
+        B2MeshKW = kwargs
+        
+        if B2MeshKW['AX']:
+            ax = B2MeshKW['AX']
         else:
             fig, ax = plt.subplots(nrows=1, ncols=1,figsize=(14,10))
+            
+        #Assume B2 Meshgrid is same for all Attempts, so just use data from 1st Attempt    
+            
+        XD1=Div1_Corners.loc[:,:,Attempts[0],'X'].values
+        YD1=Div1_Corners.loc[:,:,Attempts[0],'Y'].values
         
-        ax.plot(RadCor.loc[:,:,Attempts[0]],VertCor.loc[:,:,Attempts[0]])
-        ax.plot(np.transpose(RadCor.loc[:,:,Attempts[0]].values),np.transpose(VertCor.loc[:,:,Attempts[0]].values))
-        ax.plot(RadLoc.loc[:,JXA,Attempts[0]],VertLoc.loc[:,JXA,Attempts[0]],color='Orange')
-        ax.plot(RadLoc.loc[:,JXI,Attempts[0]],VertLoc.loc[:,JXI,Attempts[0]],color='Red')
-        ax.plot(RadLoc.loc[SEP,:,Attempts[0]],VertLoc.loc[SEP,:,Attempts[0]],color='Black')
-        ax.title('Vessel Mesh Geometry')
-        ax.xlabel('Radial Coordinate r (m)')
-        ax.ylabel('Vertical Coordinate z (m)')
-        ax.gca().set_aspect(1.0)
+        XD2=Div2_Corners.loc[:,:,Attempts[0],'X'].values
+        YD2=Div2_Corners.loc[:,:,Attempts[0],'Y'].values
+        
+        XCC=Core_Corners.loc[:,:,Attempts[0],'X'].values
+        YCC=Core_Corners.loc[:,:,Attempts[0],'Y'].values   
+            
+        PD1 = np.zeros((XD1.shape[0]-1,XD1.shape[1]-1)) 
+        PD2 = np.zeros((XD2.shape[0]-1,XD2.shape[1]-1)) 
+        PCC = np.zeros((XCC.shape[0]-1,XCC.shape[1]-1)) 
+        
+        IM1 = ax.pcolormesh(XCC,YCC,PCC,edgecolors='black')
+        
+        if DIVREG:
+            
+            IM2 = ax.pcolormesh(XD1,YD1,PD1,edgecolors='black')
+            
+            IM3 = ax.pcolormesh(XD2,YD2,PD2,edgecolors='black')
+        
+        if Markers:
+            ax.plot(RadLoc.loc[:,JXA,Attempts[0]],VertLoc.loc[:,JXA,Attempts[0]],color='Orange')
+            ax.plot(RadLoc.loc[:,JXI,Attempts[0]],VertLoc.loc[:,JXI,Attempts[0]],color='Red')
+            
+            SEP = int((XCC.shape[0]-1)/2)
+            ax.plot(XCC[SEP,:],YCC[SEP,:],'r:',XD1[SEP,:],YD1[SEP,:],'r:',XD2[SEP,:],YD2[SEP,:],'r:')
+        
+        if WallFile is not None:
+            for i in range(len(WallFile[:,0])):
+                ax.plot((WallFile[i,0],WallFile[i,2]),(WallFile[i,1],WallFile[i,3]),'k-',linewidth=3.0)
+        else:
+            ax.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000)
+
+        if Publish != []:
+            ax.set_title('B2.5 Meshgrid \n {}'.format(Publish[0]))
+        else:
+            ax.set_title('B2.5 Meshgrid \n Discharge {} Attempt {}'.format(Shot, str(Attempts[0])))
+            
+        ax.set_xlabel('Radial Coordinate r (m)')
+        ax.set_ylabel('Vertical Coordinate z (m)')
+        ax.set_aspect('equal')
         ax.grid()
     
     def Contour(self,Parameter=None,**kwargs):
@@ -676,11 +762,10 @@ class SOLPSPLOT(object):
                 kwargs[key] = value
         
         N = self.N
-        Xx = self.Xx
-        Yy = self.Yy
         Attempts = self.Attempts
         Shot = self.Shot
         VVFILE = self.VVFILE
+        WallFile = self.WallFile
         PolVec = self.PolVec
         Markers = kwargs['Markers']
         POLC = kwargs['POLC']
@@ -693,19 +778,15 @@ class SOLPSPLOT(object):
         JXA = kwargs['JXA']
         JXI = kwargs['JXI']
         SEP = kwargs['SEP']
+        MESHGRID = kwargs['MESHGRID']
         Offset = [kwargs['PsinOffset'],kwargs['RadOffset']]             
         ContKW = kwargs
         
         RadLoc = self.RadCoords['RadLoc']
         VertLoc = self.RadCoords['VertLoc']
-        Rad0Cor = self.RadCoords['Rad0Cor']
-        Vert0Cor = self.RadCoords['Vert0Cor']
-        Rad1Cor = self.RadCoords['Rad1Cor']
-        Vert1Cor = self.RadCoords['Vert1Cor']
-        Rad2Cor = self.RadCoords['Rad2Cor']
-        Vert2Cor = self.RadCoords['Vert2Cor']
-        Rad3Cor = self.RadCoords['Rad3Cor']
-        Vert3Cor = self.RadCoords['Vert3Cor']
+        Core_Corners = self.RadCoords['Core_Corners']
+        Div1_Corners = self.RadCoords['Div1_Corners']
+        Div2_Corners = self.RadCoords['Div2_Corners']
         XMin = self.RadCoords['XMin']
         
         RR, Rexp, Rstr = self.GetRadCoords(ContKW['RADC'], Offset)
@@ -736,7 +817,7 @@ class SOLPSPLOT(object):
                     pass
             
             #print('Beginning Plot Sequence')
-            if ContKW['AVG']:
+            if AVG:
                 if 'AVG' not in Attempts:
                     print('Taking Average over Attempts')
                     Attempts.append('AVG')
@@ -747,40 +828,46 @@ class SOLPSPLOT(object):
                 N=[-1]            
             
             if ContKW['SUBTRACT']:
-                CMAP = cm.seismic
                 for n in np.arange(1,N):
                     PARAM.values[:,:,n] = (PARAM.values[:,:,0]-PARAM[:,:,n])
                 PARAM.values[:,:,0] = PARAM.values[:,:,0]-PARAM[:,:,0]
-            
+                CMAP = cm.seismic
+                
             # NEED TO FIX -> PREVENT PARAM FROM BEING OVERWRITTEN EVERY TIME
             
+            NORM=colors.Normalize()
+            
             if ContKW['LOG10'] == 1:
-                #PARAM.values[PARAM.values<0] = 0
                 PARAM.values[PARAM.values>1] = np.log10(PARAM.values[PARAM.values>1])
                 PARAM.values[PARAM.values<-1] = -1*np.log10(np.abs(PARAM.values[PARAM.values<-1]))    
-                y_exp = np.arange(np.floor(np.nanmin(PARAM.values)), np.ceil(np.nanmax(PARAM.values))+1,2)
                 levs = np.arange(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()))
                 if any(x<0 for x in levs):
-                    CMAP = cm.coolwarm
+                    CMAP = cm.seismic
+                    NORM=colors.CenteredNorm(0.0)
+                    
             elif ContKW['LOG10'] == 2:
                 NPARAM = np.abs(PARAM.values[PARAM.values<0])
-                NPARAM[NPARAM<=1] = np.nan
-                PARAM.values[np.abs(PARAM.values)<=1] = np.nan
+                NPARAM[NPARAM<=0.1] = np.nan
+                PARAM.values[np.abs(PARAM.values)<=0.1] = np.nan
                 if NPARAM.size>0:            
                     lev_exp = np.arange(-(np.ceil(np.log10(np.nanmax(NPARAM)))+1), np.ceil(np.log10(np.nanmax(PARAM.values)))+1,5)
                     levs = np.sign(lev_exp)*np.power(10, np.abs(lev_exp))
                     np.set_printoptions(threshold=np.inf)
-                    print(levs)
-                    CMAP = cm.coolwarm
+                    CMAP = cm.seismic
+                    NORM=colors.SymLogNorm(1.0)
                 else:
                     lev_exp = np.arange(np.floor(np.log10(np.nanmin(PARAM.values)))-1, np.ceil(np.log10(np.nanmax(PARAM.values)))+1)
-                levs = np.power(10, lev_exp)   
+                    NORM=colors.LogNorm()
+                levs = np.power(10, lev_exp)
+                
             elif type(ContKW['LVN'])==list:
                 levs=ContKW['LVN']
+                
             else:
                 levs = np.linspace(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()),ContKW['LVN'])
                 if any(x<0 for x in levs):
-                    CMAP = cm.coolwarm
+                    CMAP = cm.seismic
+                    NORM=colors.CenteredNorm(0.0)
             
             for n in N:
                 if ContKW['AX']:
@@ -788,31 +875,52 @@ class SOLPSPLOT(object):
                 else:
                     fig, ax = plt.subplots(nrows=1, ncols=1,figsize=(14,10))
                 
-                if ContKW['GEO']:
-                    if ContKW['LOG10'] == 2:
-                        if DIVREG:
-                            IM2 = ax.contourf(RadLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],VertLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
-                            IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
-
-                        IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
-                        #IM1 = ax.pcolormesh(X1,Y1,PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
+                if ContKW['PHYS']:
+                    
+                    XD1=Div1_Corners.loc[:,:,Attempts[n],'X'].values
+                    YD1=Div1_Corners.loc[:,:,Attempts[n],'Y'].values
+                    
+                    XD2=Div2_Corners.loc[:,:,Attempts[n],'X'].values
+                    YD2=Div2_Corners.loc[:,:,Attempts[n],'Y'].values
+                    
+                    XCC=Core_Corners.loc[:,:,Attempts[n],'X'].values
+                    YCC=Core_Corners.loc[:,:,Attempts[n],'Y'].values
+                    
+                    if DIVREG:
                         
+                        NORM.vmin = np.nanmin(PARAM.values)
+                        NORM.vmax = np.nanmax(PARAM.values)
+                        
+                        IM2 = ax.pcolormesh(XD1,YD1,PARAM.loc[:,1.0:CoreBound[0],Attempts[n]],
+                                            edgecolors=MESHGRID,cmap=CMAP,norm=NORM)
+                        
+                        IM3 = ax.pcolormesh(XD2,YD2,PARAM.loc[:,CoreBound[1]+2:,Attempts[n]],
+                                            edgecolors=MESHGRID,cmap=CMAP,norm=NORM)
                     else:
-                        if DIVREG:
-                            IM2 = ax.contourf(RadLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],VertLoc.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,colors=Colors,cmap=CMAP)
-                            IM3 = ax.contourf(RadLoc.loc[:,CoreBound[1]+1:,Attempts[n]],VertLoc.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,colors=Colors,cmap=CMAP)
-
-                        IM1 = ax.contourf(RadLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],VertLoc.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,colors=Colors,cmap=CMAP)                      
+                        
+                        NORM.vmin = np.nanmin(PARAM.loc[:,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]].values)
+                        NORM.vmax = np.nanmax(PARAM.loc[:,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]].values)
+                            
+                    IM1 = ax.pcolormesh(XCC,YCC,PARAM.loc[:,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]],
+                                        edgecolors=MESHGRID,cmap=CMAP,norm=NORM)
                     
                     if Markers:                 
-                        ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=3)
-                        ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=3)
+                        ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=2)
+                        ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=2)
                     
-                    ax.plot(RadLoc.values[SEP-1,:,n],VertLoc.values[SEP-1,:,n],color='Black',linewidth=3)
-                    ax.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000)
+                    if WallFile is not None:
+                        for i in range(len(WallFile[:,0])):
+                            ax.plot((WallFile[i,0],WallFile[i,2]),(WallFile[i,1],WallFile[i,3]),'k-',linewidth=3.0)
+                    else:
+                        ax.plot(VVFILE[:,0]/1000,VVFILE[:,1]/1000)
+                    
+                    SEP = int((XCC.shape[0]-1)/2)
+                    
+                    ax.plot(XCC[SEP,:],YCC[SEP,:],'r:',XD1[SEP,:],YD1[SEP,:],'r:',XD2[SEP,:],YD2[SEP,:],'r:',linewidth=2)
                     ax.set_xlabel('Radial Location (m)')
                     ax.set_ylabel('Vertical Location (m)')
                     ax.set_aspect('equal')
+                
                 else:
                     if ContKW['LOG10'] == 2:
                         if DIVREG and POLC != 'theta':
@@ -837,10 +945,10 @@ class SOLPSPLOT(object):
                     ax.set_xlabel(PolXLbl)
                     ax.set_ylabel(Rstr) 
 
-                if ContKW['Publish'] != []:
+                if Publish != []:
                     ax.set_title('Attempt {} {}'.format(Publish[n], PARAM.name))
                 else:
-                    ax.set_title('Discharge 0{} Attempt {} {}'.format(Shot, str(Attempts[n]), PARAM.name))
+                    ax.set_title('Discharge {} Attempt {}\n{}'.format(Shot, str(Attempts[n]), PARAM.name))
                     
                 plt.colorbar(IM1,ax=ax)
 
@@ -931,7 +1039,6 @@ class SOLPSPLOT(object):
                 PARAM.values = np.gradient(PARAM.values,axis=0)
                 
             if PolKW['LOG10'] == 1:
-                #PARAM.values[PARAM.values<0] = 0
                 PARAM.values[PARAM.values>1] = np.log10(PARAM.values[PARAM.values>1])
                 PARAM.values[PARAM.values<-1] = -1*np.log10(np.abs(PARAM.values[PARAM.values<-1]))      
             
@@ -1028,11 +1135,9 @@ class SOLPSPLOT(object):
                 ax = RadProfKW['AX']
                     
             if RadProfKW['LOG10'] == 1:
-                #PARAM.values[PARAM.values<0] = 0
                 PARAM.values[PARAM.values>1] = np.log10(PARAM.values[PARAM.values>1])
                 PARAM.values[PARAM.values<-1] = -1*np.log10(np.abs(PARAM.values[PARAM.values<-1]))    
-                y_exp = np.arange(np.floor(np.nanmin(PARAM.values)), np.ceil(np.nanmax(PARAM.values))+1,2)    
-            
+                #y_exp = np.arange(np.floor(np.nanmin(PARAM.values)), np.ceil(np.nanmax(PARAM.values))+1,2)    
             
             if len(PlotScheme) == N:
                 for n in range(N):
