@@ -71,6 +71,7 @@ class SOLPSPLOT(object):
     SURF = 20 > Same purpose as PolSlc
     PHYS = True > Map Contour to PHYSical Geometry; if False, plots on rectangular grid     
     LVN = 100 > Number of colorbar levels for contour plots or List [] of specific contour levels
+    LINTHRESH = 1.0 > +/- Value at which divergent-logarithmic Contour plots should switch to linear scale going from positive to negative values
     DIVREG = True > Include Divertor Region Data (May cause loss of logarithmic resolution)   
     SAVE = False > Save plot to a .png file 
     SUBTRACT = False > For a series of Attempts, subtract the matrix data of each Attempt from the first declared Attempt, to compare difference 
@@ -91,7 +92,7 @@ class SOLPSPLOT(object):
     ! SOLPSPLOT.RadPlot() > Plot Radial Contours for every Poloidal grid point (ONLY TAKES 1 ATTEMPT INPUT)
     SOLPSPLOT.RadProf() > Plot Radial Profile of Parameter at Outer Midplane (JXA)
     ! SOLPSPLOT.SumPlot() > Plot Poloidally-Summed Parameter values vs Radial location
-    ! SOLPSPLOT.VeslMesh() > Plot SOLPS Carre Curvilinear Grid
+    SOLPSPLOT.B2Mesh() > Plot SOLPS B2.5 Curvilinear Grid
     SOLPSPLOT.Export() > No Plot, Save Data to a Variable [PARAM, RR]
     
     '''
@@ -142,6 +143,7 @@ class SOLPSPLOT(object):
                      'SURF' : 20,
                      'PHYS' : True,
                      'LVN' : 100,
+                     'LINTHRESH' : 1.0,
                      'DIVREG' : True,
                      'SAVE' : False,
                      'SUBTRACT' : False,
@@ -606,7 +608,6 @@ class SOLPSPLOT(object):
         self.Xpoint = Xpoint
         self.N = N
         self.P = P
-        #self.XP = XP
         self.RadCoords['XMin'] = XMin
         self.RadCoords['YYLoc'] = YYLoc        
         self.RadCoords['PsinLoc'] = PsinLoc
@@ -716,20 +717,20 @@ class SOLPSPLOT(object):
         PD2 = np.zeros((XD2.shape[0]-1,XD2.shape[1]-1)) 
         PCC = np.zeros((XCC.shape[0]-1,XCC.shape[1]-1)) 
         
-        IM1 = ax.pcolormesh(XCC,YCC,PCC,edgecolors='black')
+        IM1 = ax.pcolormesh(XCC,YCC,PCC,edgecolors='black',cmap='binary')
         
         if DIVREG:
             
-            IM2 = ax.pcolormesh(XD1,YD1,PD1,edgecolors='black')
+            IM2 = ax.pcolormesh(XD1,YD1,PD1,edgecolors='black',cmap='binary')
             
-            IM3 = ax.pcolormesh(XD2,YD2,PD2,edgecolors='black')
+            IM3 = ax.pcolormesh(XD2,YD2,PD2,edgecolors='black',cmap='binary')
         
         if Markers:
-            ax.plot(RadLoc.loc[:,JXA,Attempts[0]],VertLoc.loc[:,JXA,Attempts[0]],color='Orange')
-            ax.plot(RadLoc.loc[:,JXI,Attempts[0]],VertLoc.loc[:,JXI,Attempts[0]],color='Red')
+            ax.plot(RadLoc.loc[:,JXA,Attempts[0]],VertLoc.loc[:,JXA,Attempts[0]],color='orange',linewidth=2.0)
+            ax.plot(RadLoc.loc[:,JXI,Attempts[0]],VertLoc.loc[:,JXI,Attempts[0]],color='gold',linewidth=2.0)
             
             SEP = int((XCC.shape[0]-1)/2)
-            ax.plot(XCC[SEP,:],YCC[SEP,:],'r:',XD1[SEP,:],YD1[SEP,:],'r:',XD2[SEP,:],YD2[SEP,:],'r:')
+            ax.plot(XCC[SEP,:],YCC[SEP,:],'r:',XD1[SEP,:],YD1[SEP,:],'r:',XD2[SEP,:],YD2[SEP,:],'r:',linewidth=2.0)
         
         if WallFile is not None:
             for i in range(len(WallFile[:,0])):
@@ -748,6 +749,7 @@ class SOLPSPLOT(object):
         ax.grid()
     
     def Contour(self,Parameter=None,**kwargs):
+        
         if Parameter is None:
             self.PltParams = self.Parameter
         elif isinstance(Parameter,str):
@@ -831,31 +833,38 @@ class SOLPSPLOT(object):
                 for n in np.arange(1,N):
                     PARAM.values[:,:,n] = (PARAM.values[:,:,0]-PARAM[:,:,n])
                 PARAM.values[:,:,0] = PARAM.values[:,:,0]-PARAM[:,:,0]
-                CMAP = cm.seismic
+                CMAP = cm.RdBu
                 
             # NEED TO FIX -> PREVENT PARAM FROM BEING OVERWRITTEN EVERY TIME
             
             NORM=colors.Normalize()
             
             if ContKW['LOG10'] == 1:
-                PARAM.values[PARAM.values>1] = np.log10(PARAM.values[PARAM.values>1])
-                PARAM.values[PARAM.values<-1] = -1*np.log10(np.abs(PARAM.values[PARAM.values<-1]))    
+                
+                if np.any([p<0 for p in PARAM.values]):
+                    PARAM.values[np.abs(PARAM.values)<=ContKW['LINTHRESH']] = 0.0
+                    PARAM.values[PARAM.values>1] = np.log10(PARAM.values[PARAM.values>1])
+                    PARAM.values[PARAM.values<-1] = -1*np.log10(np.abs(PARAM.values[PARAM.values<-1]))
+                    CMAP = cm.RdBu
+                    NORM=colors.TwoSlopeNorm(0.0)
+                else:
+                    PARAM.values[PARAM.values==0.0] = np.min(PARAM.values[PARAM.values!=0.0])
+                    PARAM.values = np.log10(PARAM.values)
                 levs = np.arange(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()))
-                if any(x<0 for x in levs):
-                    CMAP = cm.seismic
-                    NORM=colors.CenteredNorm(0.0)
                     
             elif ContKW['LOG10'] == 2:
-                NPARAM = np.abs(PARAM.values[PARAM.values<0])
-                NPARAM[NPARAM<=0.1] = np.nan
-                PARAM.values[np.abs(PARAM.values)<=0.1] = np.nan
-                if NPARAM.size>0:            
+                
+                if np.any([p<0 for p in PARAM.values]):
+                    NPARAM = np.abs(PARAM.values[PARAM.values<0])
+                    NPARAM[NPARAM<=0.1] = np.nan
+                    PARAM.values[np.abs(PARAM.values)<=0.1] = np.nan
                     lev_exp = np.arange(-(np.ceil(np.log10(np.nanmax(NPARAM)))+1), np.ceil(np.log10(np.nanmax(PARAM.values)))+1,5)
                     levs = np.sign(lev_exp)*np.power(10, np.abs(lev_exp))
                     np.set_printoptions(threshold=np.inf)
-                    CMAP = cm.seismic
-                    NORM=colors.SymLogNorm(1.0)
+                    CMAP = cm.RdBu
+                    NORM=colors.SymLogNorm(ContKW['LINTHRESH'])
                 else:
+                    PARAM.values[PARAM.values==0.0] = np.min(PARAM.values[PARAM.values!=0.0])
                     lev_exp = np.arange(np.floor(np.log10(np.nanmin(PARAM.values)))-1, np.ceil(np.log10(np.nanmax(PARAM.values)))+1)
                     NORM=colors.LogNorm()
                 levs = np.power(10, lev_exp)
@@ -864,10 +873,11 @@ class SOLPSPLOT(object):
                 levs=ContKW['LVN']
                 
             else:
-                levs = np.linspace(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()),ContKW['LVN'])
-                if any(x<0 for x in levs):
-                    CMAP = cm.seismic
+                
+                if np.any([p<0 for p in PARAM.values]):
+                    CMAP = cm.RdBu
                     NORM=colors.CenteredNorm(0.0)
+                levs = np.linspace(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()),ContKW['LVN'])
             
             for n in N:
                 if ContKW['AX']:
@@ -905,8 +915,8 @@ class SOLPSPLOT(object):
                                         edgecolors=MESHGRID,cmap=CMAP,norm=NORM)
                     
                     if Markers:                 
-                        ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='Orange',linewidth=2)
-                        ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='Red',linewidth=2)
+                        ax.plot(RadLoc.values[:,(JXA-XMin),n],VertLoc.values[:,(JXA-XMin),n],color='orange',linewidth=2)
+                        ax.plot(RadLoc.values[:,(JXI-XMin),n],VertLoc.values[:,(JXI-XMin),n],color='gold',linewidth=2)
                     
                     if WallFile is not None:
                         for i in range(len(WallFile[:,0])):
@@ -936,12 +946,12 @@ class SOLPSPLOT(object):
                         IM1 = ax.contour(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,colors=Colors,cmap=CMAP)
                     
                     if Markers:
-                        ax.plot(PP.loc[:,JXA,Attempts[n]],RR.loc[:,JXA,Attempts[n]],color='Orange',linewidth=3)                         #Outer Midplane
-                        ax.plot(PP.loc[:,JXI,Attempts[n]],RR.loc[:,JXI,Attempts[n]],color='Red',linewidth=3)                            #Inner Midplane
+                        ax.plot(PP.loc[:,JXA,Attempts[n]],RR.loc[:,JXA,Attempts[n]],color='orange',linewidth=2)                         #Outer Midplane
+                        ax.plot(PP.loc[:,JXI,Attempts[n]],RR.loc[:,JXI,Attempts[n]],color='gold',linewidth=2)                            #Inner Midplane
                     
-                    ax.plot(PP.loc[1:SEP,CoreBound[0],Attempts[n]],RR.loc[1:SEP,CoreBound[0],Attempts[n]],color='Blue',linewidth=3)    #Inner PFR Boundary
-                    ax.plot(PP.loc[1:SEP,CoreBound[1],Attempts[n]],RR.loc[1:SEP,CoreBound[1],Attempts[n]],color='Blue',linewidth=3)    #Outer PFR Boundary
-                    ax.plot(PP.loc[SEP,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[SEP,CoreBound[0]:CoreBound[1],Attempts[n]],color='Black',linewidth=3)  #Separatrix line                              #Separatrix
+                    ax.plot(PP.loc[1:SEP,CoreBound[0],Attempts[n]],RR.loc[1:SEP,CoreBound[0],Attempts[n]],color='Blue',linewidth=2)    #Inner PFR Boundary
+                    ax.plot(PP.loc[1:SEP,CoreBound[1],Attempts[n]],RR.loc[1:SEP,CoreBound[1],Attempts[n]],color='Blue',linewidth=2)    #Outer PFR Boundary
+                    ax.plot(PP.loc[SEP,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[SEP,CoreBound[0]:CoreBound[1],Attempts[n]],color='red',linewidth=2,linestyle=':')  #Separatrix line                              #Separatrix
                     ax.set_xlabel(PolXLbl)
                     ax.set_ylabel(Rstr) 
 
@@ -1219,8 +1229,13 @@ class SOLPSPLOT(object):
             else:
                 ax.legend()
                 ax.set_title('Radial Midplane {}'.format(PARAM.name))
-            if Markers == True:
-                ax.axvline(RR.loc[SEP,JXA,Attempts[0]],color='orange',linewidth=3,linestyle='dashed')
+            if Markers:
+                if RADC == 'psin':
+                    ax.axvline(1.0,color='red',linewidth=3,linestyle='dashed')
+                elif RADC == 'rrsep':
+                    ax.axvline(0.0,color='red',linewidth=3,linestyle='dashed')    
+                else:
+                    ax.axvline(RR.loc[SEP,JXA,Attempts[0]],color='red',linewidth=3,linestyle='dashed')
             
             if RadProfKW['GRID'] is True:
                 ax.grid(b=1)
