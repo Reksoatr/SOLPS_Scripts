@@ -30,15 +30,18 @@ class SOLPSPLOT(object):
     Shot = Shot Number (Either 12 or 25) or 'd3d' for d3d experiment
     Attempts = Simulation Attempt Number(s) [As a List!]
     Parameters = Parameters to be plotted 
-        (Specified by a string:  
-        'NeuDen' - Neutral Density
-        'IonFlx' - Ionization/Radial Particle Flux
+        (Specified by a string - Defaults are:  
         'Ne' - Electron Density
         'Te' - Electron Temperature
+        'Ti' - Ion Temperature
         'DN' - Particle Diffusion Coefficient
         'KYE' - Electron Thermal Diffusion Coefficient
-        'KYI' - Ion Thermal Diffusion Coefficient  )  
-    
+        'KYI' - Ion Thermal Diffusion Coefficient  
+        'NeuDen' - Neutral Density
+        'IonFlx' - Radial Ion Particle Flux
+        'IonPol' - Poloidal Ion Particle Flux
+        'RadPinch' - Radial Pinch Velocity)
+            
     OPTIONAL:
 
     TimeRange = [1.10,1.30] > Time range (in sec) over which experimental data is averaged    
@@ -65,7 +68,7 @@ class SOLPSPLOT(object):
     PsinOffset = 0 > Psi_n offset of Experimental Data Points
     RadOffset = 0 > Radial (in meters) offset of Experimental Data Points
     RADC = 'psin' > Set radial coordinate convention - Either 'psin', 'radial', 'rrsep' or 'Y'    
-    POLC = 'theta' > Set poloidal coordinate convention - Either 'theta', 'dXP', 'dXP_norm' or 'X'
+    POLC = 'dXP' > Set poloidal coordinate convention - Either 'X', 'theta', 'dXP', or 'dXP_norm'
     RadSlc = None > Radial surface selection for poloidal plots - Can set specific radial index, 'all', or 'None' defaults to SEP
     PolSlc = None > Poloidal grid line selection for radial plots - Can set specific poloidal index, 'all', or 'None' defaults to [JXA, JXI]
     SURF = 20 > Same purpose as PolSlc
@@ -174,10 +177,10 @@ class SOLPSPLOT(object):
                      'MolDen': r'Neutral Molecule (D2) Density $(m^{-3})$',
                      'NeuTemp': r'Neutral Atom (D) Temperature (eV)',
                      'MolTemp': r'Neutral Molecule (D2) Temperature (eV)',
-                     'IonFlx': r'Radial Particle Flux $s^{-1}$',
+                     'IonFlx': r'Radial Ion (D+) Flux $s^{-1}$',
+                     'IonPol': r'Poloidal Ion (D+) Flux $s^{-1}$',
                      'MolFlx': r'Radial Molecule Flux $m^{-2}s^{-1}$',
                      'RadFlx': r'Radial Atomic Flux $m^{-2}s^{-1}$',
-                     'IonPol': r'Poloidal Particle Flux $m^{-2}s^{-1}$',
                      'VLY': r'Radial Pinch $v_y (m^2/s)$',
                      'SX': r'Poloidal Contact Area SX $(m^{2})$',
                      'SY': r'Radial Contact Area SY $(m^{2})$',
@@ -442,7 +445,7 @@ class SOLPSPLOT(object):
         for n in range(N):
             Attempt = Attempts[n]
             print('Loading data for Attempt {} now...'.format(Attempt))
-            if Attempt == 'AVG':
+            if n == N-1 and Attempt == 'AVG':
                 YYLoc.values[:,:,n] = Yy
                 RadLoc.values[:,:,n] = RadLoc.values[:,:,0:n-1].mean(2)
                 VertLoc.values[:,:,n] = VertLoc.values[:,:,0:n-1].mean(2)
@@ -502,36 +505,32 @@ class SOLPSPLOT(object):
                     for i in range(len(X)):
                         PsinLoc.values[j,i,n] = GF.psiN(RadLoc.loc[Y[j],X[i],Attempt].values,VertLoc.loc[Y[j],X[i],Attempt].values,)            
                 
+                #Populate Poloidal Coordinate Data array
+                
                 PolVec.loc[:,:,Attempt,'XXLoc'] = Xx
                 
                 YVector=np.zeros((len(X),2))
                 YVector[:,0] = RadLoc.values[1,:,n] - RadLoc.values[0,:,n]
                 YVector[:,1] = VertLoc.values[1,:,n] - VertLoc.values[0,:,n]            
             
-            XP_range=np.array([CoreBound[0]-1,CoreBound[0],CoreBound[1],CoreBound[1]+1])
-            X_xp=np.mean(RadLoc.loc[SEP,XP_range,Attempt].values)
-            Y_xp=np.mean(VertLoc.loc[SEP,XP_range,Attempt].values)
-            Xpoint=np.array([X_xp,Y_xp])
-            
-            for i in range(len(X)):
-                PolVec.loc[:,X[i],Attempt,'Theta'] = np.degrees(np.math.atan2(np.linalg.det([YVector[JXA-1,:],YVector[i,:]]),np.dot(YVector[JXA-1,:],YVector[i,:])))
-                if PolVec.loc[:,X[i],Attempt,'Theta'].values[0] < 0 and X[i] < JXA:
-                    PolVec.loc[:,X[i],Attempt,'Theta'] = PolVec.loc[:,X[i],Attempt,'Theta'] + 360          
-            
-            for index in np.arange(CoreBound[0],CoreBound[1]+1):
-                if index == CoreBound[0]:
-                    PolVec.loc[:,index,Attempt,'dXP'] = round(np.sqrt((RadLoc.loc[SEP,index,Attempt].values-X_xp)**2 + (VertLoc.loc[SEP,index,Attempt].values-Y_xp)**2),5)
-                else:
-                    NL = np.sqrt((RadLoc.loc[SEP,index,Attempt].values-RadLoc.loc[SEP,index-1,Attempt].values)**2 + (VertLoc.loc[SEP,index,Attempt].values-VertLoc.loc[SEP,index-1,Attempt].values)**2)
-                    PolVec.loc[:,index,Attempt,'dXP']= PolVec.loc[:,index-1,Attempt,'dXP']+NL
-         
-            PolVec.loc[:,:,Attempt,'dXP_norm'] = PolVec.loc[:,:,Attempt,'dXP'].values/np.max(PolVec.loc[:,:,Attempt,'dXP'].values)
-
-            #try:
-            #    RadCor.values[:,:,n] = np.loadtxt(DRT2 + '/Rad0Cor' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
-            #    VertCor.values[:,:,n] = np.loadtxt(DRT2 + '/Vert0Cor' + str(Attempt),usecols = (3)).reshape((YDIM,XDIM))[1:YDIM-1,XMin:XMax+1]
-            #except:
-            #    print("Warning, Grid Corner Coordinates Not Found for Attempt" + str(Attempt))
+                for i in range(len(X)):
+                    PolVec.loc[:,X[i],Attempt,'Theta'] = np.degrees(np.math.atan2(np.linalg.det([YVector[JXA-1,:],YVector[i,:]]),np.dot(YVector[JXA-1,:],YVector[i,:])))
+                    if PolVec.loc[:,X[i],Attempt,'Theta'].values[0] < 0 and X[i] < JXA:
+                        PolVec.loc[:,X[i],Attempt,'Theta'] = PolVec.loc[:,X[i],Attempt,'Theta'] + 360          
+                
+                XP_range=np.array([CoreBound[0]-1,CoreBound[0],CoreBound[1],CoreBound[1]+1])
+                X_xp=np.mean(RadLoc.loc[SEP,XP_range,Attempt].values)
+                Y_xp=np.mean(VertLoc.loc[SEP,XP_range,Attempt].values)
+                Xpoint=np.array([X_xp,Y_xp])
+                
+                for index in np.arange(CoreBound[0],CoreBound[1]+1):
+                    if index == CoreBound[0]:
+                        PolVec.loc[:,index,Attempt,'dXP'] = round(np.sqrt((RadLoc.loc[SEP,index,Attempt].values-X_xp)**2 + (VertLoc.loc[SEP,index,Attempt].values-Y_xp)**2),5)
+                    else:
+                        NL = np.sqrt((RadLoc.loc[SEP,index,Attempt].values-RadLoc.loc[SEP,index-1,Attempt].values)**2 + (VertLoc.loc[SEP,index,Attempt].values-VertLoc.loc[SEP,index-1,Attempt].values)**2)
+                        PolVec.loc[:,index,Attempt,'dXP']= PolVec.loc[:,index-1,Attempt,'dXP']+NL
+             
+                PolVec.loc[:,:,Attempt,'dXP_norm'] = PolVec.loc[:,:,Attempt,'dXP'].values/np.max(PolVec.loc[:,:,Attempt,'dXP'].values)
         
         # Condensed Data Loading Command! :
         
@@ -776,6 +775,7 @@ class SOLPSPLOT(object):
         Publish = kwargs['Publish']
         CoreBound = kwargs['CoreBound']
         DIVREG = kwargs['DIVREG']
+        LINTHRESH = kwargs['LINTHRESH']
         AVG = kwargs['AVG']
         JXA = kwargs['JXA']
         JXI = kwargs['JXI']
@@ -801,9 +801,12 @@ class SOLPSPLOT(object):
         elif POLC == 'X':
             PP = PolVec.loc[:,:,:,'XXLoc']
             PolXLbl = r'Poloidal Cell Index $X$'
-        elif POLC == 'djxa':
-            PP = PolVec.loc[:,:,:,'DJXA']
-            PolXLbl = r'Distance from Outer Midplane $m$'
+        elif POLC == 'dXP':
+            PP = PolVec.loc[:,:,:,'dXP']
+            PolXLbl = r'Distance from X-Point $m$'
+        elif POLC == 'dXP_norm':
+            PP = PolVec.loc[:,:,:,'dXP_norm']
+            PolXLbl = r'Normalized distance from X-Point'
         
         for pn in self.PltParams:
             try:
@@ -842,7 +845,7 @@ class SOLPSPLOT(object):
             if ContKW['LOG10'] == 1:
                 
                 if np.any([p<0 for p in PARAM.values]):
-                    PARAM.values[np.abs(PARAM.values)<=ContKW['LINTHRESH']] = 0.0
+                    PARAM.values[np.abs(PARAM.values) <= LINTHRESH] = 0.0
                     PARAM.values[PARAM.values>1] = np.log10(PARAM.values[PARAM.values>1])
                     PARAM.values[PARAM.values<-1] = -1*np.log10(np.abs(PARAM.values[PARAM.values<-1]))
                     CMAP = cm.RdBu
@@ -850,7 +853,7 @@ class SOLPSPLOT(object):
                 else:
                     PARAM.values[PARAM.values==0.0] = np.min(PARAM.values[PARAM.values!=0.0])
                     PARAM.values = np.log10(PARAM.values)
-                levs = np.arange(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()))
+                levs = np.arange(np.floor(PARAM.values.min()),np.ceil(PARAM.values.max()),0.5)
                     
             elif ContKW['LOG10'] == 2:
                 
@@ -858,16 +861,18 @@ class SOLPSPLOT(object):
                     NPARAM = np.abs(PARAM.values[PARAM.values<0])
                     NPARAM[NPARAM<=0.1] = np.nan
                     PARAM.values[np.abs(PARAM.values)<=0.1] = np.nan
-                    lev_exp = np.arange(-(np.ceil(np.log10(np.nanmax(NPARAM)))+1), np.ceil(np.log10(np.nanmax(PARAM.values)))+1,5)
-                    levs = np.sign(lev_exp)*np.power(10, np.abs(lev_exp))
+                    #lev_exp = np.arange(-1*(np.ceil(np.log10(np.nanmax(NPARAM)))+1), np.ceil(np.log10(np.nanmax(PARAM.values)))+1,0.5)
+                    #levs = np.sign(lev_exp)*np.power(10, np.abs(lev_exp))
+                    levs=ContKW['LVN']
                     np.set_printoptions(threshold=np.inf)
                     CMAP = cm.RdBu
-                    NORM=colors.SymLogNorm(ContKW['LINTHRESH'])
+                    NORM=colors.SymLogNorm(LINTHRESH)
                 else:
                     PARAM.values[PARAM.values==0.0] = np.min(PARAM.values[PARAM.values!=0.0])
-                    lev_exp = np.arange(np.floor(np.log10(np.nanmin(PARAM.values)))-1, np.ceil(np.log10(np.nanmax(PARAM.values)))+1)
+                    lev_exp = np.arange(np.floor(np.log10(np.nanmin(PARAM.values)))-1, np.ceil(np.log10(np.nanmax(PARAM.values)))+1,0.5)
+                    levs = np.power(10, lev_exp)
                     NORM=colors.LogNorm()
-                levs = np.power(10, lev_exp)
+                    
                 
             elif type(ContKW['LVN'])==list:
                 levs=ContKW['LVN']
@@ -932,26 +937,65 @@ class SOLPSPLOT(object):
                     ax.set_aspect('equal')
                 
                 else:
+                    '''
                     if ContKW['LOG10'] == 2:
                         if DIVREG and POLC != 'theta':
-                            IM2 = ax.contourf(PP.loc[:,1:CoreBound[0]-1,Attempts[n]],RR.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
-                            IM3 = ax.contourf(PP.loc[:,CoreBound[1]+1:,Attempts[n]],RR.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
+                            IM2 = ax.contourf(PP.loc[:,1:CoreBound[0]-1,Attempts[n]],
+                                              RR.loc[:,1:CoreBound[0]-1,Attempts[n]],
+                                              PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],
+                                              levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
+                            
+                            IM3 = ax.contourf(PP.loc[:,CoreBound[1]+1:,Attempts[n]],
+                                              RR.loc[:,CoreBound[1]+1:,Attempts[n]],
+                                              PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],
+                                              levs,colors=Colors,cmap=CMAP,norm=colors.LogNorm())
                         
-                        IM1 = ax.contourf(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,norm=colors.LogNorm(),colors=Colors,cmap=CMAP)
+                        IM1 = ax.contourf(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],
+                                          RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],
+                                          PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],
+                                          levs,norm=colors.LogNorm(),colors=Colors,cmap=CMAP)
                     else:
-                        if DIVREG and POLC != 'theta':
-                            IM2 = ax.contourf(PP.loc[:,1:CoreBound[0]-1,Attempts[n]],RR.loc[:,1:CoreBound[0]-1,Attempts[n]],PARAM.loc[:,1:CoreBound[0]-1,Attempts[n]],levs,colors=Colors,cmap=CMAP)
-                            IM3 = ax.contourf(PP.loc[:,CoreBound[1]+1:,Attempts[n]],RR.loc[:,CoreBound[1]+1:,Attempts[n]],PARAM.loc[:,CoreBound[1]+1:,Attempts[n]],levs,colors=Colors,cmap=CMAP)
+                    '''
+                    if DIVREG and POLC != 'theta':
+                        NORM.vmin = np.nanmin(PARAM.values)
+                        NORM.vmax = np.nanmax(PARAM.values)
+                        
+                        ax.plot(PP.loc[SEP,:,Attempts[n]],
+                                RR.loc[SEP,:,Attempts[n]],
+                                color='red',linewidth=2,
+                                linestyle=':',label='Separatrix')                                                                        #Full Separatrix
 
-                        IM1 = ax.contour(PP.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],PARAM.loc[:,CoreBound[0]:CoreBound[1],Attempts[n]],levs,colors=Colors,cmap=CMAP)
+                        
+                        IM2 = ax.contourf(PP.loc[:,1:CoreBound[0],Attempts[n]],
+                                          RR.loc[:,1:CoreBound[0],Attempts[n]],
+                                          PARAM.loc[:,1:CoreBound[0],Attempts[n]],
+                                          levels=levs,cmap=CMAP,norm=NORM)
+                            
+                        IM3 = ax.contourf(PP.loc[:,CoreBound[1]+2:,Attempts[n]],
+                                          RR.loc[:,CoreBound[1]+2:,Attempts[n]],
+                                          PARAM.loc[:,CoreBound[1]+2:,Attempts[n]],
+                                          levels=levs,cmap=CMAP,norm=NORM)
+                    else:
+                        NORM.vmin = np.nanmin(PARAM.loc[:,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]].values)
+                        NORM.vmax = np.nanmax(PARAM.loc[:,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]].values)
+                        
+                        ax.plot(PP.loc[SEP,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]],
+                                RR.loc[SEP,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]],
+                                color='red',linewidth=2,linestyle=':',label='Separatrix')                                                #Core-only Separatrix
+
+
+                    IM1 = ax.contourf(PP.loc[:,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]],
+                                     RR.loc[:,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]],
+                                     PARAM.loc[:,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]],
+                                     levels=levs,cmap=CMAP,norm=NORM)
                     
                     if Markers:
-                        ax.plot(PP.loc[:,JXA,Attempts[n]],RR.loc[:,JXA,Attempts[n]],color='orange',linewidth=2)                         #Outer Midplane
+                        ax.plot(PP.loc[:,JXA,Attempts[n]],RR.loc[:,JXA,Attempts[n]],color='orange',linewidth=2)                          #Outer Midplane
                         ax.plot(PP.loc[:,JXI,Attempts[n]],RR.loc[:,JXI,Attempts[n]],color='gold',linewidth=2)                            #Inner Midplane
                     
-                    ax.plot(PP.loc[1:SEP,CoreBound[0],Attempts[n]],RR.loc[1:SEP,CoreBound[0],Attempts[n]],color='Blue',linewidth=2)    #Inner PFR Boundary
-                    ax.plot(PP.loc[1:SEP,CoreBound[1],Attempts[n]],RR.loc[1:SEP,CoreBound[1],Attempts[n]],color='Blue',linewidth=2)    #Outer PFR Boundary
-                    ax.plot(PP.loc[SEP,CoreBound[0]:CoreBound[1],Attempts[n]],RR.loc[SEP,CoreBound[0]:CoreBound[1],Attempts[n]],color='red',linewidth=2,linestyle=':')  #Separatrix line                              #Separatrix
+                    ax.plot(PP.loc[1:SEP,CoreBound[0]+1,Attempts[n]],RR.loc[1:SEP,CoreBound[0]+1,Attempts[n]],color='Blue',linewidth=2)    #Inner PFR Boundary
+                    ax.plot(PP.loc[1:SEP,CoreBound[1]+1,Attempts[n]],RR.loc[1:SEP,CoreBound[1]+1,Attempts[n]],color='Blue',linewidth=2)    #Outer PFR Boundary
+                    
                     ax.set_xlabel(PolXLbl)
                     ax.set_ylabel(Rstr) 
 
@@ -960,7 +1004,8 @@ class SOLPSPLOT(object):
                 else:
                     ax.set_title('Discharge {} Attempt {}\n{}'.format(Shot, str(Attempts[n]), PARAM.name))
                     
-                plt.colorbar(IM1,ax=ax)
+                SM=SM=cm.ScalarMappable(NORM,CMAP)    
+                plt.colorbar(SM,ax=ax)
 
                 #a.set_xticklabels(['%.1f' % i for i in a.get_xticks()], fontsize='x-large')
                 #a.set_yticklabels(['%.1f' % j for j in a.get_yticks()], fontsize='x-large')
