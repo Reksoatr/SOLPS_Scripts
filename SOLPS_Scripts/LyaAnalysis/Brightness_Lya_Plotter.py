@@ -300,11 +300,11 @@ if Plot:
             SOLPS_nn.append(solps[p].PARAM['NeuDen'].loc[:,JXA[p],:].values)
             SOLPS_emiss.append(solps[p].PARAM['LyaEmissW'].loc[:,JXA[p],:].values)
             
-            Interp_ne=interp1d()
-            Interp_te=interp1d()
-            Interp_nn=interp1d(Rnn[p],nn[p][1])
-            Interp_emiss=interp1d(Remiss[p],bright[p][emiss_idx]) 
-            Interp_bright=interp1d(Rbright[p],bright[p][1])
+            Interp_ne=interp1d(SOLPS_R[p],SOLPS_ne[p])
+            Interp_te=interp1d(SOLPS_R[p],SOLPS_te[p])
+            Interp_nn=interp1d(SOLPS_R[p],SOLPS_nn[p])
+            Interp_emiss=interp1d(SOLPS_R[p],SOLPS_emiss[p]) 
+            Interp_bright=interp1d(RLYMID0,LYMID[p,:])
             
             i = np.min([x for x in range(len(SOLPS_R[p])) if SOLPS_R[p][x] > Rnn[p][0]])
             Interp_Exp_nn.append(Interp_nn(SOLPS_R[p][i:]))

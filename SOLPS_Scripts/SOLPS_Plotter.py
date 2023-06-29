@@ -15,6 +15,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import colors, cm
 from scipy.io import loadmat
+from scipy.interpolate import interp1d, griddata, RectBivariateSpline
 import equilibrium as eq
 from D3DPreProcess import PsiNtoR
 from D3DPreProcess import RhotoPsiN
@@ -185,7 +186,7 @@ class SOLPSPLOT(object):
                      'SX': r'Poloidal Contact Area SX $(m^{2})$',
                      'SY': r'Radial Contact Area SY $(m^{2})$',
                      'SZ': r'Poloidal Cross-Sectional Area SZ $(m^{2})$',
-                     'VOL': r'Cell Volume VOL $(m^{2})$',
+                     'VOL': r'Cell Volume VOL $(m^{3})$',
                      'RadPinch': r'Anomalous Radial Pinch Velocity $v_y\;(m/s)$',
                      'AHAL': r'Atomic $H_\alpha$ emissivity $(photons*m^{-3}s^{-1})$',
                      'MHAL': r'Molecular $H_\alpha$ emissivity $(photons*m^{-3}s^{-1})$',
@@ -624,7 +625,74 @@ class SOLPSPLOT(object):
             self.RadCoords['PsinAvg'] = []
             self.RadCoords['RmidAvg'] = []
         
-                
+    def Add(self, P1, P2, Name=None):
+        if type(P1) == str:
+            if P1 not in self.Parameter:
+                self._LoadSOLPSData(AddNew=P1)
+            P1 = self.PARAM[P1]
+            
+        if type(P2) == str:
+            if P2 not in self.Parameter:
+                self._LoadSOLPSData(AddNew=P2)
+            P2 = self.PARAM[P2]
+            
+        P3 = P1 + P2
+        
+        if Name is not None:
+            self.PARAM[Name] = P3     
+        return P3
+    
+    def Subtract(self, P1, P2, Name=None):
+        if type(P1) == str:
+            if P1 not in self.Parameter:
+                self._LoadSOLPSData(AddNew=P1)
+            P1 = self.PARAM[P1]
+            
+        if type(P2) == str:
+            if P2 not in self.Parameter:
+                self._LoadSOLPSData(AddNew=P2)
+            P2 = self.PARAM[P2]
+            
+        P3 = P1 - P2
+        
+        if Name is not None:
+            self.PARAM[Name] = P3     
+        return P3
+    
+    def Multiply(self, P1, P2, Name=None):
+        if type(P1) == str:
+            if P1 not in self.Parameter:
+                self._LoadSOLPSData(AddNew=P1)
+            P1 = self.PARAM[P1]
+            
+        if type(P2) == str:
+            if P2 not in self.Parameter:
+                self._LoadSOLPSData(AddNew=P2)
+            P2 = self.PARAM[P2]
+            
+        P3 = P1 * P2
+        
+        if Name is not None:
+            self.PARAM[Name] = P3     
+        return P3
+    
+    def Divide(self, P1, P2, Name=None):
+        if type(P1) == str:
+            if P1 not in self.Parameter:
+                self._LoadSOLPSData(AddNew=P1)
+            P1 = self.PARAM[P1]
+            
+        if type(P2) == str:
+            if P2 not in self.Parameter:
+                self._LoadSOLPSData(AddNew=P2)
+            P2 = self.PARAM[P2]
+            
+        P3 = P1 / P2
+        
+        if Name is not None:
+            self.PARAM[Name] = P3     
+        return P3
+            
     def GetRadCoords(self,RADC, Offset=[0,0]):
         #Separate method to handle radial coordinate switching
         
@@ -1233,7 +1301,7 @@ class SOLPSPLOT(object):
                             ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3,color=PlotScheme[0][0], label='Exp')
             else:
                 if RadProfKW['LOG10'] == 2:
-                    ax.semilogy(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:], label=Publish)
+                    ax.semilogy(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:],linewidth=3, label=Publish)
                 else:
                     ax.plot(RR.loc[:,JXA,:], PARAM.loc[:,JXA,:],linewidth=3, label=Publish)
 
@@ -1262,31 +1330,55 @@ class SOLPSPLOT(object):
                             Tid3d = self.ExpDict['Tid3d']
                             ax.plot(PsinTi,Tid3d,'o',markersize=7,linewidth=3, label='Exp')
             
+            if RadProfKW['AX'] is None: #End of current axes reached if not pre-supplied
+                
+                ax.set_xlabel(Rstr)
+                
+                if RadProfKW['LOG10'] == 1:
+                    ax.set_ylabel('Log_10 of {}'.format(PARAM.name))
+                else:    
+                    ax.set_ylabel(PARAM.name)
+    
+                ax.legend([*Publish])
+                ax.set_title('Radial Midplane {}'.format(PARAM.name))
+                
+                if Markers:
+                    if RADC == 'psin':
+                        ax.axvline(1.0,color='red',linewidth=2,linestyle='dashed')
+                    elif RADC == 'rrsep':
+                        ax.axvline(0.0,color='red',linewidth=2,linestyle='dashed')    
+                    else:
+                        ax.axvline(RR.loc[SEP,JXA,Attempts[0]],color='red',linewidth=2,linestyle='dashed')
+                
+                if RadProfKW['GRID'] is True:
+                    ax.grid(b=1)
+                
+            self.RadProfKW = RadProfKW
+
+        if RadProfKW['AX'] is not None:
+            
             ax.set_xlabel(Rstr)
             
             if RadProfKW['LOG10'] == 1:
                 ax.set_ylabel('Log_10 of {}'.format(PARAM.name))
             else:    
                 ax.set_ylabel(PARAM.name)
-            if RadProfKW['Publish']==[]:
-                ax.legend()
-                ax.set_title('Discharge 0{} Attempt(s) {} Midplane Radial {}'.format(str(Shot), str(Attempts), PARAM.name))
-            else:
-                ax.legend()
-                ax.set_title('Radial Midplane {}'.format(PARAM.name))
+
+            ax.legend([*Publish])
+            ax.set_title('Attempts: {}\nRadial Midplane Profile of {}'.format(Attempts,PARAM.name))
+            
             if Markers:
                 if RADC == 'psin':
-                    ax.axvline(1.0,color='red',linewidth=3,linestyle='dashed')
+                    ax.axvline(1.0,color='red',linewidth=2,linestyle='dashed')
                 elif RADC == 'rrsep':
-                    ax.axvline(0.0,color='red',linewidth=3,linestyle='dashed')    
+                    ax.axvline(0.0,color='red',linewidth=2,linestyle='dashed')    
                 else:
-                    ax.axvline(RR.loc[SEP,JXA,Attempts[0]],color='red',linewidth=3,linestyle='dashed')
+                    ax.axvline(RR.loc[SEP,JXA,Attempts[0]],color='red',linewidth=2,linestyle='dashed')
             
             if RadProfKW['GRID'] is True:
                 ax.grid(b=1)
-                
-            self.RadProfKW = RadProfKW
-
+            
+        self.RadProfKW = RadProfKW            
 
 ### FUNCTIONS BELOW NEED TO BE WORKED ON
 
