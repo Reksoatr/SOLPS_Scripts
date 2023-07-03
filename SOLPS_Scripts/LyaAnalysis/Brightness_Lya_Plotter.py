@@ -90,43 +90,44 @@ for m,a in enumerate(SHOTS):
         LYMID[m,:,n]=np.loadtxt('{}SOLPS_2d_prof/cmod/{}home/Attempt{}/Output/LyaBrightW{}'.format(TOP,a,i,i),
                         skiprows=2)[:,1]    # Load special Brightness profile simulation data
 
+
+Rbright=[]
+Remiss=[]    
+Rnn=[]
+Sep=[]
+RLYMID=[]
+
+if RADC=='radial':                                          # Convert all data coordinates to R (meters)
+    for m in range(AN):
+        
+        Rbright.append(bright[m][0])                        # Brightness profile coordinates already given in R
+        Remiss.append(bright[m][Remiss_idx])                # Emissivity profile coordinates already given in R
+        Rnn.append(PsiN2R(GFiles[m],nn[m][0],Z=ZLYMID0[0]))    # Convert neutral density coordinates from PsiN to R with gfile
+        Sep.append(PsiN2R(GFiles[m],1.0,Z=ZLYMID0[0]))    # Calculate R coordinate of Separatrix from gfile
+        RLYMID.append(RLYMID0)                              # SOLPS brightness profile coordinates already given in R
+
+        '''
+        Rnn[m]=np.array([[j for j,k in zip(*GFiles[m].get_fluxsurface(i)) if j > GFiles[m].axis.r and k==0] 
+                         for i in nn[m][0]])[:,0]  
+        Sep[m]=GFiles[m].get_fluxsurface(1.0)[0].max()
+        '''
+        
+    Rlabel=r'Major Radius [m]'
+    
+elif RADC=='psin':                                                          # Convert all data coordinates to PsiN
+    for m in range(AN):
+        
+        Rbright.append(R2PsiN(GFiles[m],bright[m][0],Z=ZLYMID0))
+        Remiss.append(R2PsiN(GFiles[m],bright[m][Remiss_idx],Z=ZLYMID0))
+        Rnn.append(nn[m][0])
+        Sep.append(1)
+        RLYMID.append(R2PsiN(GFiles[m],RLYMID0,Z=ZLYMID0))
+    
+    Rlabel=r'$\Psi_n$'
+
 ### PLOTTING ROUTINE ###
 
 if Plot:
-    
-    Rbright=[]
-    Remiss=[]    
-    Rnn=[]
-    Sep=[]
-    RLYMID=[]
-
-    if RADC=='radial':                                          # Convert all data coordinates to R (meters)
-        for m in range(AN):
-            
-            Rbright.append(bright[m][0])                        # Brightness profile coordinates already given in R
-            Remiss.append(bright[m][Remiss_idx])                # Emissivity profile coordinates already given in R
-            Rnn.append(PsiN2R(GFiles[m],nn[m][0],Z=ZLYMID0[0]))    # Convert neutral density coordinates from PsiN to R with gfile
-            Sep.append(PsiN2R(GFiles[m],1.0,Z=ZLYMID0[0]))    # Calculate R coordinate of Separatrix from gfile
-            RLYMID.append(RLYMID0)                              # SOLPS brightness profile coordinates already given in R
-
-            '''
-            Rnn[m]=np.array([[j for j,k in zip(*GFiles[m].get_fluxsurface(i)) if j > GFiles[m].axis.r and k==0] 
-                             for i in nn[m][0]])[:,0]  
-            Sep[m]=GFiles[m].get_fluxsurface(1.0)[0].max()
-            '''
-            
-        Rlabel=r'Major Radius [m]'
-        
-    elif RADC=='psin':                                                          # Convert all data coordinates to PsiN
-        for m in range(AN):
-            
-            Rbright.append(R2PsiN(GFiles[m],bright[m][0],Z=ZLYMID0))
-            Remiss.append(R2PsiN(GFiles[m],bright[m][Remiss_idx],Z=ZLYMID0))
-            Rnn.append(nn[m][0])
-            Sep.append(1)
-            RLYMID.append(R2PsiN(GFiles[m],RLYMID0,Z=ZLYMID0))
-        
-        Rlabel=r'$\Psi_n$'
     
     figA,axA=plt.subplots(3,AN,sharex=True,sharey='row')
     figB,axB=plt.subplots(3,AN,sharex=True,sharey='row')

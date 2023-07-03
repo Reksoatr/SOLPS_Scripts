@@ -20,11 +20,11 @@ from scipy.interpolate import griddata
 from PARAMDICT import EireneDict
 #from SOLPS_Plotter import SOLPSPLOT
 
-Shot='1100308004'
+Shot='1100305023'
 Device='cmod'
-Attempt='14Rf0.7_split2' # 14Rf0.7 for 1100308004, 18Rf0.6 for 1080416025, 24Rf2.0 for 1100305023 
+Attempt='24Rf2.0_split2' # 14Rf0.7 for 1100308004, 18Rf0.6 for 1080416025, 24Rf2.0 for 1100305023 
 
-MeshID='010'  # 026 used for Shot025, 020 used for Shot012, 001 for d3d, 
+MeshID='009'  # 026 used for Shot025, 020 used for Shot012, 001 for d3d, 
               # 025/010 for 1100308004, 024/009 for 1100305023, 027/011 for 1080416025
 LOG=True
 Pressure=True
