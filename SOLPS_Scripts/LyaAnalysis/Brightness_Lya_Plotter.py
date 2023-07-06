@@ -37,6 +37,7 @@ JXA=[40,40,55]
 JXI=[59,58,38]
 PsinOffset=[0,0.02,-0.014]
 RadOffset=[0,0.005,-0.007]
+LyaBrightErr = 0.05
 
 if EMISS=='tree':
     Remiss_idx=2
@@ -45,24 +46,24 @@ elif EMISS=='tomo':
     Remiss_idx=4
     emiss_idx=5
     
-# Load Experimental Data
+## Load Experimental Data ##
 
 BASE,TOP = SET_WDIR('','')
 
-GFCMOD='{}gfileProcessing/cmod_files/'.format(TOP) #gfile directory under TOP directory
+GFCMOD='{}gfileProcessing/cmod_files/'.format(TOP)                                              #gfile directory under TOP directory
 
 GFiles=[]
 bright=[]
 nn=[]
 
 for A in SHOTS:
-    GFiles.append(eq.equilibrium(gfile='{}g{}.01000'.format(GFCMOD,A))) #Load gfiles into list
+    GFiles.append(eq.equilibrium(gfile='{}g{}.01000'.format(GFCMOD,A)))                         #Load gfiles into list
     
-    with open('{}Brightness_Profiles/lya_brightness_{}.pkl'.format(GFCMOD,A),'rb') as file1:
-        bright.append(pkl.load(file1))    #Experimental Ly-a brightness and emissivity data
+    with open('{}Brightness_Profiles/lya_brightness_{}_v2.pkl'.format(GFCMOD,A),'rb') as file1:
+        bright.append(pkl.load(file1))                                                          #Experimental Ly-a brightness and emissivity data
 
     with open('{}Brightness_Profiles/lyman_data_{}.pkl'.format(GFCMOD,A),'rb') as file2:
-        nn.append(pkl.load(file2))   #Experimental neutral density profile data
+        nn.append(pkl.load(file2))                                                              #Experimental neutral density profile data
 
 nnlogerr=[]
 
@@ -71,7 +72,9 @@ for N in nn:
     N[2]=1e6*N[2]
     nnlogerr.append(0.434*N[2]/N[1])    #Process neutral density error for semilogy plotting
 
-# Load SOLPS simulation data
+lyabrighterr = [LyaBrightErr*bright[A][1] for A in SHOTS]                       #Assume 3% nominal uncertainty in Ly-a Brightness measurements
+
+## Load SOLPS simulation data ##
 
 solps=[SOLPSPLOT(SHOTS[i], ATTEMPTS[i], Markers=False, JXA=JXA[i], JXI=JXI[i], TimeRange=[0.95,1.05],
                  PlotScheme=['b--','b-','b--'], PsinOffset=PsinOffset[i], RadOffset=RadOffset[i]) 
@@ -169,14 +172,16 @@ if Plot:
         axB[0,p].legend(['$\pm50\%$','Base','_nolabel','LYMID'],loc=2)
         
         solps[p].RadProf('LyaEmissW',RADC=RADC,AX=axB[1,p], Publish=['$\pm50\%$','Base',None])
-        axB[1,p].plot(Remiss[p],bright[p][emiss_idx],'--*',color='red',label='LYMID')
+        axB[1,p].plot(Remiss[p],bright[p][emiss_idx],'r--',label='LYMID')
         axB[1,p].legend()
         
         axB[2,p].plot(RLYMID[p],LYMID[p][:,0],'b--',linewidth='2.0',label='+/-50%')
         axB[2,p].plot(RLYMID[p],LYMID[p][:,1],'bx-',linewidth='2.0',label='Base')
         axB[2,p].plot(RLYMID[p],LYMID[p][:,2],'b--',linewidth='2.0',label=None)
-        axB[2,p].plot(Rbright[p],bright[p][1],'+--',color='red',label='LYMID')
+        axB[2,p].errorbar(Rbright[p],bright[p][1],lyabrighterr[p],fmt='r--',label='LYMID')
         axB[2,p].legend()
+        
+        plt.errorbar()
         
         axB[0,p].axvline(Sep[p],linestyle=':')
         axB[1,p].axvline(Sep[p],linestyle=':')
@@ -245,6 +250,8 @@ if Plot:
         SOLPS_nn=[]
         SOLPS_emiss=[]
         SOLPS_R=[]
+        Interp_ne=[]
+        Interp_te=[]
         Interp_Exp_nn=[]
         Interp_Exp_emiss=[]
         Interp_Exp_bright=[]
@@ -306,6 +313,9 @@ if Plot:
             Interp_nn=interp1d(SOLPS_R[p],SOLPS_nn[p])
             Interp_emiss=interp1d(SOLPS_R[p],SOLPS_emiss[p]) 
             Interp_bright=interp1d(RLYMID0,LYMID[p,:])
+            
+            i = np.min([x for x in range(len(SOLPS_R[p])) if SOLPS_R[p][x] > Rnn[p][0]])
+            Interp_Exp_nn.append(Interp_nn(SOLPS_R[p][i:]))
             
             i = np.min([x for x in range(len(SOLPS_R[p])) if SOLPS_R[p][x] > Rnn[p][0]])
             Interp_Exp_nn.append(Interp_nn(SOLPS_R[p][i:]))

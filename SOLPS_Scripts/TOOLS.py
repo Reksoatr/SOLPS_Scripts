@@ -110,6 +110,36 @@ def gaussian_shading(ax, x, y, y_unc, c='k', min_val=0.0):
                         linewidth=0.0,
                         color=c)
 
+def ErrorQuant(exp_data, model_data, exp_unc=None, name=None):
+    '''Calculate a collection of Goodness-of-Fit Error Quantification metrics 
+    for a set of experiemntal data and corresponding model prediction data'''
+    
+    if len(exp_data) == len(model_data):
+        N = len(exp_data)
+        err = exp_data - model_data
+        exp_mean = np.mean(exp_data)
+        exp_var = exp_data - exp_mean
+        
+        MAE = np.sum(np.abs(err))/N
+        RMSE = np.sqrt(np.sum(err**2)/N)
+        
+        RAE = np.sum(np.abs(err))/np.sum(np.abs(exp_var))
+        RSE = np.sqrt(np.sum(err**2)/np.sum(exp_var**2))
+        
+        if exp_unc is not None and len(exp_unc) == len(exp_data):
+            norm_res = err/exp_unc
+            
+            return {'MAE':MAE, 'RMSE':RMSE, 'RAE':RAE, 'RSE':RSE, 'norm_res':norm_res, 'Quantity':name}
+            
+        else:
+            
+            return {'MAE':MAE, 'RMSE':RMSE, 'RAE':RAE, 'RSE':RSE, 'Quantity':name}
+        
+    else:
+        print("Experimental data array and model data array must be the same length")
+        quit()            
+
+
 def JumpConnect(host, user, ssh_home, jumphost,port=22):
     client = paramiko.SSHClient()
     client.load_system_host_keys(filename='{}known_hosts'.format(ssh_home))

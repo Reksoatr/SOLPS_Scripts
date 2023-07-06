@@ -19,7 +19,7 @@ BASEDRT, TOPDRT=SET_WDIR('','')
 
 Device='cmod'
 
-Shots=['1100308004','1080416025','1100305023']#['1080416025','1101014029']#['1100308004','1101014006']#['1100305023','1101014019']#['1120917011']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#   
+Shots=['1100305023']#['1100308004','1080416025','1100305023']#['1080416025','1101014029']#['1100308004','1101014006']#['1100305023','1101014019']#['1120917011']#['1160718024','1160718025']#['1160718012','1160718013','1160718023']#   
 
 Rad='psin'#'rmid'#
 
@@ -27,7 +27,7 @@ Filter = True
 
 SOLPS=False
 Attempts=[]#[15N]
-KW={'JXA':40}
+KW={'JXA':55}
 '''
 KW={'JXA' : 27,
     'JXI' : 38,
@@ -39,20 +39,20 @@ KW={'JXA' : 27,
         
 Time0=70
 AVG=0
-PsinOffset=[-0.015,0.03,0]#[0.03,-0.013]#[-0.015,-0.02]
-RmidOffset=[0,0,0]#[-0.01,-0.015]
+PsinOffset=[0]#[-0.015,0.03,0]#[0.03,-0.013]#[-0.015,-0.02]
+RmidOffset=[0]#[0,0,0]#[-0.01,-0.015]
 TimeA=np.nan
 TimeB=np.nan
 
 CoreTS=True
 CoreTime=1.0
-LCFS_Te=[90,83,93]#[83,98]#[90,90]#[93,110]#
+LCFS_Te=[93]#[90,83,93]#[83,98]#[90,90]#[93,110]#
 
 XLIM=[0.60,1.05]#[0.45,1.06]
 NeLIM=[]#[0,7.5e19]
 TeLIM=[]#[0,1500]
 
-Colors=['red','green','blue']
+Colors=['blue']
 
 fig, ax = plt.subplots()
 ax.set_frame_on(False)
@@ -106,10 +106,14 @@ if CoreTS:
                         
         Time0=0
         Data[i]['time']=[CoreTime]
-        CoreNe = ne_profile.errorbar(Data[i]['ne'][0][Mask[i]['ne']]+PsinOffset[n],Data[i]['ne'][1][Mask[i]['ne']],
-                                     yerr=Data[i]['ne'][2][Mask[i]['ne']],linestyle=':',capsize=5,marker='.',color=Colors[n])
-        CoreTe = te_profile.errorbar(Data[i]['te'][0][Mask[i]['te']]+PsinOffset[n],Data[i]['te'][1][Mask[i]['te']],
-                                     yerr=Data[i]['te'][2][Mask[i]['te']],linestyle=':',capsize=5,marker='.',color=Colors[n])
+        CoreNe = ne_profile.errorbar(Data[i]['ne'][0][Mask[i]['ne']]+PsinOffset[n],
+                                     Data[i]['ne'][1][Mask[i]['ne']],
+                                     yerr=Data[i]['ne'][2][Mask[i]['ne']],
+                                     linestyle=':',capsize=5,marker='.',color=Colors[n])
+        CoreTe = te_profile.errorbar(Data[i]['te'][0][Mask[i]['te']]+PsinOffset[n],
+                                     Data[i]['te'][1][Mask[i]['te']],
+                                     yerr=Data[i]['te'][2][Mask[i]['te']],
+                                     linestyle=':',capsize=5,marker='.',color=Colors[n])
         ne_profile.fill_between(Data[i]['ne'][0][Mask[i]['ne']]+PsinOffset[n],
                                 Data[i]['ne'][1][Mask[i]['ne']]+Data[i]['ne'][2][Mask[i]['ne']],
                                 Data[i]['ne'][1][Mask[i]['ne']]-Data[i]['ne'][2][Mask[i]['ne']],

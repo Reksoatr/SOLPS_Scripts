@@ -1087,6 +1087,8 @@ class SOLPSPLOT(object):
                         NORM.vmin = np.nanmin(PARAM.loc[:,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]].values)
                         NORM.vmax = np.nanmax(PARAM.loc[:,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]].values)
                         
+                        levs = np.linspace(np.floor(NORM.vmin),np.ceil(NORM.vmax),ContKW['LVN'])
+                        
                         ax.plot(PP.loc[SEP,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]],
                                 RR.loc[SEP,CoreBound[0]+1:CoreBound[1]+1,Attempts[n]],
                                 color='red',linewidth=2,linestyle=':',label='Separatrix')                                                #Core-only Separatrix
@@ -1112,7 +1114,7 @@ class SOLPSPLOT(object):
                 else:
                     ax.set_title('Discharge {} Attempt {}\n{}'.format(Shot, str(Attempts[n]), PARAM.name))
                     
-                SM=SM=cm.ScalarMappable(NORM,CMAP)    
+                SM=cm.ScalarMappable(NORM,CMAP)    
                 plt.colorbar(SM,ax=ax)
 
                 #a.set_xticklabels(['%.1f' % i for i in a.get_xticks()], fontsize='x-large')
