@@ -10,6 +10,8 @@ V2.0 - Updated June 17, 2023
 """
 
 from TOOLS import SET_WDIR
+import re
+import linecache
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
@@ -20,15 +22,16 @@ from scipy.interpolate import griddata
 from PARAMDICT import EireneDict
 #from SOLPS_Plotter import SOLPSPLOT
 
-Shot='1100305023'
+Shot='1100308004'
 Device='cmod'
-Attempt='24Rf2.0_split2' # 14Rf0.7 for 1100308004, 18Rf0.6 for 1080416025, 24Rf2.0 for 1100305023 
+Attempt='14Rf0.7_split2' # 14Rf0.7 for 1100308004, 18Rf0.6 for 1080416025, 24Rf2.0 for 1100305023 
 
-MeshID='009'  # 026 used for Shot025, 020 used for Shot012, 001 for d3d, 
+MeshID='010'  # 026 used for Shot025, 020 used for Shot012, 001 for d3d, 
               # 025/010 for 1100308004, 024/009 for 1100305023, 027/011 for 1080416025
 LOG=True
 Pressure=True
 Param='PDENA'
+F_157='0'
 B2=True
 B2_Param='Ne'
 
@@ -63,8 +66,26 @@ except:
     WF=False
     VVFILE = np.loadtxt('{}/vvfile.ogr'.format(BASEDRT))
 
-Parameter=EireneDict[Param]
-Data=np.loadtxt('{}/{}{}'.format(DRT,Parameter['FileName'],Attempt),usecols = (2))
+if Param == 'fort.157':
+    file='{}/{}'.format(DRT,Param)
+    Parameter=EireneDict[F_157]
+    
+    with open(file,'r') as fp:
+        for i,L in enumerate(fp):
+            x=re.search(Parameter['Header'], L)
+            if x is not None:
+                print(L)
+                line_start=i+5
+                if F_157=='0':
+                    line_start+=1
+                
+    row_num=int(linecache.getline(file,line_start).split()[0])-1
+    
+    Data=(100*100*100*2.052E-17/(4*np.pi))*np.genfromtxt(file,skip_header=line_start,max_rows=row_num,usecols=(2))               
+    
+else:
+    Parameter=EireneDict[Param]
+    Data=np.loadtxt('{}/{}{}'.format(DRT,Parameter['FileName'],Attempt),usecols = (2))
 
 #NeuDen=np.loadtxt('{}/EirAtom{}'.format(DRT,Attempt),usecols = (2))
 #MolDen=np.loadtxt('{}/EirMol{}'.format(DRT,Attempt),usecols = (2))
@@ -329,7 +350,7 @@ def chordplot(event):
     
     EirFig.canvas.draw()
     
-    Output={'Chord':Chord,'Data':Band,'InterpChord':Dist,'InterpData':Vals}
+    Output={'P0':P0,'Chord':(ChordX,ChordY),'Data':Band,'InterpChord':Dist,'InterpData':Vals}
     
     return Output   # To access Output dict in workspace, just call A=chordplot(0)
     

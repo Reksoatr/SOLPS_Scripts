@@ -41,7 +41,7 @@ def R2PsiN(GF,R,Z=0):
     '''Uses equilibrium to convert from R to PsiN
         Must provide gfile (GF) loaded as an equilibrium object
         Default assumes Z=0'''
-    PP=GF.psiN(R,Z)[0]
+    PP=GF.psiN(R,Z).flatten()
     
     return PP
 
@@ -50,7 +50,7 @@ def PsiN2R(GF,psin,Z=0):
        Must provide gfile (GF) loaded as an equilibrium object
        Default assumes Z=0'''
     Rlfs=[i for i in GF.R if i>GF.axis.r]
-    RR=np.interp(psin,R2PsiN(GF,Rlfs,Z),Rlfs)
+    RR=np.interp(psin,GF.psiN(Rlfs,Z).flatten(),Rlfs)
     
     return RR
 
@@ -128,8 +128,9 @@ def ErrorQuant(exp_data, model_data, exp_unc=None, name=None):
         
         if exp_unc is not None and len(exp_unc) == len(exp_data):
             norm_res = err/exp_unc
+            SER = np.sqrt(np.sum(norm_res**2)/N)
             
-            return {'MAE':MAE, 'RMSE':RMSE, 'RAE':RAE, 'RSE':RSE, 'norm_res':norm_res, 'Quantity':name}
+            return {'MAE':MAE, 'RMSE':RMSE, 'RAE':RAE, 'RSE':RSE, 'norm_res':norm_res, 'SER':SER, 'Quantity':name}
             
         else:
             

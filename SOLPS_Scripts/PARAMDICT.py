@@ -10,7 +10,14 @@ Parameter Quantity Dictionary
 EireneDict = {'PDENA':{'FileName':'EirAtom', 'Label': r'Neutral D Density $(m^{-3})$'},
               'PDENM':{'FileName':'EirMol', 'Label': r'Molecular D2 Density $(m^{-3})$'},
               'EDENA':{'FileName':'AtomEnergy', 'Label': r'Neutral D Energy Density $(eV*m^{-3})$'},
-              'EDENM':{'FileName':'MolEnergy', 'Label': r'Molecular D2 Energy Density $(eV*m^{-3})$'}}
+              'EDENM':{'FileName':'MolEnergy', 'Label': r'Molecular D2 Energy Density $(eV*m^{-3})$'},
+              '0':{'Header':'^ SUM OVER COMPONENTS', 'Label': r'Total Ly-alpha Emissivity $(W/m^{-3})$', 'sym': 'SUM'},
+              '1':{'Header':'^ ATOMIC NEUTRAL HYDR.', 'Label': r'D Ly-alpha Emissivity $(W/m^{-3})$', 'sym': r'$D_0$'},
+              '2':{'Header':'^ ATOMIC HYDR. ION', 'Label': r'D+ Ly-alpha Emissivity $(W/m^{-3})$', 'sym': r'$D^+$'},
+              '3':{'Header':'^ DIATOMIC NEUTRAL HYDR. M', 'Label': r'D2 Ly-alpha Emissivity $(W/m^{-3})$', 'sym': r'$D_2$'},
+              '4':{'Header':'^ DIATOMIC HYDR. MOL ION', 'Label': r'D2+ Ly-alpha Emissivity $(W/m^{-3})$', 'sym': r'$D_2^+$'},
+              '5':{'Header':'^ NEGATIVE HYDR. ION', 'Label': r'D- Ly-alpha Emissivity $(W/m^{-3})$', 'sym': r'$D^-$'},
+              '6':{'Header':'^ TRIATOMIC HYDR. ION', 'Label': r'D3+ Ly-alpha Emissivity $(W/m^{-3})$', 'sym': r'$D_3^+$'}}
 
 
 B2Dict = {'Ne': r'Electron Density $n_e\;(m^{-3})$',
