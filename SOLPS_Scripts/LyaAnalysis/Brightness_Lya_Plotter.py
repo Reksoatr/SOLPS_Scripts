@@ -11,6 +11,7 @@ study discharges, and compare to SOLPS profiles
 import pickle as pkl
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 import equilibrium as eq
 from scipy.interpolate import interp1d
 from TOOLS import SET_WDIR, R2PsiN, PsiN2R, gaussian_shading, ErrorQuant
@@ -464,24 +465,24 @@ if Plot:
         ax_bright.axhline(0,color='black',linestyle='--')
         
         ax_ne_err.axhline(0,color='black',linestyle='--')
-        ax_ne_err.axhline(0.5,color='black',linestyle=':')
-        ax_ne_err.axhline(-0.5,color='black',linestyle=':')
+        ax_ne_err.axhline(0.5,color='magenta',linestyle='dashdot')
+        ax_ne_err.axhline(-0.5,color='magenta',linestyle='dashdot')
         
         ax_te_err.axhline(0,color='black',linestyle='--')
-        ax_te_err.axhline(0.5,color='black',linestyle=':')
-        ax_te_err.axhline(-0.5,color='black',linestyle=':')
+        ax_te_err.axhline(0.5,color='magenta',linestyle='dashdot')
+        ax_te_err.axhline(-0.5,color='magenta',linestyle='dashdot')
         
         ax_nn_err.axhline(0,color='black',linestyle='--')
-        ax_nn_err.axhline(0.5,color='black',linestyle=':')
-        ax_nn_err.axhline(-0.5,color='black',linestyle=':')
+        ax_nn_err.axhline(0.5,color='magenta',linestyle='dashdot')
+        ax_nn_err.axhline(-0.5,color='magenta',linestyle='dashdot')
         
         ax_emiss_err.axhline(0,color='black',linestyle='--')
-        ax_emiss_err.axhline(0.5,color='black',linestyle=':')
-        ax_emiss_err.axhline(-0.5,color='black',linestyle=':')
+        ax_emiss_err.axhline(0.5,color='magenta',linestyle='dashdot')
+        ax_emiss_err.axhline(-0.5,color='magenta',linestyle='dashdot')
         
         ax_bright_err.axhline(0,color='black',linestyle='--')
-        ax_bright_err.axhline(0.5,color='black',linestyle=':')
-        ax_bright_err.axhline(-0.5,color='black',linestyle=':')
+        ax_bright_err.axhline(0.5,color='magenta',linestyle='dashdot')
+        ax_bright_err.axhline(-0.5,color='magenta',linestyle='dashdot')
         
         for p in range(AN):
             
@@ -629,23 +630,31 @@ if Plot:
             ax_ne_err.set_title('Fraction variation from center baseline case')
             ax_ne_err.set_xlabel('$\Psi_n$')
             ax_ne_err.set_ylabel('$n_e$')
+            ax_ne_err.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1.0,decimals=0))
             ax_ne_err.legend()
             ax_te_err.set_title('')
             ax_te_err.set_xlabel('$\Psi_n$')
             ax_te_err.set_ylabel('$T_e$')
+            ax_te_err.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1.0,decimals=0))
             #ax_te_err.legend()
             
             ax_nn_err.set_title('Fraction variation from center baseline case')
             ax_nn_err.set_xlabel('R [m]')
             ax_nn_err.set_ylabel('$n_D$')
+            ax_nn_err.yaxis.set_major_locator(mtick.MultipleLocator(0.5))
+            ax_nn_err.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1.0,decimals=0))
             #ax_nn_err.legend()
             ax_emiss_err.set_title('')                
             ax_emiss_err.set_xlabel('R [m]')
             ax_emiss_err.set_ylabel('Ly-a Emissivity')
+            ax_emiss_err.yaxis.set_major_locator(mtick.MultipleLocator(0.5))
+            ax_emiss_err.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1.0,decimals=0))
             #ax_emiss_err.legend()
             ax_bright_err.set_title('')
             ax_bright_err.set_xlabel('R [m]')
             ax_bright_err.set_ylabel('Ly-a Brightness')
+            ax_bright_err.yaxis.set_major_locator(mtick.MultipleLocator(0.5))
+            ax_bright_err.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1.0,decimals=0))
             ax_bright_err.legend()          
             
             
