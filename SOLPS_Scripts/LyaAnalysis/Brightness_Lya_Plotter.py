@@ -627,7 +627,7 @@ if Plot:
             ax_bright.legend()
             
             
-            ax_ne_err.set_title('Fraction variation from center baseline case')
+            ax_ne_err.set_title('Percent variation from center baseline case')
             ax_ne_err.set_xlabel('$\Psi_n$')
             ax_ne_err.set_ylabel('$n_e$')
             ax_ne_err.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1.0,decimals=0))
@@ -638,7 +638,7 @@ if Plot:
             ax_te_err.yaxis.set_major_formatter(mtick.PercentFormatter(xmax=1.0,decimals=0))
             #ax_te_err.legend()
             
-            ax_nn_err.set_title('Fraction variation from center baseline case')
+            ax_nn_err.set_title('Percent variation from center baseline case')
             ax_nn_err.set_xlabel('R [m]')
             ax_nn_err.set_ylabel('$n_D$')
             ax_nn_err.yaxis.set_major_locator(mtick.MultipleLocator(0.5))
