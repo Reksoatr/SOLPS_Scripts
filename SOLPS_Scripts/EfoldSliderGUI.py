@@ -20,9 +20,9 @@ import json
 
 ### Input Fields ###
 
-Shot = '027205'
-Attempt = ['22']
-DEV='mast'
+Shot = 'd3d'
+Attempt = ['86']
+DEV='d3d'
 GasLvl = 0
 Balloon = 0
 
@@ -490,21 +490,20 @@ def wholefit(event):
   
     y_adj = np.array(sorted(efold_adj.items()))[:,1]
     y_adj_err = np.array(sorted(efold_adj_err.items()))[:,1]
-    wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y_adj,'bv:')
+    wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y_adj,'bv:',label='Adjusted e-folding length')
     wholeAx.fill_between(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y_adj-y_adj_err,y_adj+y_adj_err,alpha=0.2,edgecolor='k',facecolor='c')
     wholeAx.set_title('Shot {} Attempt {} neutral e-folding lengths'.format(Shot,Attempt[-1]))
     wholeAx.set_xlabel(PolCoords[0])
     wholeAx.set_ylabel('e_folding length (mm)')
-    wholeAx.axvline(dXP.loc[JXA,PolCoords[0]].values,color='red')
-    wholeAx.axvline(dXP.loc[JXI,PolCoords[0]].values,color='orange')
-    wholeAx.axvline(dXP.loc[CoreBound[0],PolCoords[0]].values,color='black')
+    wholeAx.axvline(dXP.loc[JXA,PolCoords[0]].values,color='red',label='Outer Midplane')
+    wholeAx.axvline(dXP.loc[JXI,PolCoords[0]].values,color='orange',label='Inner Midplane')
+    wholeAx.axvline(dXP.loc[CoreBound[0],PolCoords[0]].values,color='black',label='X-Point')
     
     if BothPlot.get_status()[0] == True:
         x,y = zip(*sorted(efold.items()))  
-        wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y,'r^:')
-        wholeAx.legend(['Adjusted e-folding length','Outer Midplane', 'Inner Midplane','X-Point','Raw e-folding length'])
-    else:
-        wholeAx.legend(['Adjusted e-folding length','std error','Outer Midplane', 'Inner Midplane','X-Point'])
+        wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y,'g^:',label='Raw e-folding length')
+    
+    wholeAx.legend()
     
     #wholeAx.xaxis.set_ticks(np.arange(20,75,5))
     starty, endy = wholeAx.get_ylim()
