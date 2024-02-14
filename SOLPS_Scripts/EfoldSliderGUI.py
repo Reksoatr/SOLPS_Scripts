@@ -479,6 +479,7 @@ PolLim_Max.on_submit(submitPolLim_Max)
 
 def wholefit(event):
     wholeFig, wholeAx = plt.subplots()
+    opaqueFig, opaqueAx = plt.subplots()
     reset(event)
     tanhfit(event)
     expfit(event)
@@ -497,19 +498,29 @@ def wholefit(event):
     wholeAx.set_ylabel('e_folding length (mm)')
     wholeAx.axvline(dXP.loc[JXA,PolCoords[0]].values,color='red',label='Outer Midplane')
     wholeAx.axvline(dXP.loc[JXI,PolCoords[0]].values,color='orange',label='Inner Midplane')
-    wholeAx.axvline(dXP.loc[CoreBound[0],PolCoords[0]].values,color='black',label='X-Point')
+    #wholeAx.axvline(dXP.loc[CoreBound[0],PolCoords[0]].values,color='black',label='X-Point')
+    
+    opaqueness = np.array([yparam[k][2]*2000/efold_adj[k] for k in sorted(yparam.keys())])
+    opaqueAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,opaqueness,'b*:',label='Opaqueness')
+    opaqueAx.set_title('Shot {} Attempt {} Opaqueness'.format(Shot,Attempt[-1]))
+    opaqueAx.set_xlabel(PolCoords[0])
+    opaqueAx.set_ylabel('Opaqueness')
+    opaqueAx.axvline(dXP.loc[JXA,PolCoords[0]].values,color='red',label='Outer Midplane')
+    opaqueAx.axvline(dXP.loc[JXI,PolCoords[0]].values,color='orange',label='Inner Midplane')
     
     if BothPlot.get_status()[0] == True:
         x,y = zip(*sorted(efold.items()))  
         wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y,'g^:',label='Raw e-folding length')
     
     wholeAx.legend()
+    opaqueAx.legend()
     
     #wholeAx.xaxis.set_ticks(np.arange(20,75,5))
     starty, endy = wholeAx.get_ylim()
     wholeAx.yaxis.set_ticks(np.linspace(0,np.round(endy),11))
-    wholeAx.axvline(dXP.loc[CoreBound[1],PolCoords[0]].values,color='black')
+    #wholeAx.axvline(dXP.loc[CoreBound[1],PolCoords[0]].values,color='black')
     wholeAx.grid()
+    opaqueAx.grid()
     
     secax=wholeAx.secondary_xaxis('top',functions=(lambda x: x / np.max(dXP[:,0].values), lambda x: x * np.max(dXP[:,0].values)))
     secax.set_xlabel(PolCoords[1])
