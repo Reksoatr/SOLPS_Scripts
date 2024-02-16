@@ -22,7 +22,7 @@ plt.rc('font',size=30)
 plt.rc('lines',linewidth=2,markersize=7)
 
 Plot=True
-Error_Analysis=True
+Error_Analysis=False
 HydrContrib=True
 
 CoreTS=True
