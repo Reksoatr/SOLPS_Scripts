@@ -489,9 +489,12 @@ def wholefit(event):
         tanhfit(event)
         expfit(event)
   
+    delta_ne= np.array([yparam[k][2]*2000 for k in sorted(yparam.keys())])
+  
     y_adj = np.array(sorted(efold_adj.items()))[:,1]
     y_adj_err = np.array(sorted(efold_adj_err.items()))[:,1]
     wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y_adj,'bv:',label='Adjusted e-folding length')
+    wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,delta_ne,'y*:',label='Pedestal Width')
     wholeAx.fill_between(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y_adj-y_adj_err,y_adj+y_adj_err,alpha=0.2,edgecolor='k',facecolor='c')
     wholeAx.set_title('Shot {} Attempt {} neutral e-folding lengths'.format(Shot,Attempt[-1]))
     wholeAx.set_xlabel(PolCoords[0])
@@ -500,7 +503,7 @@ def wholefit(event):
     wholeAx.axvline(dXP.loc[JXI,PolCoords[0]].values,color='orange',label='Inner Midplane')
     #wholeAx.axvline(dXP.loc[CoreBound[0],PolCoords[0]].values,color='black',label='X-Point')
     
-    opaqueness = np.array([yparam[k][2]*2000/efold_adj[k] for k in sorted(yparam.keys())])
+    opaqueness = delta_ne/y_adj
     opaqueAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,opaqueness,'b*:',label='Opaqueness')
     opaqueAx.set_title('Shot {} Attempt {} Opaqueness'.format(Shot,Attempt[-1]))
     opaqueAx.set_xlabel(PolCoords[0])
@@ -524,6 +527,9 @@ def wholefit(event):
     
     secax=wholeAx.secondary_xaxis('top',functions=(lambda x: x / np.max(dXP[:,0].values), lambda x: x * np.max(dXP[:,0].values)))
     secax.set_xlabel(PolCoords[1])
+    
+    sec2ax=opaqueAx.secondary_xaxis('top',functions=(lambda x: x / np.max(dXP[:,0].values), lambda x: x * np.max(dXP[:,0].values)))
+    sec2ax.set_xlabel(PolCoords[1])
     plt.show
 
 def export(event):    
