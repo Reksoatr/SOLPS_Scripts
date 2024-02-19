@@ -25,6 +25,7 @@ Attempt = ['86']
 DEV='d3d'
 GasLvl = 0
 Balloon = 0
+ROOTSHOT=''
 
 PS=['.','.','.','.','.','x']
 
@@ -34,7 +35,7 @@ EXPORTYPE='json' #Either 'json' or 'nc'
 
 ### Setting up Base Variables ###
 
-NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],DEV=DEV,EXP=False,AVG=False,PlotScheme='')#,ROOTSHOT='')
+NeuDen = SOLPSPLOT(Shot,Attempt,['Ne','NeuDen'],DEV=DEV,ROOTSHOT=ROOTSHOT,EXP=False,AVG=False,PlotScheme='')#,ROOTSHOT='')
 
 JXA = NeuDen.KW['JXA']
 JXI = NeuDen.KW['JXI']
@@ -489,14 +490,14 @@ def wholefit(event):
         tanhfit(event)
         expfit(event)
   
-    delta_ne= np.array([yparam[k][2]*2000 for k in sorted(yparam.keys())])
+    delta_ne = np.array([yparam[k][2]*2000 for k in sorted(yparam.keys())])
   
     y_adj = np.array(sorted(efold_adj.items()))[:,1]
     y_adj_err = np.array(sorted(efold_adj_err.items()))[:,1]
     wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y_adj,'bv:',label='Adjusted e-folding length')
     wholeAx.plot(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,delta_ne,'y*:',label='Pedestal Width')
     wholeAx.fill_between(dXP.loc[PolLim[0]:PolLim[1],PolCoords[0]].values,y_adj-y_adj_err,y_adj+y_adj_err,alpha=0.2,edgecolor='k',facecolor='c')
-    wholeAx.set_title('Shot {} Attempt {} neutral e-folding length and pedestal width'.format(Shot,Attempt[-1]))
+    wholeAx.set_title('Shot {} Attempt {} Neutral e-Folding Length and Pedestal Width'.format(Shot,Attempt[-1]))
     wholeAx.set_xlabel(PolCoords[0])
     wholeAx.set_ylabel('Length (mm)')
     wholeAx.axvline(dXP.loc[JXA,PolCoords[0]].values,color='red',label='Outer Midplane')
@@ -592,11 +593,19 @@ def export(event):
         efold_plot['LFS Gradient_Scale_Length'] = ldparam1[JXA]
         efold_plot['LFS_Gradient_Scale_Length_V2'] = ldparam2[JXA]
         
+        efold_dict={'e-folding length (mm)': dict(sorted(efold.items()))}
+        
+        efold_adj_dict={'flux expansion adjusted efolding length (mm)': dict(sorted(efold_adj.items()))}
+        
+        delta_ne={'n_e pedestal width (mm)': {k:yparam[k][2]*2000 for k in sorted(yparam.keys())}}
+        
+        opaqueness={'opaqueness (delta_ne/efold_adj)': {k:(yparam[k][2]*2000)/efold_adj[k] for k in sorted(yparam.keys())}}
+        
         dXP_dict=dXP.to_dict()
         
         NeuDen_dict=NeuDen.PARAM['NeuDen'].loc[SEP,:,Attempt[-1]].to_dict()
         
-        export_data=[efold_plot,efold,efold_adj,dXP_dict,NeuDen_dict,efold_adj_err]
+        export_data=[efold_plot,efold_dict,efold_adj_dict,delta_ne,opaqueness,dXP_dict,NeuDen_dict,efold_adj_err]
         
         with open('{}efold_data_{}.json'.format(DRT,Attempt[0]),'w') as fp:
             json.dump(export_data,fp,indent=2)
