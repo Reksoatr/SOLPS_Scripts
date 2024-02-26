@@ -20,12 +20,12 @@ import json
 
 ### Input Fields ###
 
-Shot = 'd3d'
-Attempt = ['86']
-DEV='d3d'
+Shot = '25'
+Attempt = ['21N']
+DEV='cmod'
 GasLvl = 0
 Balloon = 0
-ROOTSHOT=''
+ROOTSHOT='1160718'
 
 PS=['.','.','.','.','.','x']
 
